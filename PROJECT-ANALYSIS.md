@@ -401,4 +401,31 @@ Bilder Website Vorläufig/
 
 ---
 
+## 8. Documentation Index
+
+The following documentation is available for the Bloghead project:
+
+### Project Documentation (Root)
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| [PROJECT-ANALYSIS.md](./PROJECT-ANALYSIS.md) | Design analysis, screen breakdown, asset inventory | All team members |
+| [DESIGN-IMPLEMENTATION-REPORT.md](./DESIGN-IMPLEMENTATION-REPORT.md) | Implementation status, design-to-code mapping | UI/UX designers |
+
+### Frontend Documentation
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| [frontend/DEVELOPER-GUIDE.md](./frontend/DEVELOPER-GUIDE.md) | Architecture, setup, coding standards | Developers |
+| [frontend/docs/COMPONENTS.md](./frontend/docs/COMPONENTS.md) | Component API reference | Developers |
+
+### Quick Links
+
+- **Start developing**: `cd frontend && npm run dev`
+- **View all components**: `http://localhost:5173` (ComponentsPreview page)
+- **Component imports**: `import { Button, Card } from '@/components/ui'`
+- **Icon imports**: `import { HeartIcon, StarIcon } from '@/components/icons'`
+
+---
+
 *Generated: November 2024*
