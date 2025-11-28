@@ -403,21 +403,16 @@ Bilder Website Vorläufig/
 
 ## 8. Documentation Index
 
-The following documentation is available for the Bloghead project:
+All project documentation is centralized in the `/docs` folder.
 
-### Project Documentation (Root)
+**Documentation Hub:** [docs/README.md](./docs/README.md)
 
 | Document | Purpose | Audience |
 |----------|---------|----------|
 | [PROJECT-ANALYSIS.md](./PROJECT-ANALYSIS.md) | Design analysis, screen breakdown, asset inventory | All team members |
-| [DESIGN-IMPLEMENTATION-REPORT.md](./DESIGN-IMPLEMENTATION-REPORT.md) | Implementation status, design-to-code mapping | UI/UX designers |
-
-### Frontend Documentation
-
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| [frontend/DEVELOPER-GUIDE.md](./frontend/DEVELOPER-GUIDE.md) | Architecture, setup, coding standards | Developers |
-| [frontend/docs/COMPONENTS.md](./frontend/docs/COMPONENTS.md) | Component API reference | Developers |
+| [docs/DEVELOPER-GUIDE.md](./docs/DEVELOPER-GUIDE.md) | Architecture, setup, coding standards | Developers |
+| [docs/COMPONENTS.md](./docs/COMPONENTS.md) | Component API reference | Developers |
+| [docs/DESIGN-IMPLEMENTATION-REPORT.md](./docs/DESIGN-IMPLEMENTATION-REPORT.md) | Implementation status, design-to-code mapping | UI/UX designers |
 
 ### Quick Links
 
