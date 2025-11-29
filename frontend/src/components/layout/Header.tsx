@@ -1,26 +1,27 @@
 import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { Button } from '../ui/Button'
 import { AuthModal } from '../ui/Modal'
 
-interface HeaderProps {
-  onNavigate?: (page: string) => void
-  currentPage?: string
-}
-
-export function Header({ onNavigate, currentPage }: HeaderProps) {
+export function Header() {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation()
 
   const navLinks = [
-    { label: 'ABOUT', href: 'about' },
-    { label: 'ARTISTS', href: 'artists' },
-    { label: 'EVENTS', href: 'events' },
+    { label: 'ABOUT', href: '/about' },
+    { label: 'ARTISTS', href: '/artists' },
+    { label: 'EVENTS', href: '/events' },
   ]
 
   const handleAuthClick = () => {
     setAuthMode('login')
     setShowAuthModal(true)
+  }
+
+  const isActiveLink = (href: string) => {
+    return location.pathname === href || location.pathname.startsWith(href + '/')
   }
 
   return (
@@ -29,37 +30,29 @@ export function Header({ onNavigate, currentPage }: HeaderProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <a
-              href="/"
+            <Link
+              to="/"
               className="font-display text-2xl text-text-primary hover:opacity-80 transition-opacity"
-              onClick={(e) => {
-                e.preventDefault()
-                onNavigate?.('home')
-              }}
             >
               BlogHead
-            </a>
+            </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.href}
-                  href={`#${link.href}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate?.(link.href)
-                  }}
+                  to={link.href}
                   className={`
                     text-sm font-medium tracking-wide transition-colors
-                    ${currentPage === link.href
+                    ${isActiveLink(link.href)
                       ? 'text-text-primary'
                       : 'text-text-secondary hover:text-text-primary'
                     }
                   `}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </nav>
 
@@ -126,18 +119,18 @@ export function Header({ onNavigate, currentPage }: HeaderProps) {
           <div className="md:hidden border-t border-white/5">
             <div className="px-4 py-4 space-y-3">
               {navLinks.map((link) => (
-                <a
+                <Link
                   key={link.href}
-                  href={`#${link.href}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate?.(link.href)
-                    setMobileMenuOpen(false)
-                  }}
-                  className="block text-text-secondary hover:text-text-primary py-2"
+                  to={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-2 ${
+                    isActiveLink(link.href)
+                      ? 'text-text-primary'
+                      : 'text-text-secondary hover:text-text-primary'
+                  }`}
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
               <Button fullWidth onClick={handleAuthClick}>
                 SIGN IN
