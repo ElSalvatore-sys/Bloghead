@@ -34,7 +34,6 @@ __pycache__/
 Thumbs.db
 
 # Project specific - large files
-pdf-pages/
 *.zip
 *.pdf
 
