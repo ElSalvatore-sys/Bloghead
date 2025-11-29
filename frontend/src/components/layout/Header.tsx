@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { HeartIcon, UserIcon, InstagramIcon, FacebookIcon, MenuIcon, CloseIcon } from '../icons'
 import { AuthModal } from '../ui/Modal'
 
@@ -374,6 +374,7 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
+  const location = useLocation()
 
   // Handle scroll for sticky header effect
   useEffect(() => {
@@ -393,6 +394,11 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
   const handleLogout = () => {
     setUserDropdownOpen(false)
     onLogout?.()
+  }
+
+  // Check if a nav link is active (from footer-layout-router branch)
+  const isActiveLink = (href: string) => {
+    return location.pathname === href || location.pathname.startsWith(href + '/')
   }
 
   return (
@@ -425,7 +431,7 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
                           setActiveDropdown(activeDropdown === item.label ? null : item.label)
                         }
                         className={`flex items-center gap-1.5 text-sm font-medium tracking-wider transition-colors ${
-                          activeDropdown === item.label
+                          activeDropdown === item.label || isActiveLink(item.href)
                             ? 'text-text-primary'
                             : 'text-text-secondary hover:text-text-primary'
                         }`}
@@ -446,7 +452,11 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
                   ) : (
                     <Link
                       to={item.href}
-                      className="text-sm font-medium tracking-wider text-text-secondary hover:text-text-primary transition-colors"
+                      className={`text-sm font-medium tracking-wider transition-colors ${
+                        isActiveLink(item.href)
+                          ? 'text-text-primary'
+                          : 'text-text-secondary hover:text-text-primary'
+                      }`}
                     >
                       {item.label}
                     </Link>

@@ -1,88 +1,89 @@
-import { GradientBrush } from '../ui/GradientBrush'
+import { Link } from 'react-router-dom'
+import { InstagramIcon, FacebookIcon } from '../icons'
 
 export function Footer() {
-  const currentYear = new Date().getFullYear()
-
   const footerLinks = [
-    { label: 'Impressum', href: '/impressum' },
-    { label: 'Kontakt', href: '/kontakt' },
-    { label: 'Datenschutz', href: '/datenschutz' },
+    { label: 'IMPRESSUM', href: '/impressum' },
+    { label: 'KONTAKT', href: '/kontakt' },
+    { label: 'DATENSCHUTZ', href: '/datenschutz' },
   ]
 
   const socialLinks = [
     {
       label: 'Instagram',
       href: 'https://instagram.com',
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <rect x="2" y="2" width="20" height="20" rx="5" />
-          <circle cx="12" cy="12" r="4" />
-          <circle cx="18" cy="6" r="1.5" fill="currentColor" />
-        </svg>
-      ),
+      icon: InstagramIcon,
     },
     {
       label: 'Facebook',
       href: 'https://facebook.com',
-      icon: (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <circle cx="12" cy="12" r="10" />
-          <path d="M15 8h-2a3 3 0 0 0-3 3v2h-2v3h2v5h3v-5h2l1-3h-3v-2a1 1 0 0 1 1-1h2V8z" />
-        </svg>
-      ),
+      icon: FacebookIcon,
     },
   ]
 
   return (
-    <footer className="bg-bg-primary">
-      {/* Gradient Divider */}
-      <div className="max-w-4xl mx-auto px-4">
-        <GradientBrush size="lg" />
+    <footer className="relative">
+      {/* Purple curved wave at top */}
+      <div className="relative">
+        <svg
+          viewBox="0 0 1440 120"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full h-auto block"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V120Z"
+            fill="#610AD1"
+          />
+        </svg>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Logo */}
-          <div className="text-center md:text-left">
-            <span className="font-display text-2xl text-text-primary">BlogHead</span>
-            <p className="text-text-muted text-sm mt-1">BE A MEMBER</p>
-          </div>
-
+      {/* Purple background section */}
+      <div className="bg-[#610AD1]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-12">
           {/* Navigation Links */}
-          <nav className="flex items-center gap-8">
-            {footerLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-text-secondary hover:text-text-primary text-sm transition-colors"
-              >
-                {link.label}
-              </a>
+          <nav className="flex items-center justify-center gap-4 sm:gap-8 mb-6">
+            {footerLinks.map((link, index) => (
+              <span key={link.href} className="flex items-center">
+                <Link
+                  to={link.href}
+                  className="text-white/80 hover:text-white text-xs sm:text-sm font-medium tracking-wider transition-colors"
+                >
+                  {link.label}
+                </Link>
+                {index < footerLinks.length - 1 && (
+                  <span className="text-white/40 ml-4 sm:ml-8 hidden sm:inline">|</span>
+                )}
+              </span>
             ))}
           </nav>
 
-          {/* Social Links */}
-          <div className="flex items-center gap-4">
-            {socialLinks.map((social) => (
-              <a
-                key={social.href}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-text-secondary hover:text-text-primary transition-colors"
-                aria-label={social.label}
-              >
-                {social.icon}
-              </a>
-            ))}
+          {/* Social Icons */}
+          <div className="flex items-center justify-center gap-6 mb-6">
+            {socialLinks.map((social) => {
+              const IconComponent = social.icon
+              return (
+                <a
+                  key={social.href}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/80 hover:text-white transition-colors"
+                  aria-label={social.label}
+                >
+                  <IconComponent size={24} />
+                </a>
+              )
+            })}
           </div>
-        </div>
 
-        {/* Copyright */}
-        <div className="mt-8 pt-8 border-t border-white/5 text-center">
-          <p className="text-text-muted text-sm">
-            &copy; {currentYear} BlogHead. Alle Rechte vorbehalten.
-          </p>
+          {/* Copyright */}
+          <div className="text-center">
+            <p className="text-white/60 text-xs sm:text-sm">
+              © 2025 Bloghead. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

@@ -1,0 +1,5 @@
+export { HomePage } from './HomePage'
+export { ArtistsPage } from './ArtistsPage'
+export { ArtistProfilePage } from './ArtistProfilePage'
+export { EventsPage } from './EventsPage'
+export { AboutPage } from './AboutPage'
