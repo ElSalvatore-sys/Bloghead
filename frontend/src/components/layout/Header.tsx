@@ -1,151 +1,550 @@
-import { useState } from 'react'
-import { Button } from '../ui/Button'
+import { useState, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { HeartIcon, UserIcon, InstagramIcon, FacebookIcon, MenuIcon, CloseIcon } from '../icons'
 import { AuthModal } from '../ui/Modal'
 
-interface HeaderProps {
-  onNavigate?: (page: string) => void
-  currentPage?: string
+// Types
+interface NavDropdownItem {
+  label: string
+  href: string
 }
 
-export function Header({ onNavigate, currentPage }: HeaderProps) {
+interface NavItem {
+  label: string
+  href: string
+  dropdown?: NavDropdownItem[]
+}
+
+interface UserMenuItem {
+  label: string
+  href: string
+  icon?: React.ReactNode
+}
+
+interface HeaderProps {
+  isLoggedIn?: boolean
+  onLogout?: () => void
+}
+
+// Navigation configuration
+const navItems: NavItem[] = [
+  {
+    label: 'ABOUT',
+    href: '/about',
+    dropdown: [
+      { label: 'Wer wir sind', href: '/about/who-we-are' },
+      { label: 'Unsere Vorteile', href: '/about/benefits' },
+      { label: 'Bloghead Coins', href: '/about/coins' },
+    ],
+  },
+  {
+    label: 'ARTISTS',
+    href: '/artists',
+  },
+  {
+    label: 'EVENTS',
+    href: '/events',
+    dropdown: [
+      { label: 'Veranstaltungen', href: '/events' },
+      { label: 'VR Events', href: '/events/vr' },
+    ],
+  },
+]
+
+const userMenuItems: UserMenuItem[] = [
+  { label: 'Mein Profil', href: '/profile' },
+  { label: 'Meine Anfragen', href: '/requests' },
+  { label: 'Meine Buchungen', href: '/bookings' },
+  { label: 'Mein Kalender', href: '/calendar' },
+  { label: 'Meine Community', href: '/community' },
+  { label: 'Meine Chat', href: '/chat' },
+  { label: 'Meine Coins', href: '/coins' },
+  { label: 'Support', href: '/support' },
+]
+
+// Chevron Down Icon
+function ChevronDownIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path
+        d="M2.5 4.5L6 8L9.5 4.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+// Dropdown Component
+function NavDropdown({
+  items,
+  isOpen,
+  onClose,
+}: {
+  items: NavDropdownItem[]
+  isOpen: boolean
+  onClose: () => void
+}) {
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen, onClose])
+
+  if (!isOpen) return null
+
+  return (
+    <div
+      ref={dropdownRef}
+      className="absolute top-full left-0 mt-2 min-w-[200px] bg-bg-card border border-white/10 rounded-lg shadow-lg py-2 z-50"
+    >
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          to={item.href}
+          className="block px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+          onClick={onClose}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </div>
+  )
+}
+
+// User Dropdown Component
+function UserDropdown({
+  isOpen,
+  onClose,
+  onLogout,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onLogout: () => void
+}) {
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen, onClose])
+
+  if (!isOpen) return null
+
+  return (
+    <div
+      ref={dropdownRef}
+      className="absolute top-full right-0 mt-2 min-w-[200px] bg-bg-card border border-white/10 rounded-lg shadow-lg py-2 z-50"
+    >
+      {userMenuItems.map((item) => (
+        <Link
+          key={item.href}
+          to={item.href}
+          className="block px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+          onClick={onClose}
+        >
+          {item.label}
+        </Link>
+      ))}
+      <div className="border-t border-white/10 mt-2 pt-2">
+        <button
+          onClick={() => {
+            onLogout()
+            onClose()
+          }}
+          className="w-full text-left px-4 py-2.5 text-sm text-accent-red hover:bg-white/5 transition-colors"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Mobile Menu Component
+function MobileMenu({
+  isOpen,
+  onClose,
+  isLoggedIn,
+  onSignInClick,
+  onLogout,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  isLoggedIn: boolean
+  onSignInClick: () => void
+  onLogout: () => void
+}) {
+  const [expandedItem, setExpandedItem] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 z-50 bg-bg-primary">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <Link to="/" className="font-display text-2xl text-text-primary" onClick={onClose}>
+          BLOGHEAD
+        </Link>
+        <button
+          onClick={onClose}
+          className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+          aria-label="Close menu"
+        >
+          <CloseIcon size={24} />
+        </button>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex flex-col p-4 overflow-y-auto h-[calc(100vh-80px)]">
+        {navItems.map((item) => (
+          <div key={item.href} className="border-b border-white/5">
+            {item.dropdown ? (
+              <>
+                <button
+                  onClick={() => setExpandedItem(expandedItem === item.label ? null : item.label)}
+                  className="flex items-center justify-between w-full py-4 text-lg font-medium text-text-primary"
+                >
+                  {item.label}
+                  <ChevronDownIcon
+                    className={`transition-transform ${expandedItem === item.label ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {expandedItem === item.label && (
+                  <div className="pl-4 pb-4 space-y-3">
+                    {item.dropdown.map((subItem) => (
+                      <Link
+                        key={subItem.href}
+                        to={subItem.href}
+                        className="block py-2 text-text-secondary hover:text-text-primary transition-colors"
+                        onClick={onClose}
+                      >
+                        {subItem.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                to={item.href}
+                className="block py-4 text-lg font-medium text-text-primary"
+                onClick={onClose}
+              >
+                {item.label}
+              </Link>
+            )}
+          </div>
+        ))}
+
+        {/* Favorites Link */}
+        <Link
+          to="/favorites"
+          className="flex items-center gap-3 py-4 text-lg font-medium text-text-primary border-b border-white/5"
+          onClick={onClose}
+        >
+          <HeartIcon size={20} />
+          Favoriten
+        </Link>
+
+        {/* User Menu Items (if logged in) */}
+        {isLoggedIn && (
+          <div className="border-b border-white/5">
+            <button
+              onClick={() => setExpandedItem(expandedItem === 'user' ? null : 'user')}
+              className="flex items-center justify-between w-full py-4 text-lg font-medium text-text-primary"
+            >
+              <span className="flex items-center gap-3">
+                <UserIcon size={20} />
+                Mein Konto
+              </span>
+              <ChevronDownIcon
+                className={`transition-transform ${expandedItem === 'user' ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {expandedItem === 'user' && (
+              <div className="pl-4 pb-4 space-y-3">
+                {userMenuItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className="block py-2 text-text-secondary hover:text-text-primary transition-colors"
+                    onClick={onClose}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <button
+                  onClick={() => {
+                    onLogout()
+                    onClose()
+                  }}
+                  className="block py-2 text-accent-red hover:opacity-80 transition-opacity"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Sign In Button (if not logged in) */}
+        {!isLoggedIn && (
+          <div className="pt-6">
+            <button
+              onClick={() => {
+                onSignInClick()
+                onClose()
+              }}
+              className="w-full py-3 px-6 bg-gradient-to-r from-accent-red to-accent-salmon text-white font-bold text-sm tracking-wider uppercase rounded-full hover:opacity-90 transition-opacity"
+            >
+              SIGN IN
+            </button>
+          </div>
+        )}
+
+        {/* Social Links */}
+        <div className="flex items-center justify-center gap-6 pt-8 mt-auto">
+          <a
+            href="https://instagram.com/bloghead"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-text-secondary hover:text-text-primary transition-colors"
+            aria-label="Instagram"
+          >
+            <InstagramIcon size={28} />
+          </a>
+          <a
+            href="https://facebook.com/bloghead"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-text-secondary hover:text-text-primary transition-colors"
+            aria-label="Facebook"
+          >
+            <FacebookIcon size={28} />
+          </a>
+        </div>
+      </nav>
+    </div>
+  )
+}
+
+// Main Header Component
+export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
 
-  const navLinks = [
-    { label: 'ABOUT', href: 'about' },
-    { label: 'ARTISTS', href: 'artists' },
-    { label: 'EVENTS', href: 'events' },
-  ]
+  // Handle scroll for sticky header effect
+  useEffect(() => {
+    function handleScroll() {
+      setIsScrolled(window.scrollY > 10)
+    }
 
-  const handleAuthClick = () => {
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const handleSignInClick = () => {
     setAuthMode('login')
     setShowAuthModal(true)
   }
 
+  const handleLogout = () => {
+    setUserDropdownOpen(false)
+    onLogout?.()
+  }
+
   return (
     <>
-      <header className="sticky top-0 z-40 bg-bg-primary/95 backdrop-blur-sm border-b border-white/5">
+      <header
+        className={`sticky top-0 z-40 transition-all duration-200 ${
+          isScrolled
+            ? 'bg-bg-primary/95 backdrop-blur-md border-b border-white/10 shadow-lg'
+            : 'bg-bg-primary border-b border-white/5'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
-            <a
-              href="/"
-              className="font-display text-2xl text-text-primary hover:opacity-80 transition-opacity"
-              onClick={(e) => {
-                e.preventDefault()
-                onNavigate?.('home')
-              }}
+            <Link
+              to="/"
+              className="font-display text-2xl lg:text-3xl text-text-primary hover:opacity-80 transition-opacity"
             >
-              BlogHead
-            </a>
+              BLOGHEAD
+            </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={`#${link.href}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate?.(link.href)
-                  }}
-                  className={`
-                    text-sm font-medium tracking-wide transition-colors
-                    ${currentPage === link.href
-                      ? 'text-text-primary'
-                      : 'text-text-secondary hover:text-text-primary'
-                    }
-                  `}
-                >
-                  {link.label}
-                </a>
+            <nav className="hidden lg:flex items-center gap-8">
+              {navItems.map((item) => (
+                <div key={item.href} className="relative">
+                  {item.dropdown ? (
+                    <>
+                      <button
+                        onClick={() =>
+                          setActiveDropdown(activeDropdown === item.label ? null : item.label)
+                        }
+                        className={`flex items-center gap-1.5 text-sm font-medium tracking-wider transition-colors ${
+                          activeDropdown === item.label
+                            ? 'text-text-primary'
+                            : 'text-text-secondary hover:text-text-primary'
+                        }`}
+                      >
+                        {item.label}
+                        <ChevronDownIcon
+                          className={`transition-transform ${
+                            activeDropdown === item.label ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                      <NavDropdown
+                        items={item.dropdown}
+                        isOpen={activeDropdown === item.label}
+                        onClose={() => setActiveDropdown(null)}
+                      />
+                    </>
+                  ) : (
+                    <Link
+                      to={item.href}
+                      className="text-sm font-medium tracking-wider text-text-secondary hover:text-text-primary transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </div>
               ))}
             </nav>
 
-            {/* Right Side - Social & Auth */}
-            <div className="hidden md:flex items-center gap-4">
-              {/* Social Icons */}
-              <div className="flex items-center gap-3">
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-text-primary transition-colors"
+            {/* Right Side Actions */}
+            <div className="hidden lg:flex items-center gap-4">
+              {/* Favorites */}
+              <Link
+                to="/favorites"
+                className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+                aria-label="Favorites"
+              >
+                <HeartIcon size={22} />
+              </Link>
+
+              {/* User Icon / Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      setUserDropdownOpen(!userDropdownOpen)
+                    } else {
+                      handleSignInClick()
+                    }
+                  }}
+                  className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+                  aria-label={isLoggedIn ? 'User menu' : 'Sign in'}
                 >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <rect x="2" y="2" width="20" height="20" rx="5" />
-                    <circle cx="12" cy="12" r="4" />
-                    <circle cx="18" cy="6" r="1.5" fill="currentColor" />
-                  </svg>
-                </a>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-text-secondary hover:text-text-primary transition-colors"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M15 8h-2a3 3 0 0 0-3 3v2h-2v3h2v5h3v-5h2l1-3h-3v-2a1 1 0 0 1 1-1h2V8z" />
-                  </svg>
-                </a>
+                  <UserIcon size={22} />
+                </button>
+                {isLoggedIn && (
+                  <UserDropdown
+                    isOpen={userDropdownOpen}
+                    onClose={() => setUserDropdownOpen(false)}
+                    onLogout={handleLogout}
+                  />
+                )}
               </div>
 
-              {/* Profile Icon */}
-              <button className="text-text-secondary hover:text-text-primary transition-colors">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </button>
-
               {/* Sign In Button */}
-              <Button size="sm" onClick={handleAuthClick}>
-                SIGN IN
-              </Button>
+              {!isLoggedIn && (
+                <button
+                  onClick={handleSignInClick}
+                  className="relative py-2 px-6 bg-gradient-to-r from-accent-red to-accent-salmon text-white font-bold text-xs tracking-wider uppercase rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  SIGN IN
+                  {/* Decorative brush stroke */}
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-gradient-to-r from-accent-purple via-accent-red to-accent-salmon rounded-full opacity-60" />
+                </button>
+              )}
+
+              {/* Social Icons */}
+              <div className="flex items-center gap-2 ml-2 pl-4 border-l border-white/10">
+                <a
+                  href="https://instagram.com/bloghead"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 text-text-secondary hover:text-text-primary transition-colors"
+                  aria-label="Instagram"
+                >
+                  <InstagramIcon size={20} />
+                </a>
+                <a
+                  href="https://facebook.com/bloghead"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 text-text-secondary hover:text-text-primary transition-colors"
+                  aria-label="Facebook"
+                >
+                  <FacebookIcon size={20} />
+                </a>
+              </div>
             </div>
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 text-text-secondary hover:text-text-primary"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 text-text-secondary hover:text-text-primary transition-colors"
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open menu"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+              <MenuIcon size={24} />
             </button>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-white/5">
-            <div className="px-4 py-4 space-y-3">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={`#${link.href}`}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate?.(link.href)
-                    setMobileMenuOpen(false)
-                  }}
-                  className="block text-text-secondary hover:text-text-primary py-2"
-                >
-                  {link.label}
-                </a>
-              ))}
-              <Button fullWidth onClick={handleAuthClick}>
-                SIGN IN
-              </Button>
-            </div>
-          </div>
-        )}
       </header>
+
+      {/* Mobile Menu */}
+      <MobileMenu
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        isLoggedIn={isLoggedIn}
+        onSignInClick={handleSignInClick}
+        onLogout={handleLogout}
+      />
 
       {/* Auth Modal */}
       <AuthModal
