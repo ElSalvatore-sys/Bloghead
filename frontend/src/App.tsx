@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from './components/layout'
-import { HomePage, ArtistsPage, ArtistProfilePage, EventsPage, AboutPage } from './pages'
+import { HomePage, ArtistsPage, ArtistProfilePage, EventsPage, AboutPage, ProfileEditPage } from './pages'
 
 function App() {
   return (
@@ -12,6 +12,7 @@ function App() {
           <Route path="/artists/:id" element={<ArtistProfilePage />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/profile/edit" element={<ProfileEditPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>
