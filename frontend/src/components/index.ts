@@ -10,5 +10,8 @@ export * from './sections'
 // Filter Components
 export * from './filters'
 
+// Auth Components
+export * from './auth'
+
 // Icons
 export * from './icons'
