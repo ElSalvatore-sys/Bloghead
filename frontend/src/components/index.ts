@@ -12,3 +12,6 @@ export * from './filters'
 
 // Icons
 export * from './icons'
+
+// Auth Components
+export * from './auth'
