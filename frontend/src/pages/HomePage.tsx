@@ -5,6 +5,7 @@ import {
   FeaturesSection,
   ArtistsCarouselSection,
   MemberCTASection,
+  VorteileMemberSection,
   EventsSection,
   VRExperiencesSection,
 } from '../components/sections'
@@ -33,6 +34,9 @@ export function HomePage() {
 
       {/* Member CTA Section - Call to action for registration */}
       <MemberCTASection onMemberClick={handleMemberClick} />
+
+      {/* Vorteile Member Section - Member benefits */}
+      <VorteileMemberSection onMemberClick={handleMemberClick} />
 
       {/* Events Section - Upcoming events showcase */}
       <EventsSection />
