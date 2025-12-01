@@ -1,24 +1,10 @@
 import { Link } from 'react-router-dom'
-import { InstagramIcon, FacebookIcon } from '../icons'
 
 export function Footer() {
   const footerLinks = [
     { label: 'IMPRESSUM', href: '/impressum' },
     { label: 'KONTAKT', href: '/kontakt' },
     { label: 'DATENSCHUTZ', href: '/datenschutz' },
-  ]
-
-  const socialLinks = [
-    {
-      label: 'Instagram',
-      href: 'https://instagram.com',
-      icon: InstagramIcon,
-    },
-    {
-      label: 'Facebook',
-      href: 'https://facebook.com',
-      icon: FacebookIcon,
-    },
   ]
 
   return (
@@ -40,47 +26,32 @@ export function Footer() {
       </div>
 
       {/* Purple background section */}
-      <div className="bg-[#610AD1]">
+      <div style={{ backgroundColor: '#610AD1' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-12">
-          {/* Navigation Links */}
-          <nav className="flex items-center justify-center gap-4 sm:gap-8 mb-6">
+          {/* Navigation Links - Centered with separators */}
+          <nav className="flex items-center justify-center gap-6 sm:gap-8 mb-8">
             {footerLinks.map((link, index) => (
               <span key={link.href} className="flex items-center">
                 <Link
                   to={link.href}
-                  className="text-white/80 hover:text-white text-xs sm:text-sm font-medium tracking-wider transition-colors"
+                  className="text-white hover:text-white/80 text-xs sm:text-sm font-medium tracking-wider uppercase transition-colors"
+                  style={{ fontFamily: 'Roboto, sans-serif' }}
                 >
                   {link.label}
                 </Link>
                 {index < footerLinks.length - 1 && (
-                  <span className="text-white/40 ml-4 sm:ml-8 hidden sm:inline">|</span>
+                  <span className="text-white/40 ml-6 sm:ml-8">|</span>
                 )}
               </span>
             ))}
           </nav>
 
-          {/* Social Icons */}
-          <div className="flex items-center justify-center gap-6 mb-6">
-            {socialLinks.map((social) => {
-              const IconComponent = social.icon
-              return (
-                <a
-                  key={social.href}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/80 hover:text-white transition-colors"
-                  aria-label={social.label}
-                >
-                  <IconComponent size={24} />
-                </a>
-              )
-            })}
-          </div>
-
           {/* Copyright */}
           <div className="text-center">
-            <p className="text-white/60 text-xs sm:text-sm">
+            <p
+              className="text-white/70 text-xs sm:text-sm"
+              style={{ fontFamily: 'Roboto, sans-serif' }}
+            >
               © 2025 Bloghead. All rights reserved.
             </p>
           </div>
