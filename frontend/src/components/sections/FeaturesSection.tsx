@@ -8,19 +8,19 @@ export function FeaturesSection({ onRegisterClick }: FeaturesSectionProps) {
   return (
     <section className="bg-bg-primary py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        {/* Two Column Layout */}
+        {/* Two Column Layout - Text left, 5 icons right in 2 rows */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start mb-12">
           {/* Left: Text Content */}
           <div>
             <h2
-              className="text-white text-xl md:text-2xl font-bold uppercase leading-tight mb-6"
+              className="text-white text-lg md:text-xl font-bold uppercase leading-tight mb-6"
               style={{ fontFamily: 'Roboto, sans-serif' }}
             >
               Every Business Is Essential<br />
               To Have A Professional USP
             </h2>
             <p
-              className="text-white/50 text-sm md:text-base leading-relaxed"
+              className="text-white/50 text-sm leading-relaxed"
               style={{ fontFamily: 'Roboto, sans-serif' }}
             >
               Our platform is able to manage your USP, Kalender, bookings and most important
@@ -28,50 +28,84 @@ export function FeaturesSection({ onRegisterClick }: FeaturesSectionProps) {
             </p>
           </div>
 
-          {/* Right: 3 Icons Row */}
-          <div className="grid grid-cols-3 gap-6 md:gap-8">
-            {/* Icon 1: Calendar */}
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 md:w-16 md:h-16 mb-3 text-white">
-                <CalendarIcon />
+          {/* Right: 5 Icons in 2 rows (2 top, 3 bottom) */}
+          <div className="flex flex-col gap-8">
+            {/* Top Row - 2 icons */}
+            <div className="grid grid-cols-2 gap-8 justify-items-center">
+              {/* Icon 1: Sound Wave - Artist Presentation */}
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 md:w-12 md:h-12 mb-3 text-white">
+                  <SoundWaveIcon />
+                </div>
+                <span
+                  className="text-white text-[10px] uppercase tracking-wider leading-tight"
+                  style={{ fontFamily: 'Roboto, sans-serif' }}
+                >
+                  Artist<br />
+                  Presentation
+                </span>
               </div>
-              <span
-                className="text-white text-xs uppercase tracking-wide leading-tight"
-                style={{ fontFamily: 'Roboto, sans-serif' }}
-              >
-                Essential<br />
-                Calendar<br />
-                Management
-              </span>
+
+              {/* Icon 2: Network - Worldwide Community */}
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 md:w-12 md:h-12 mb-3 text-white">
+                  <NetworkIcon />
+                </div>
+                <span
+                  className="text-white text-[10px] uppercase tracking-wider leading-tight"
+                  style={{ fontFamily: 'Roboto, sans-serif' }}
+                >
+                  Worldwide<br />
+                  Community
+                </span>
+              </div>
             </div>
 
-            {/* Icon 2: Bookkeeping */}
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 md:w-16 md:h-16 mb-3 text-white">
-                <BookkeepingIcon />
+            {/* Bottom Row - 3 icons */}
+            <div className="grid grid-cols-3 gap-6">
+              {/* Icon 3: Calendar */}
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 md:w-12 md:h-12 mb-3 text-white">
+                  <CalendarIcon />
+                </div>
+                <span
+                  className="text-white text-[10px] uppercase tracking-wider leading-tight"
+                  style={{ fontFamily: 'Roboto, sans-serif' }}
+                >
+                  Essential<br />
+                  Calendar<br />
+                  Management
+                </span>
               </div>
-              <span
-                className="text-white text-xs uppercase tracking-wide leading-tight"
-                style={{ fontFamily: 'Roboto, sans-serif' }}
-              >
-                Bookkeeping<br />
-                And<br />
-                Paymentplan
-              </span>
-            </div>
 
-            {/* Icon 3: USP */}
-            <div className="flex flex-col items-center text-center">
-              <div className="w-12 h-12 md:w-16 md:h-16 mb-3 text-white">
-                <PersonIcon />
+              {/* Icon 4: Plus Circle - Bookkeeping */}
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 md:w-12 md:h-12 mb-3 text-white">
+                  <PlusCircleIcon />
+                </div>
+                <span
+                  className="text-white text-[10px] uppercase tracking-wider leading-tight"
+                  style={{ fontFamily: 'Roboto, sans-serif' }}
+                >
+                  Bookkeeping<br />
+                  And<br />
+                  Paymentplan
+                </span>
               </div>
-              <span
-                className="text-white text-xs uppercase tracking-wide leading-tight"
-                style={{ fontFamily: 'Roboto, sans-serif' }}
-              >
-                Getting<br />
-                Your USP
-              </span>
+
+              {/* Icon 5: Person - USP */}
+              <div className="flex flex-col items-center text-center">
+                <div className="w-10 h-10 md:w-12 md:h-12 mb-3 text-white">
+                  <PersonIcon />
+                </div>
+                <span
+                  className="text-white text-[10px] uppercase tracking-wider leading-tight"
+                  style={{ fontFamily: 'Roboto, sans-serif' }}
+                >
+                  Getting<br />
+                  Your USP
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -91,30 +125,53 @@ export function FeaturesSection({ onRegisterClick }: FeaturesSectionProps) {
   )
 }
 
-// Calendar Icon
-function CalendarIcon() {
+// Sound Wave Icon (vertical bars like audio waveform)
+function SoundWaveIcon() {
   return (
-    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <rect x="6" y="10" width="36" height="32" rx="4" />
-      <path d="M6 20h36" />
-      <path d="M16 6v8M32 6v8" strokeLinecap="round" />
-      <circle cx="16" cy="28" r="2" fill="currentColor" />
-      <circle cx="24" cy="28" r="2" fill="currentColor" />
-      <circle cx="32" cy="28" r="2" fill="currentColor" />
-      <circle cx="16" cy="36" r="2" fill="currentColor" />
-      <path d="M22 34l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="w-full h-full">
+      <path d="M8 24v-4M8 24v4" />
+      <path d="M14 24v-8M14 24v8" />
+      <path d="M20 24v-12M20 24v12" />
+      <path d="M26 24v-16M26 24v16" />
+      <path d="M32 24v-12M32 24v12" />
+      <path d="M38 24v-8M38 24v8" />
+      <path d="M44 24v-4M44 24v4" />
     </svg>
   )
 }
 
-// Bookkeeping Icon (document with plus)
-function BookkeepingIcon() {
+// Network Icon (connected nodes)
+function NetworkIcon() {
   return (
     <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <rect x="8" y="4" width="32" height="40" rx="4" />
-      <path d="M16 14h16M16 22h16M16 30h10" strokeLinecap="round" />
-      <circle cx="36" cy="36" r="8" fill="currentColor" stroke="none" />
-      <path d="M36 32v8M32 36h8" stroke="#171717" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="24" cy="12" r="4" />
+      <circle cx="12" cy="24" r="4" />
+      <circle cx="36" cy="24" r="4" />
+      <circle cx="16" cy="36" r="4" />
+      <circle cx="32" cy="36" r="4" />
+      <path d="M24 16v0M20 14l-5 7M28 14l5 7M14 28l3 5M34 28l-3 5M20 36h8" />
+    </svg>
+  )
+}
+
+// Calendar Icon with checkmark
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <rect x="8" y="12" width="32" height="28" rx="3" />
+      <path d="M8 20h32" />
+      <path d="M16 8v8M32 8v8" strokeLinecap="round" />
+      <path d="M18 30l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+// Plus Circle Icon
+function PlusCircleIcon() {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
+      <circle cx="24" cy="24" r="16" />
+      <path d="M24 16v16M16 24h16" strokeLinecap="round" />
     </svg>
   )
 }
@@ -123,8 +180,8 @@ function BookkeepingIcon() {
 function PersonIcon() {
   return (
     <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full">
-      <circle cx="24" cy="14" r="8" />
-      <path d="M8 44c0-8.837 7.163-16 16-16s16 7.163 16 16" />
+      <circle cx="24" cy="14" r="6" />
+      <path d="M12 40c0-6.627 5.373-12 12-12s12 5.373 12 12" />
     </svg>
   )
 }

@@ -142,9 +142,15 @@ export function ArtistsCarouselSection({ artists = sampleArtists, onMemberClick 
   }
 
   return (
-    <section className="relative bg-bg-primary py-16 md:py-24 overflow-hidden">
+    <section className="relative bg-bg-primary overflow-hidden">
+      {/* Purple accent bar at top */}
+      <div
+        className="w-full h-2 md:h-3 relative z-20"
+        style={{ backgroundColor: '#610AD1' }}
+      />
+
       {/* Full-width Grayscale Background Image */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 top-3">
         <img
           src="/images/latrach-med-jamil-VD0LgaqFf4U-unsplash.jpg"
           alt="Artist background"
@@ -154,7 +160,7 @@ export function ArtistsCarouselSection({ artists = sampleArtists, onMemberClick 
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
         {/* Section Title */}
         <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8">
           Artists

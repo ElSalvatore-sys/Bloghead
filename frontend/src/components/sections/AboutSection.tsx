@@ -6,14 +6,14 @@ export function AboutSection() {
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Section Title - Top Left */}
         <div className="mb-8 md:mb-12">
-          <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white">
+          <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white italic">
             About
           </h2>
-          {/* Gradient underline bar */}
+          {/* Gradient underline bar - matches designer exactly */}
           <div
-            className="h-1 w-48 md:w-56 mt-4 rounded-full"
+            className="h-1 w-32 md:w-40 mt-2"
             style={{
-              background: 'linear-gradient(90deg, #4CAF50 0%, #FB7A43 50%, #610AD1 100%)'
+              background: 'linear-gradient(90deg, #610AD1 0%, #F92B02 100%)'
             }}
           />
         </div>
