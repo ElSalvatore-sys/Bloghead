@@ -7,7 +7,7 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({
-  backgroundImage = '/images/hero-bg.jpg',
+  backgroundImage = '/images/SW-jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg',
   onMemberClick
 }: HeroSectionProps) {
   const [isVisible, setIsVisible] = useState(false)

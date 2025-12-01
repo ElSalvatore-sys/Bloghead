@@ -7,7 +7,7 @@ interface AboutSectionProps {
 }
 
 export function AboutSection({
-  image = '/images/about-artist.jpg',
+  image = '/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg',
   onLearnMoreClick
 }: AboutSectionProps) {
   return (

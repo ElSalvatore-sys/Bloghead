@@ -14,12 +14,12 @@ interface EventsSectionProps {
 
 // Default event images from the Bilder Website Vorläufig folder
 const defaultImages: EventImage[] = [
-  { src: '/images/events/flavio-gasperini-QO0hJHVUVso-unsplash.jpg', alt: 'Event 1' },
-  { src: '/images/events/german-lopez-sP45Es070zI-unsplash.jpg', alt: 'Event 2' },
-  { src: '/images/events/pexels-wendy-wei-1699161.jpg', alt: 'Event 3' },
-  { src: '/images/events/luis-reynoso-J5a0MRXVnUI-unsplash.jpg', alt: 'Event 4' },
-  { src: '/images/events/minh-pham-jSAb1ifwf8Y-unsplash.jpg', alt: 'Event 5' },
-  { src: '/images/events/niclas-moser-OjWNwULqFek-unsplash.jpg', alt: 'Event 6' },
+  { src: '/images/flavio-gasperini-QO0hJHVUVso-unsplash.jpg', alt: 'Concert crowd with purple lights' },
+  { src: '/images/german-lopez-sP45Es070zI-unsplash.jpg', alt: 'DJ performing live' },
+  { src: '/images/pexels-wendy-wei-1699161.jpg', alt: 'Concert audience' },
+  { src: '/images/luis-reynoso-J5a0MRXVnUI-unsplash.jpg', alt: 'Live music event' },
+  { src: '/images/minh-pham-jSAb1ifwf8Y-unsplash.jpg', alt: 'VR experience' },
+  { src: '/images/niclas-moser-OjWNwULqFek-unsplash.jpg', alt: 'Night event' },
 ]
 
 export function EventsSection({
