@@ -27,7 +27,7 @@ export function HomePage() {
       <AboutSection />
 
       {/* Features Section - Platform USP and benefits */}
-      <FeaturesSection />
+      <FeaturesSection onRegisterClick={handleMemberClick} />
 
       {/* Artists Carousel Section - Featured artists slider */}
       <ArtistsCarouselSection />

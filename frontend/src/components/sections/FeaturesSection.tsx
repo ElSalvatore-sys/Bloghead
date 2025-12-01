@@ -1,4 +1,5 @@
 import { GradientBrush } from '../ui/GradientBrush'
+import { Button } from '../ui/Button'
 
 interface Feature {
   icon: React.ReactNode
@@ -68,64 +69,29 @@ function ArtistPresentationIcon({ className = '' }: { className?: string }) {
   )
 }
 
-function WorldwideCommunityIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 48 48"
-      fill="none"
-      className={className}
-    >
-      <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="2.5" fill="none" />
-      <ellipse cx="24" cy="24" rx="8" ry="20" stroke="currentColor" strokeWidth="2.5" fill="none" />
-      <path d="M4 24h40" stroke="currentColor" strokeWidth="2.5" />
-      <path d="M6 14h36" stroke="currentColor" strokeWidth="2" />
-      <path d="M6 34h36" stroke="currentColor" strokeWidth="2" />
-    </svg>
-  )
-}
-
-function USPIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 48 48"
-      fill="none"
-      className={className}
-    >
-      <path
-        d="M11.4,41.8L13.3,30c0.1-0.4-0.1-0.8-0.4-1l-8.6-8.2c-0.7-0.7-0.3-1.9,0.6-2l11.8-1.8c0.4-0.1,0.7-0.3,0.9-0.7l5.2-10.8c0.4-0.9,1.7-0.9,2.1,0l5.4,10.7c0.2,0.3,0.5,0.6,0.9,0.6L43,18.3c1,0.1,1.4,1.3,0.7,2l-8.5,8.4c-0.3,0.3-0.4,0.7-0.3,1.1l2.1,11.7c0.2,1-0.8,1.7-1.7,1.3l-10.6-5.4c-0.3-0.2-0.8-0.2-1.1,0l-10.5,5.7C12.3,43.5,11.2,42.8,11.4,41.8z"
-        fill="currentColor"
-      />
-    </svg>
-  )
-}
-
 const features: Feature[] = [
   {
-    icon: <CalendarManagementIcon className="w-12 h-12 md:w-16 md:h-16" />,
+    icon: <CalendarManagementIcon className="w-14 h-14 md:w-20 md:h-20" />,
     label: 'ESSENTIAL CALENDARMANAGEMENT',
   },
   {
-    icon: <BookkeepingIcon className="w-12 h-12 md:w-16 md:h-16" />,
+    icon: <BookkeepingIcon className="w-14 h-14 md:w-20 md:h-20" />,
     label: 'BOOKKEEPING',
   },
   {
-    icon: <ArtistPresentationIcon className="w-12 h-12 md:w-16 md:h-16" />,
+    icon: <ArtistPresentationIcon className="w-14 h-14 md:w-20 md:h-20" />,
     label: 'ARTIST PRESENTATION',
-  },
-  {
-    icon: <WorldwideCommunityIcon className="w-12 h-12 md:w-16 md:h-16" />,
-    label: 'WORLDWIDE COMMUNITY',
-  },
-  {
-    icon: <USPIcon className="w-12 h-12 md:w-16 md:h-16" />,
-    label: 'GETTING YOUR USP',
   },
 ]
 
-export function FeaturesSection() {
+interface FeaturesSectionProps {
+  onRegisterClick?: () => void
+}
+
+export function FeaturesSection({ onRegisterClick }: FeaturesSectionProps) {
   return (
     <section className="bg-bg-primary py-16 md:py-20">
-      <div className="max-w-6xl mx-auto px-4 md:px-6">
+      <div className="max-w-5xl mx-auto px-4 md:px-6">
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16">
           <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white mb-4">
@@ -136,24 +102,36 @@ export function FeaturesSection() {
           </div>
         </div>
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8">
+        {/* Features Grid - 3 Icons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-12">
           {features.map((feature, index) => (
             <div
               key={index}
-              className="group flex flex-col items-center text-center p-4 md:p-6 rounded-lg transition-all duration-300 hover:bg-bg-card-hover hover:-translate-y-1 cursor-pointer"
+              className="group flex flex-col items-center text-center"
             >
               {/* Icon Container */}
-              <div className="text-white mb-4 transition-transform duration-300 group-hover:scale-110">
+              <div className="text-white mb-4">
                 {feature.icon}
               </div>
 
               {/* Label */}
-              <span className="text-text-secondary text-xs md:text-sm font-medium tracking-wide uppercase leading-tight">
+              <span className="text-text-secondary text-sm font-medium tracking-wide uppercase leading-tight">
                 {feature.label}
               </span>
             </div>
           ))}
+        </div>
+
+        {/* CTA Button */}
+        <div className="flex justify-center">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={onRegisterClick}
+            className="px-10 py-4 tracking-wider uppercase rounded-full"
+          >
+            Jetzt Registrieren
+          </Button>
         </div>
       </div>
     </section>
