@@ -1,15 +1,13 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/Button'
-import { StarRating } from '../ui/StarRating'
 import { GradientBrush } from '../ui/GradientBrush'
 
 interface Artist {
   id: string
   name: string
-  role: string
+  description: string
   imageUrl: string
-  rating: number
 }
 
 // Sample artist data - replace with real data from API
@@ -17,44 +15,32 @@ const sampleArtists: Artist[] = [
   {
     id: '1',
     name: 'DJ MARCUS',
-    role: 'ELECTRONIC DJ',
+    description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
     imageUrl: '/images/alexander-popov-f3e6YNo3Y98-unsplash.jpg',
-    rating: 5,
   },
   {
     id: '2',
     name: 'LISA VOICE',
-    role: 'SINGER',
+    description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
     imageUrl: '/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg',
-    rating: 4,
   },
   {
     id: '3',
     name: 'MIKE BEATS',
-    role: 'HIP-HOP PRODUCER',
+    description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
     imageUrl: '/images/thiago-borrere-alvim-bf8APnBxoCk-unsplash.jpg',
-    rating: 5,
   },
   {
     id: '4',
     name: 'ANNA STRINGS',
-    role: 'VIOLINIST',
+    description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
     imageUrl: '/images/0df1b407-55a7-4251-99e9-b54723369de6.jpeg',
-    rating: 4,
   },
   {
     id: '5',
     name: 'TOM WAVE',
-    role: 'TECHNO DJ',
+    description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
     imageUrl: '/images/curtis-potvin-XBqp-UxhCVs-unsplash.jpg',
-    rating: 5,
-  },
-  {
-    id: '6',
-    name: 'SARAH SOUL',
-    role: 'JAZZ SINGER',
-    imageUrl: '/images/latrach-med-jamil-VD0LgaqFf4U-unsplash.jpg',
-    rating: 4,
   },
 ]
 
@@ -91,94 +77,55 @@ function ChevronRightIcon({ className = '' }: { className?: string }) {
   )
 }
 
-// Heart icon for favorite button
-function HeartIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  )
-}
-
 interface ArtistCardProps {
   artist: Artist
 }
 
 function ArtistCard({ artist }: ArtistCardProps) {
+  const [isHovered, setIsHovered] = useState(false)
+
   return (
-    <div className="flex-shrink-0 w-[260px] md:w-[280px] group">
-      {/* Image Container */}
-      <div className="relative aspect-square mb-4 overflow-hidden">
-        {/* Placeholder or actual image */}
-        {artist.imageUrl ? (
-          <img
-            src={artist.imageUrl}
-            alt={artist.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="w-full h-full bg-bg-card flex items-center justify-center">
-            <div className="text-text-muted text-6xl opacity-30">
-              <svg viewBox="0 0 48 48" className="w-24 h-24" fill="currentColor">
-                <path d="M24.7,23.9c5.6,0,10.1-4.4,10.1-10.1S30.3,3.7,24.7,3.7S14.6,8.2,14.6,13.8S19.1,23.9,24.7,23.9z M24.7,6.5c4,0,7.2,3.1,7.2,7.2S28.8,21,24.7,21s-7.2-3.1-7.2-7.2S20.7,6.5,24.7,6.5z M26.2,26.8h-2.9c-8.8,0-15.9,7.1-15.9,15.8C7.4,43.4,8,44,8.9,44h31.7c0.9,0,1.5-0.6,1.5-1.5C42,33.8,34.9,26.8,26.2,26.8z" />
-              </svg>
-            </div>
-          </div>
-        )}
+    <Link
+      to={`/artists/${artist.id}`}
+      className="relative flex-shrink-0 w-[200px] md:w-[220px] aspect-square group cursor-pointer"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Base Image */}
+      <img
+        src={artist.imageUrl}
+        alt={artist.name}
+        className="w-full h-full object-cover"
+      />
 
-        {/* Favorite Button */}
-        <button
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-white/70 hover:text-accent-purple transition-colors"
-          aria-label="Add to favorites"
-        >
-          <HeartIcon className="w-6 h-6" />
-        </button>
-      </div>
-
-      {/* Content */}
-      <div className="space-y-2">
-        {/* Name */}
-        <h3 className="text-white font-bold text-lg uppercase tracking-wide">
+      {/* Purple Hover Overlay */}
+      <div
+        className={`
+          absolute inset-0 flex flex-col justify-end p-4
+          transition-opacity duration-300
+          ${isHovered ? 'opacity-100' : 'opacity-0'}
+        `}
+        style={{
+          background: 'linear-gradient(180deg, rgba(97, 10, 209, 0.8) 0%, rgba(97, 10, 209, 0.95) 100%)',
+        }}
+      >
+        <h4 className="text-white font-bold text-sm uppercase tracking-wide mb-2">
           {artist.name}
-        </h3>
-
-        {/* Role */}
-        <p className="text-text-secondary text-sm uppercase tracking-wider">
-          {artist.role}
+        </h4>
+        <p className="text-white/80 text-xs leading-relaxed line-clamp-3">
+          {artist.description}
         </p>
-
-        {/* Rating */}
-        <div className="py-1">
-          <StarRating rating={artist.rating} size="sm" />
-        </div>
-
-        {/* CTA Button */}
-        <Link to={`/artists/${artist.id}`}>
-          <Button
-            variant="secondary"
-            size="sm"
-            fullWidth
-            className="mt-4 rounded-full border-white/30 hover:border-white/50"
-          >
-            PROFIL ANSEHEN
-          </Button>
-        </Link>
       </div>
-    </div>
+    </Link>
   )
 }
 
 interface ArtistsCarouselSectionProps {
   artists?: Artist[]
+  onMemberClick?: () => void
 }
 
-export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarouselSectionProps) {
+export function ArtistsCarouselSection({ artists = sampleArtists, onMemberClick }: ArtistsCarouselSectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -210,7 +157,7 @@ export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarou
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current
     if (container) {
-      const cardWidth = 300 // Approximate card width + gap
+      const cardWidth = 240
       const scrollAmount = direction === 'left' ? -cardWidth : cardWidth
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
     }
@@ -218,83 +165,141 @@ export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarou
 
   return (
     <section className="bg-bg-primary py-16 md:py-20 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        {/* Section Header */}
-        <div className="text-center mb-12 md:mb-16">
-          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl text-white mb-4">
-            ARTISTS
-          </h2>
-          <div className="flex justify-center">
+      {/* Main Artists Section with B&W Background */}
+      <div className="relative">
+        {/* B&W Background Image - Right Side */}
+        <div className="absolute top-0 right-0 w-1/2 h-full hidden lg:block">
+          <img
+            src="/images/SW-jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg"
+            alt="Artist performing"
+            className="w-full h-full object-cover grayscale"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-bg-primary via-bg-primary/80 to-transparent" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6">
+          {/* Section Header */}
+          <div className="mb-8">
+            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4">
+              ARTISTS
+            </h2>
             <GradientBrush className="w-32 md:w-40" size="md" />
           </div>
-        </div>
 
-        {/* Carousel Container */}
-        <div className="relative">
-          {/* Navigation Arrows */}
-          <button
-            onClick={() => scroll('left')}
-            disabled={!canScrollLeft}
-            className={`
-              absolute left-0 top-1/2 -translate-y-1/2 z-10
-              w-10 h-10 md:w-12 md:h-12 rounded-full
-              bg-bg-card/80 backdrop-blur-sm
-              flex items-center justify-center
-              transition-all duration-200
-              -translate-x-1/2 md:-translate-x-0
-              ${canScrollLeft
-                ? 'text-white hover:bg-bg-card-hover cursor-pointer'
-                : 'text-text-disabled cursor-not-allowed opacity-50'
-              }
-            `}
-            aria-label="Scroll left"
-          >
-            <ChevronLeftIcon className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
+          {/* Two-column layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
+            {/* Left Content */}
+            <div className="max-w-lg">
+              <h3 className="text-white font-bold text-xl md:text-2xl uppercase tracking-wide mb-6">
+                UPGRADE YOUR BUSINESS
+              </h3>
+              <p className="text-white/70 text-base leading-relaxed mb-8">
+                One of the most important challenges of each artist is not only to be an
+                entrepreneur, but also be an influencer, content creator and others.
+                We will help you achieve your goals.
+              </p>
+              <Link to="/artists">
+                <Button
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10 px-8 py-3 tracking-wider uppercase rounded-full"
+                >
+                  Find Out More
+                </Button>
+              </Link>
+            </div>
+          </div>
 
-          <button
-            onClick={() => scroll('right')}
-            disabled={!canScrollRight}
-            className={`
-              absolute right-0 top-1/2 -translate-y-1/2 z-10
-              w-10 h-10 md:w-12 md:h-12 rounded-full
-              bg-bg-card/80 backdrop-blur-sm
-              flex items-center justify-center
-              transition-all duration-200
-              translate-x-1/2 md:translate-x-0
-              ${canScrollRight
-                ? 'text-white hover:bg-bg-card-hover cursor-pointer'
-                : 'text-text-disabled cursor-not-allowed opacity-50'
-              }
-            `}
-            aria-label="Scroll right"
-          >
-            <ChevronRightIcon className="w-5 h-5 md:w-6 md:h-6" />
-          </button>
+          {/* Artist Cards Carousel */}
+          <div className="relative mt-8">
+            {/* Navigation Arrows */}
+            <button
+              onClick={() => scroll('left')}
+              disabled={!canScrollLeft}
+              className={`
+                absolute left-0 top-1/2 -translate-y-1/2 z-10
+                w-10 h-10 md:w-12 md:h-12 rounded-full
+                bg-bg-card/80 backdrop-blur-sm
+                flex items-center justify-center
+                transition-all duration-200
+                -translate-x-1/2
+                ${canScrollLeft
+                  ? 'text-white hover:bg-bg-card-hover cursor-pointer'
+                  : 'text-text-disabled cursor-not-allowed opacity-50'
+                }
+              `}
+              aria-label="Scroll left"
+            >
+              <ChevronLeftIcon className="w-5 h-5 md:w-6 md:h-6" />
+            </button>
 
-          {/* Scrollable Cards Container */}
-          <div
-            ref={scrollContainerRef}
-            className="flex gap-6 overflow-x-auto scrollbar-hide scroll-smooth px-2 md:px-8 py-4"
-            style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-          >
-            {artists.map((artist) => (
-              <ArtistCard key={artist.id} artist={artist} />
-            ))}
+            <button
+              onClick={() => scroll('right')}
+              disabled={!canScrollRight}
+              className={`
+                absolute right-0 top-1/2 -translate-y-1/2 z-10
+                w-10 h-10 md:w-12 md:h-12 rounded-full
+                bg-bg-card/80 backdrop-blur-sm
+                flex items-center justify-center
+                transition-all duration-200
+                translate-x-1/2
+                ${canScrollRight
+                  ? 'text-white hover:bg-bg-card-hover cursor-pointer'
+                  : 'text-text-disabled cursor-not-allowed opacity-50'
+                }
+              `}
+              aria-label="Scroll right"
+            >
+              <ChevronRightIcon className="w-5 h-5 md:w-6 md:h-6" />
+            </button>
+
+            {/* Scrollable Cards Container */}
+            <div
+              ref={scrollContainerRef}
+              className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth px-2 py-4"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+            >
+              {artists.map((artist) => (
+                <ArtistCard key={artist.id} artist={artist} />
+              ))}
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* View All Button */}
-        <div className="flex justify-center mt-10 md:mt-12">
-          <Link to="/artists">
-            <Button variant="primary" size="md" className="rounded-full px-8">
-              ALLE ARTISTS ANSEHEN
-            </Button>
-          </Link>
-        </div>
+      {/* BE A MEMBER. BE A FAN. Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 mt-16 md:mt-20 text-center">
+        <h3 className="font-display text-3xl md:text-4xl text-white mb-6">
+          BE A MEMBER. BE A FAN.
+        </h3>
+        <p className="text-white/70 max-w-2xl mx-auto text-base leading-relaxed mb-8">
+          Was gibt es besseres als etwas, das einen an gute Zeiten erinnert?
+          Wenn du also ein Konzert besuchen, eine Buchung anfragst oder ein großartiges
+          Künstler-Erlebnis schaffen möchtest, registriere dich jetzt!
+        </p>
+      </div>
+
+      {/* VORTEILE MEMBER Section */}
+      <div className="max-w-7xl mx-auto px-4 md:px-6 mt-12 md:mt-16 text-center">
+        <h3 className="text-white font-bold text-xl md:text-2xl uppercase tracking-wide mb-8">
+          VORTEILE MEMBER
+        </h3>
+        <p className="text-white/70 max-w-3xl mx-auto text-sm leading-relaxed mb-4">
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+        </p>
+        <p className="text-white/70 max-w-3xl mx-auto text-sm leading-relaxed mb-8">
+          Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+          Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
+        </p>
+        <Button
+          variant="outline"
+          onClick={onMemberClick}
+          className="border-white text-white hover:bg-white/10 px-8 py-3 tracking-wider uppercase rounded-full"
+        >
+          MEMBER WERDEN
+        </Button>
       </div>
 
       {/* Hide scrollbar globally for this component */}
