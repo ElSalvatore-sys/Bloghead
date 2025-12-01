@@ -24,6 +24,8 @@ export function VRExperiencesSection() {
 
           {/* Right: Gradient Card */}
           <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-accent-purple via-accent-red to-accent-salmon p-8 md:p-10 lg:p-12 flex flex-col justify-between min-h-[400px]">
+            {/* Orange Accent Bar at Bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-2 bg-accent-salmon" style={{ backgroundColor: '#FB7A43' }} />
             {/* Content */}
             <div>
               <h3 className="text-white text-2xl md:text-3xl lg:text-4xl font-bold uppercase tracking-wide mb-6">
