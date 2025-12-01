@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/Button'
-import { GradientBrush } from '../ui/GradientBrush'
 
 interface Artist {
   id: string
@@ -10,7 +9,7 @@ interface Artist {
   imageUrl: string
 }
 
-// Sample artist data - replace with real data from API
+// Sample artist data
 const sampleArtists: Artist[] = [
   {
     id: '1',
@@ -47,15 +46,7 @@ const sampleArtists: Artist[] = [
 // Arrow icons
 function ChevronLeftIcon({ className = '' }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15 18l-6-6 6-6" />
     </svg>
   )
@@ -63,31 +54,20 @@ function ChevronLeftIcon({ className = '' }: { className?: string }) {
 
 function ChevronRightIcon({ className = '' }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      className={className}
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 18l6-6-6-6" />
     </svg>
   )
 }
 
-interface ArtistCardProps {
-  artist: Artist
-}
-
-function ArtistCard({ artist }: ArtistCardProps) {
+// Artist Card with purple hover overlay
+function ArtistCard({ artist }: { artist: Artist }) {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
     <Link
       to={`/artists/${artist.id}`}
-      className="relative flex-shrink-0 w-[200px] md:w-[220px] aspect-square group cursor-pointer"
+      className="relative flex-shrink-0 w-[180px] md:w-[200px] aspect-square group cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -100,19 +80,21 @@ function ArtistCard({ artist }: ArtistCardProps) {
 
       {/* Purple Hover Overlay */}
       <div
-        className={`
-          absolute inset-0 flex flex-col justify-end p-4
-          transition-opacity duration-300
-          ${isHovered ? 'opacity-100' : 'opacity-0'}
-        `}
+        className={`absolute inset-0 flex flex-col justify-end p-4 transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
         style={{
           background: 'linear-gradient(180deg, rgba(97, 10, 209, 0.8) 0%, rgba(97, 10, 209, 0.95) 100%)',
         }}
       >
-        <h4 className="text-white font-bold text-sm uppercase tracking-wide mb-2">
+        <h4
+          className="text-white font-bold text-sm uppercase tracking-wide mb-2"
+          style={{ fontFamily: 'Roboto, sans-serif' }}
+        >
           {artist.name}
         </h4>
-        <p className="text-white/80 text-xs leading-relaxed line-clamp-3">
+        <p
+          className="text-white/80 text-xs leading-relaxed line-clamp-3"
+          style={{ fontFamily: 'Roboto, sans-serif' }}
+        >
           {artist.description}
         </p>
       </div>
@@ -134,9 +116,7 @@ export function ArtistsCarouselSection({ artists = sampleArtists, onMemberClick 
     const container = scrollContainerRef.current
     if (container) {
       setCanScrollLeft(container.scrollLeft > 0)
-      setCanScrollRight(
-        container.scrollLeft < container.scrollWidth - container.clientWidth - 10
-      )
+      setCanScrollRight(container.scrollLeft < container.scrollWidth - container.clientWidth - 10)
     }
   }
 
@@ -146,7 +126,6 @@ export function ArtistsCarouselSection({ artists = sampleArtists, onMemberClick 
       checkScrollButtons()
       container.addEventListener('scroll', checkScrollButtons)
       window.addEventListener('resize', checkScrollButtons)
-
       return () => {
         container.removeEventListener('scroll', checkScrollButtons)
         window.removeEventListener('resize', checkScrollButtons)
@@ -157,157 +136,96 @@ export function ArtistsCarouselSection({ artists = sampleArtists, onMemberClick 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current
     if (container) {
-      const cardWidth = 240
-      const scrollAmount = direction === 'left' ? -cardWidth : cardWidth
+      const scrollAmount = direction === 'left' ? -220 : 220
       container.scrollBy({ left: scrollAmount, behavior: 'smooth' })
     }
   }
 
   return (
-    <section className="bg-bg-primary py-16 md:py-20 overflow-hidden">
-      {/* Main Artists Section with B&W Background */}
-      <div className="relative">
-        {/* B&W Background Image - Right Side */}
-        <div className="absolute top-0 right-0 w-1/2 h-full hidden lg:block">
-          <img
-            src="/images/SW-jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg"
-            alt="Artist performing"
-            className="w-full h-full object-cover grayscale"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-bg-primary via-bg-primary/80 to-transparent" />
+    <section className="relative bg-bg-primary py-16 md:py-24 overflow-hidden">
+      {/* Full-width Grayscale Background Image */}
+      <div className="absolute inset-0">
+        <img
+          src="/images/latrach-med-jamil-VD0LgaqFf4U-unsplash.jpg"
+          alt="Artist background"
+          className="w-full h-full object-cover"
+          style={{ filter: 'grayscale(100%)' }}
+        />
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
+        {/* Section Title */}
+        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8">
+          Artists
+        </h2>
+
+        {/* Content: Left text, artist cards on bottom */}
+        <div className="max-w-lg mb-12">
+          <h3
+            className="text-white text-xl md:text-2xl font-bold uppercase tracking-wide mb-4"
+            style={{ fontFamily: 'Roboto, sans-serif' }}
+          >
+            Upgrade Your Business
+          </h3>
+          <p
+            className="text-white/70 text-sm md:text-base leading-relaxed mb-6"
+            style={{ fontFamily: 'Roboto, sans-serif' }}
+          >
+            One of the most important challenges of each artist is not only to be an
+            entrepreneur, but also be an influencer, content creator and others.
+            We will help you achieve your goals.
+          </p>
+          <Link to="/artists">
+            <Button
+              variant="outline"
+              className="border-white text-white hover:bg-white/10 px-8 py-3 tracking-wider uppercase rounded-full text-sm font-bold"
+            >
+              Find Out More
+            </Button>
+          </Link>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6">
-          {/* Section Header */}
-          <div className="mb-8">
-            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4">
-              ARTISTS
-            </h2>
-            <GradientBrush className="w-32 md:w-40" size="md" />
-          </div>
+        {/* Artist Cards Carousel */}
+        <div className="relative">
+          {/* Navigation Arrows */}
+          <button
+            onClick={() => scroll('left')}
+            disabled={!canScrollLeft}
+            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center transition-all -translate-x-1/2 ${
+              canScrollLeft ? 'text-white hover:bg-black/80 cursor-pointer' : 'text-white/30 cursor-not-allowed'
+            }`}
+            aria-label="Scroll left"
+          >
+            <ChevronLeftIcon className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
 
-          {/* Two-column layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
-            {/* Left Content */}
-            <div className="max-w-lg">
-              <h3 className="text-white font-bold text-xl md:text-2xl uppercase tracking-wide mb-6">
-                UPGRADE YOUR BUSINESS
-              </h3>
-              <p className="text-white/70 text-base leading-relaxed mb-8">
-                One of the most important challenges of each artist is not only to be an
-                entrepreneur, but also be an influencer, content creator and others.
-                We will help you achieve your goals.
-              </p>
-              <Link to="/artists">
-                <Button
-                  variant="outline"
-                  className="border-white text-white hover:bg-white/10 px-8 py-3 tracking-wider uppercase rounded-full"
-                >
-                  Find Out More
-                </Button>
-              </Link>
-            </div>
-          </div>
+          <button
+            onClick={() => scroll('right')}
+            disabled={!canScrollRight}
+            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center transition-all translate-x-1/2 ${
+              canScrollRight ? 'text-white hover:bg-black/80 cursor-pointer' : 'text-white/30 cursor-not-allowed'
+            }`}
+            aria-label="Scroll right"
+          >
+            <ChevronRightIcon className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
 
-          {/* Artist Cards Carousel */}
-          <div className="relative mt-8">
-            {/* Navigation Arrows */}
-            <button
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft}
-              className={`
-                absolute left-0 top-1/2 -translate-y-1/2 z-10
-                w-10 h-10 md:w-12 md:h-12 rounded-full
-                bg-bg-card/80 backdrop-blur-sm
-                flex items-center justify-center
-                transition-all duration-200
-                -translate-x-1/2
-                ${canScrollLeft
-                  ? 'text-white hover:bg-bg-card-hover cursor-pointer'
-                  : 'text-text-disabled cursor-not-allowed opacity-50'
-                }
-              `}
-              aria-label="Scroll left"
-            >
-              <ChevronLeftIcon className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
-
-            <button
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight}
-              className={`
-                absolute right-0 top-1/2 -translate-y-1/2 z-10
-                w-10 h-10 md:w-12 md:h-12 rounded-full
-                bg-bg-card/80 backdrop-blur-sm
-                flex items-center justify-center
-                transition-all duration-200
-                translate-x-1/2
-                ${canScrollRight
-                  ? 'text-white hover:bg-bg-card-hover cursor-pointer'
-                  : 'text-text-disabled cursor-not-allowed opacity-50'
-                }
-              `}
-              aria-label="Scroll right"
-            >
-              <ChevronRightIcon className="w-5 h-5 md:w-6 md:h-6" />
-            </button>
-
-            {/* Scrollable Cards Container */}
-            <div
-              ref={scrollContainerRef}
-              className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth px-2 py-4"
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-              }}
-            >
-              {artists.map((artist) => (
-                <ArtistCard key={artist.id} artist={artist} />
-              ))}
-            </div>
+          {/* Scrollable Cards Container */}
+          <div
+            ref={scrollContainerRef}
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth px-2"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {artists.map((artist) => (
+              <ArtistCard key={artist.id} artist={artist} />
+            ))}
           </div>
         </div>
       </div>
 
-      {/* BE A MEMBER. BE A FAN. Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 mt-16 md:mt-20 text-center">
-        <h3 className="font-display text-3xl md:text-4xl text-white mb-6">
-          BE A MEMBER. BE A FAN.
-        </h3>
-        <p className="text-white/70 max-w-2xl mx-auto text-base leading-relaxed mb-8">
-          Was gibt es besseres als etwas, das einen an gute Zeiten erinnert?
-          Wenn du also ein Konzert besuchen, eine Buchung anfragst oder ein großartiges
-          Künstler-Erlebnis schaffen möchtest, registriere dich jetzt!
-        </p>
-      </div>
-
-      {/* VORTEILE MEMBER Section */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 mt-12 md:mt-16 text-center">
-        <h3 className="text-white font-bold text-xl md:text-2xl uppercase tracking-wide mb-8">
-          VORTEILE MEMBER
-        </h3>
-        <p className="text-white/70 max-w-3xl mx-auto text-sm leading-relaxed mb-4">
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
-        </p>
-        <p className="text-white/70 max-w-3xl mx-auto text-sm leading-relaxed mb-8">
-          Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-          Lorem ipsum dolor sit amet, consetetur sadipscing elitr.
-        </p>
-        <Button
-          variant="outline"
-          onClick={onMemberClick}
-          className="border-white text-white hover:bg-white/10 px-8 py-3 tracking-wider uppercase rounded-full"
-        >
-          MEMBER WERDEN
-        </Button>
-      </div>
-
-      {/* Hide scrollbar globally for this component */}
-      <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+      {/* Hide scrollbar */}
+      <style>{`.scrollbar-hide::-webkit-scrollbar { display: none; }`}</style>
     </section>
   )
 }
