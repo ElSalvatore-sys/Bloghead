@@ -5,7 +5,6 @@ import {
   FeaturesSection,
   ArtistsCarouselSection,
   MemberCTASection,
-  VorteileMemberSection,
   EventsSection,
   VRExperiencesSection,
 } from '../components/sections'
@@ -29,14 +28,11 @@ export function HomePage() {
       {/* Features Section - Platform USP and benefits */}
       <FeaturesSection onRegisterClick={handleMemberClick} />
 
-      {/* Artists Carousel Section - Featured artists slider */}
-      <ArtistsCarouselSection />
+      {/* Artists Carousel Section - Featured artists with member benefits */}
+      <ArtistsCarouselSection onMemberClick={handleMemberClick} />
 
       {/* Member CTA Section - Call to action for registration */}
       <MemberCTASection onMemberClick={handleMemberClick} />
-
-      {/* Vorteile Member Section - Member benefits */}
-      <VorteileMemberSection onMemberClick={handleMemberClick} />
 
       {/* Events Section - Upcoming events showcase */}
       <EventsSection />
