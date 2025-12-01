@@ -157,6 +157,13 @@ Phase 2 of the Bloghead project is complete. The entire frontend UI has been bui
 - "ALLE ARTISTS ANSEHEN" button navigates to `/artists`
 - "MEMBER WERDEN" buttons open RegisterModal on homepage
 
+### Design Fixes (Match Original PDFs)
+- **Artists Section**: Two-column layout with B&W background, artist cards with purple hover overlay, integrated "BE A MEMBER" and "VORTEILE MEMBER" sections
+- **Events Section**: Featured image grid (large left, stacked right), purple accent bars, event info overlays
+- **VR Section**: Added orange accent bar (#FB7A43) at bottom of gradient card
+- **Features Section**: Reduced to 3 icons, added "JETZT REGISTRIEREN" button
+- Removed duplicate VorteileMemberSection (now part of Artists section)
+
 ### Working Features
 - Full page navigation (all 6 routes functional)
 - Artist card click-through to profile
