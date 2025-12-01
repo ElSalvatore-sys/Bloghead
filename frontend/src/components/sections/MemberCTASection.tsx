@@ -3,24 +3,24 @@ interface MemberCTASectionProps {
   onMemberClick?: () => void
 }
 
-export function MemberCTASection({ className = '', onMemberClick }: MemberCTASectionProps) {
+export function MemberCTASection({ className = '' }: MemberCTASectionProps) {
   return (
     <section
-      className={`relative w-full py-16 md:py-24 overflow-hidden ${className}`}
+      className={`relative w-full py-20 md:py-28 overflow-hidden ${className}`}
       style={{
         background: 'linear-gradient(135deg, #610AD1 0%, #F92B02 50%, #FB7A43 100%)',
       }}
     >
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-        {/* Main Title - Hyperwave Font */}
-        <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight">
+        {/* Main Title - Hyperwave Font italic - matching d5 */}
+        <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-10 leading-tight italic">
           Be a Member. Be a Fan.
         </h2>
 
-        {/* Question Lines - Each on its own line */}
+        {/* Question Lines - Each on its own line with more spacing */}
         <div
-          className="text-white/90 text-sm md:text-base leading-loose mb-8 space-y-1"
+          className="text-white/90 text-sm md:text-base leading-relaxed space-y-2"
           style={{ fontFamily: 'Roboto, sans-serif' }}
         >
           <p>You are an artist searching for a location to perform?</p>

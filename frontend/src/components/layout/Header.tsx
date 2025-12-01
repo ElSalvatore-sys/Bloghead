@@ -559,7 +559,7 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        onLogin={(membername, password) => {
+        onLogin={(membername, _password) => {
           console.log('Login:', membername)
           setShowLoginModal(false)
         }}

@@ -4,7 +4,7 @@ interface HeroSectionProps {
   onMemberClick?: () => void
 }
 
-export function HeroSection({ onMemberClick }: HeroSectionProps) {
+export function HeroSection({}: HeroSectionProps) {
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {

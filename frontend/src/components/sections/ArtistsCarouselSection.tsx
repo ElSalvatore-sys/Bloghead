@@ -107,7 +107,7 @@ interface ArtistsCarouselSectionProps {
   onMemberClick?: () => void
 }
 
-export function ArtistsCarouselSection({ artists = sampleArtists, onMemberClick }: ArtistsCarouselSectionProps) {
+export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarouselSectionProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -161,8 +161,8 @@ export function ArtistsCarouselSection({ artists = sampleArtists, onMemberClick 
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
-        {/* Section Title */}
-        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8">
+        {/* Section Title - Hyperwave italic */}
+        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8 italic">
           Artists
         </h2>
 

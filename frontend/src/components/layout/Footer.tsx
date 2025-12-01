@@ -8,18 +8,19 @@ export function Footer() {
   ]
 
   return (
-    <footer className="relative">
-      {/* Purple curved wave at top */}
-      <div className="relative">
+    <footer className="relative bg-bg-primary">
+      {/* Purple curved wave at top - matching d8 designer */}
+      <div className="relative h-24 md:h-32 overflow-hidden">
         <svg
-          viewBox="0 0 1440 120"
+          viewBox="0 0 1440 200"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-auto block"
+          className="absolute bottom-0 w-full h-auto"
           preserveAspectRatio="none"
         >
+          {/* Organic wave shape matching designer */}
           <path
-            d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V120Z"
+            d="M0 200H1440V100C1440 100 1350 60 1200 80C1050 100 950 140 800 130C650 120 550 80 400 90C250 100 150 140 0 120V200Z"
             fill="#610AD1"
           />
         </svg>
@@ -27,34 +28,24 @@ export function Footer() {
 
       {/* Purple background section */}
       <div style={{ backgroundColor: '#610AD1' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-10">
           {/* Navigation Links - Centered with separators */}
-          <nav className="flex items-center justify-center gap-6 sm:gap-8 mb-8">
+          <nav className="flex items-center justify-center gap-8 sm:gap-12">
             {footerLinks.map((link, index) => (
               <span key={link.href} className="flex items-center">
                 <Link
                   to={link.href}
-                  className="text-white hover:text-white/80 text-xs sm:text-sm font-medium tracking-wider uppercase transition-colors"
+                  className="text-white hover:text-white/80 text-xs sm:text-sm font-medium tracking-widest uppercase transition-colors"
                   style={{ fontFamily: 'Roboto, sans-serif' }}
                 >
                   {link.label}
                 </Link>
                 {index < footerLinks.length - 1 && (
-                  <span className="text-white/40 ml-6 sm:ml-8">|</span>
+                  <span className="text-white/40 ml-8 sm:ml-12">|</span>
                 )}
               </span>
             ))}
           </nav>
-
-          {/* Copyright */}
-          <div className="text-center">
-            <p
-              className="text-white/70 text-xs sm:text-sm"
-              style={{ fontFamily: 'Roboto, sans-serif' }}
-            >
-              © 2025 Bloghead. All rights reserved.
-            </p>
-          </div>
         </div>
       </div>
     </footer>

@@ -23,11 +23,11 @@ export function EventsSection() {
     <section className="bg-bg-primary py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Section Title - Left aligned */}
-        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8">
+        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8 italic">
           Events
         </h2>
 
-        {/* Image Grid Layout */}
+        {/* Image Grid Layout - matching designer d6/d7 */}
         <div className="relative mb-12">
           {/* Navigation Arrows */}
           <button
@@ -44,17 +44,18 @@ export function EventsSection() {
             <ChevronRightIcon className="w-5 h-5 md:w-6 md:h-6" />
           </button>
 
-          <div className="grid grid-cols-4 grid-rows-2 gap-2 md:gap-4">
-            {/* Left Column - Text + Small Images */}
-            <div className="col-span-1 row-span-2 flex flex-col gap-2 md:gap-4">
+          {/* Grid: Text left, 3 columns of images */}
+          <div className="grid grid-cols-12 gap-2 md:gap-3">
+            {/* Left Column - Text + Bottom Image */}
+            <div className="col-span-3 flex flex-col gap-2 md:gap-3">
               {/* Text Block */}
-              <div className="flex-1 flex flex-col justify-center">
-                <h3 className="font-display text-2xl md:text-3xl lg:text-4xl text-white leading-tight mb-4">
+              <div className="flex-1 flex flex-col justify-end pb-4">
+                <h3 className="font-display text-xl md:text-2xl lg:text-3xl text-white leading-tight mb-3 italic">
                   Ready To<br />
                   Inspire You.
                 </h3>
                 <p
-                  className="text-white/60 text-xs md:text-sm leading-relaxed hidden md:block"
+                  className="text-white/50 text-xs leading-relaxed hidden md:block"
                   style={{ fontFamily: 'Roboto, sans-serif' }}
                 >
                   Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo.
@@ -62,7 +63,7 @@ export function EventsSection() {
               </div>
 
               {/* Small Image Bottom Left */}
-              <div className="aspect-video overflow-hidden">
+              <div className="aspect-[4/3] overflow-hidden">
                 <img
                   src="/images/pexels-luis-quintero-2091383.jpg"
                   alt="Event"
@@ -71,17 +72,26 @@ export function EventsSection() {
               </div>
             </div>
 
-            {/* Small Image Top Left */}
-            <div className="col-span-1 row-span-1 overflow-hidden">
-              <img
-                src="/images/alexander-popov-f3e6YNo3Y98-unsplash.jpg"
-                alt="Concert crowd"
-                className="w-full h-full object-cover"
-              />
+            {/* Second Column - 2 stacked images */}
+            <div className="col-span-3 flex flex-col gap-2 md:gap-3">
+              <div className="flex-1 overflow-hidden">
+                <img
+                  src="/images/alexander-popov-f3e6YNo3Y98-unsplash.jpg"
+                  alt="Concert crowd"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <img
+                  src="/images/flavio-gasperini-QO0hJHVUVso-unsplash.jpg"
+                  alt="Concert lights"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
 
-            {/* Center Large Image - Spanning 2 columns, 2 rows */}
-            <div className="col-span-1 row-span-2 relative overflow-hidden">
+            {/* Center Large Image with Purple bar */}
+            <div className="col-span-3 relative overflow-hidden">
               {/* Purple bar on top */}
               <div
                 className="absolute top-0 left-0 right-0 h-2 md:h-3 z-10"
@@ -94,41 +104,38 @@ export function EventsSection() {
               />
             </div>
 
-            {/* Right Column - Small Images */}
-            <div className="col-span-1 row-span-1 overflow-hidden">
-              <img
-                src="/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg"
-                alt="Artist performing"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Bottom row small images */}
-            <div className="col-span-1 row-span-1 overflow-hidden">
-              <img
-                src="/images/flavio-gasperini-QO0hJHVUVso-unsplash.jpg"
-                alt="Concert lights"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            <div className="col-span-1 row-span-1 overflow-hidden">
-              <img
-                src="/images/german-lopez-sP45Es070zI-unsplash.jpg"
-                alt="DJ set"
-                className="w-full h-full object-cover"
-              />
+            {/* Right Column - 2 stacked images with purple bar on last */}
+            <div className="col-span-3 flex flex-col gap-2 md:gap-3">
+              <div className="flex-1 overflow-hidden">
+                <img
+                  src="/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg"
+                  alt="Artist performing"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-1 relative overflow-hidden">
+                {/* Purple bar on right side */}
+                <div
+                  className="absolute top-0 bottom-0 right-0 w-2 md:w-3 z-10"
+                  style={{ backgroundColor: '#610AD1' }}
+                />
+                <img
+                  src="/images/german-lopez-sP45Es070zI-unsplash.jpg"
+                  alt="DJ set"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Section - Centered text and button */}
         <div className="text-center">
-          <h3 className="font-display text-2xl md:text-3xl lg:text-4xl text-white mb-4">
+          <h3 className="font-display text-xl md:text-2xl lg:text-3xl text-white mb-4 italic">
             Hier Steht Etwas Zum Thema Events.
           </h3>
           <p
-            className="text-white/60 text-sm md:text-base leading-relaxed max-w-3xl mx-auto mb-8"
+            className="text-white/50 text-sm leading-relaxed max-w-3xl mx-auto mb-8"
             style={{ fontFamily: 'Roboto, sans-serif' }}
           >
             Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.
