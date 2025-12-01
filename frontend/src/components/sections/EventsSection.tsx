@@ -1,150 +1,148 @@
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/Button'
-import { GradientBrush } from '../ui/GradientBrush'
 
-interface EventImage {
-  src: string
-  alt: string
-  title?: string
-  date?: string
-  location?: string
-}
-
-interface EventsSectionProps {
-  className?: string
-  images?: EventImage[]
-}
-
-// Default event images
-const defaultImages: EventImage[] = [
-  {
-    src: '/images/flavio-gasperini-QO0hJHVUVso-unsplash.jpg',
-    alt: 'Concert crowd with purple lights',
-    title: 'SUMMER BEATS FESTIVAL',
-    date: '15. JULI 2025',
-    location: 'Frankfurt am Main',
-  },
-  {
-    src: '/images/german-lopez-sP45Es070zI-unsplash.jpg',
-    alt: 'DJ performing live',
-    title: 'CLUB NIGHT',
-    date: '22. JULI 2025',
-    location: 'Berlin',
-  },
-  {
-    src: '/images/pexels-wendy-wei-1699161.jpg',
-    alt: 'Concert audience',
-    title: 'LIVE ACOUSTIC',
-    date: '28. JULI 2025',
-    location: 'Hamburg',
-  },
-]
-
-export function EventsSection({
-  className = '',
-  images = defaultImages,
-}: EventsSectionProps) {
-  const featuredEvent = images[0]
-  const sideEvents = images.slice(1, 3)
-
+// Arrow icons
+function ChevronLeftIcon({ className = '' }: { className?: string }) {
   return (
-    <section className={`bg-bg-primary py-16 md:py-24 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        {/* Section Header */}
-        <div className="mb-12">
-          <h2 className="font-display text-5xl md:text-6xl lg:text-7xl text-white mb-4">
-            EVENTS
-          </h2>
-          <GradientBrush className="w-32 md:w-40" size="md" />
-        </div>
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 18l-6-6 6-6" />
+    </svg>
+  )
+}
 
-        {/* Image Grid - Featured Left, Stack Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-12">
-          {/* Featured Event - Large Left Image */}
-          <Link
-            to="/events"
-            className="lg:col-span-2 relative group overflow-hidden aspect-[4/3] lg:aspect-auto lg:row-span-2"
+function ChevronRightIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 18l6-6-6-6" />
+    </svg>
+  )
+}
+
+export function EventsSection() {
+  return (
+    <section className="bg-bg-primary py-16 md:py-24">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        {/* Section Title - Left aligned */}
+        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8">
+          Events
+        </h2>
+
+        {/* Image Grid Layout */}
+        <div className="relative mb-12">
+          {/* Navigation Arrows */}
+          <button
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 -translate-x-1/2"
+            aria-label="Previous"
           >
-            <img
-              src={featuredEvent.src}
-              alt={featuredEvent.alt}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            {/* Dark Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <ChevronLeftIcon className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
 
-            {/* Event Info Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-              {/* Purple Accent Bar */}
-              <div className="w-12 h-1 bg-accent-purple mb-4" />
+          <button
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 translate-x-1/2"
+            aria-label="Next"
+          >
+            <ChevronRightIcon className="w-5 h-5 md:w-6 md:h-6" />
+          </button>
 
-              <h3 className="text-white font-bold text-xl md:text-2xl uppercase tracking-wide mb-2">
-                {featuredEvent.title}
-              </h3>
-              <p className="text-white/80 text-sm uppercase tracking-wider">
-                {featuredEvent.date} • {featuredEvent.location}
-              </p>
-            </div>
-          </Link>
-
-          {/* Side Events - Stacked Right */}
-          {sideEvents.map((event, index) => (
-            <Link
-              key={index}
-              to="/events"
-              className="relative group overflow-hidden aspect-[4/3]"
-            >
-              <img
-                src={event.src}
-                alt={event.alt}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              {/* Dark Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-              {/* Event Info Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                {/* Purple Accent Bar */}
-                <div className="w-8 h-1 bg-accent-purple mb-3" />
-
-                <h4 className="text-white font-bold text-base md:text-lg uppercase tracking-wide mb-1">
-                  {event.title}
-                </h4>
-                <p className="text-white/80 text-xs uppercase tracking-wider">
-                  {event.date} • {event.location}
+          <div className="grid grid-cols-4 grid-rows-2 gap-2 md:gap-4">
+            {/* Left Column - Text + Small Images */}
+            <div className="col-span-1 row-span-2 flex flex-col gap-2 md:gap-4">
+              {/* Text Block */}
+              <div className="flex-1 flex flex-col justify-center">
+                <h3 className="font-display text-2xl md:text-3xl lg:text-4xl text-white leading-tight mb-4">
+                  Ready To<br />
+                  Inspire You.
+                </h3>
+                <p
+                  className="text-white/60 text-xs md:text-sm leading-relaxed hidden md:block"
+                  style={{ fontFamily: 'Roboto, sans-serif' }}
+                >
+                  Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo.
                 </p>
               </div>
-            </Link>
-          ))}
+
+              {/* Small Image Bottom Left */}
+              <div className="aspect-video overflow-hidden">
+                <img
+                  src="/images/pexels-luis-quintero-2091383.jpg"
+                  alt="Event"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            {/* Small Image Top Left */}
+            <div className="col-span-1 row-span-1 overflow-hidden">
+              <img
+                src="/images/alexander-popov-f3e6YNo3Y98-unsplash.jpg"
+                alt="Concert crowd"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Center Large Image - Spanning 2 columns, 2 rows */}
+            <div className="col-span-1 row-span-2 relative overflow-hidden">
+              {/* Purple bar on top */}
+              <div
+                className="absolute top-0 left-0 right-0 h-2 md:h-3 z-10"
+                style={{ backgroundColor: '#610AD1' }}
+              />
+              <img
+                src="/images/luis-reynoso-J5a0MRXVnUI-unsplash.jpg"
+                alt="Main event"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Right Column - Small Images */}
+            <div className="col-span-1 row-span-1 overflow-hidden">
+              <img
+                src="/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg"
+                alt="Artist performing"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Bottom row small images */}
+            <div className="col-span-1 row-span-1 overflow-hidden">
+              <img
+                src="/images/flavio-gasperini-QO0hJHVUVso-unsplash.jpg"
+                alt="Concert lights"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            <div className="col-span-1 row-span-1 overflow-hidden">
+              <img
+                src="/images/german-lopez-sP45Es070zI-unsplash.jpg"
+                alt="DJ set"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Text Content Below Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-          {/* Left - Headline */}
-          <div>
-            <h3 className="font-display text-3xl md:text-4xl lg:text-5xl text-white leading-tight">
-              READY TO<br />
-              INSPIRE YOU.
-            </h3>
-          </div>
-
-          {/* Right - Description and CTA */}
-          <div>
-            <p className="text-white/70 text-base leading-relaxed mb-6">
-              Entdecke einzigartige Events und unvergessliche Momente mit unseren Künstlern.
-              Von intimen Akustik-Sessions bis zu großen Bühnenauftritten – erlebe Live-Musik
-              wie nie zuvor. Unsere Events bringen Menschen zusammen und schaffen bleibende
-              Erinnerungen.
-            </p>
-            <Link to="/events">
-              <Button
-                variant="outline"
-                className="border-white text-white hover:bg-white/10 px-8 py-3 tracking-wider uppercase rounded-full"
-              >
-                Alle Events Ansehen
-              </Button>
-            </Link>
-          </div>
+        {/* Bottom Section - Centered text and button */}
+        <div className="text-center">
+          <h3 className="font-display text-2xl md:text-3xl lg:text-4xl text-white mb-4">
+            Hier Steht Etwas Zum Thema Events.
+          </h3>
+          <p
+            className="text-white/60 text-sm md:text-base leading-relaxed max-w-3xl mx-auto mb-8"
+            style={{ fontFamily: 'Roboto, sans-serif' }}
+          >
+            Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.
+            Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur
+            ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu.
+          </p>
+          <Link to="/events">
+            <Button
+              variant="outline"
+              className="border-accent-purple text-accent-purple hover:bg-accent-purple/10 px-10 py-3 tracking-wider uppercase rounded-full text-sm font-bold"
+            >
+              Jetzt Registrieren
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
