@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '../ui/Button'
 import { StarRating } from '../ui/StarRating'
 import { GradientBrush } from '../ui/GradientBrush'
@@ -158,14 +159,16 @@ function ArtistCard({ artist }: ArtistCardProps) {
         </div>
 
         {/* CTA Button */}
-        <Button
-          variant="secondary"
-          size="sm"
-          fullWidth
-          className="mt-4 rounded-full border-white/30 hover:border-white/50"
-        >
-          PROFIL ANSEHEN
-        </Button>
+        <Link to={`/artists/${artist.id}`}>
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
+            className="mt-4 rounded-full border-white/30 hover:border-white/50"
+          >
+            PROFIL ANSEHEN
+          </Button>
+        </Link>
       </div>
     </div>
   )
@@ -286,9 +289,11 @@ export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarou
 
         {/* View All Button */}
         <div className="flex justify-center mt-10 md:mt-12">
-          <Button variant="primary" size="md" className="rounded-full px-8">
-            ALLE ARTISTS ANSEHEN
-          </Button>
+          <Link to="/artists">
+            <Button variant="primary" size="md" className="rounded-full px-8">
+              ALLE ARTISTS ANSEHEN
+            </Button>
+          </Link>
         </div>
       </div>
 

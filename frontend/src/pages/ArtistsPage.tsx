@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
 import { FilterBar, type FilterBarFilters } from '../components/filters'
@@ -241,14 +242,16 @@ function ArtistCard({ artist, onFavoriteToggle }: ArtistCardProps) {
         </div>
 
         {/* CTA Button */}
-        <Button
-          variant="secondary"
-          size="sm"
-          fullWidth
-          className="mt-3 rounded-full border-white/30 hover:border-white/50 uppercase tracking-wider"
-        >
-          Profil Ansehen
-        </Button>
+        <Link to={`/artists/${artist.id}`}>
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
+            className="mt-3 rounded-full border-white/30 hover:border-white/50 uppercase tracking-wider"
+          >
+            Profil Ansehen
+          </Button>
+        </Link>
       </div>
     </div>
   )

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   HeroSection,
   AboutSection,
@@ -8,12 +9,19 @@ import {
   EventsSection,
   VRExperiencesSection,
 } from '../components/sections'
+import { RegisterModal } from '../components/auth'
 
 export function HomePage() {
+  const [showRegisterModal, setShowRegisterModal] = useState(false)
+
+  const handleMemberClick = () => {
+    setShowRegisterModal(true)
+  }
+
   return (
     <div className="scroll-smooth">
       {/* Hero Section - Main banner with Bloghead branding */}
-      <HeroSection />
+      <HeroSection onMemberClick={handleMemberClick} />
 
       {/* About Section - Introduction to the platform */}
       <AboutSection />
@@ -25,16 +33,30 @@ export function HomePage() {
       <ArtistsCarouselSection />
 
       {/* Member CTA Section - Call to action for registration */}
-      <MemberCTASection />
+      <MemberCTASection onMemberClick={handleMemberClick} />
 
       {/* Vorteile Member Section - Member benefits */}
-      <VorteileMemberSection />
+      <VorteileMemberSection onMemberClick={handleMemberClick} />
 
       {/* Events Section - Upcoming events showcase */}
       <EventsSection />
 
       {/* VR Experiences Section - Virtual reality concerts */}
       <VRExperiencesSection />
+
+      {/* Registration Modal */}
+      <RegisterModal
+        isOpen={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onRegister={(data) => {
+          console.log('Register:', data)
+          setShowRegisterModal(false)
+        }}
+        onLoginClick={() => {
+          setShowRegisterModal(false)
+          // Could open login modal here if needed
+        }}
+      />
     </div>
   )
 }
