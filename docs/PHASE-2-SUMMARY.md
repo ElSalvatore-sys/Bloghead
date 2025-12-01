@@ -142,6 +142,32 @@ Phase 2 of the Bloghead project is complete. The entire frontend UI has been bui
 
 ---
 
+## Recent Updates (December 1, 2025)
+
+### Images Added
+- Copied 19 stock photos to `frontend/public/images/`
+- HeroSection: B&W performer background image
+- AboutSection: Color performer image
+- ArtistsCarouselSection: Real profile images for artist cards
+- EventsSection: Concert/event photos for carousel
+- VRExperiencesSection: VR/concert image
+
+### Navigation Fixed
+- "PROFIL ANSEHEN" buttons navigate to `/artists/:id`
+- "ALLE ARTISTS ANSEHEN" button navigates to `/artists`
+- "MEMBER WERDEN" buttons open RegisterModal on homepage
+
+### Working Features
+- Full page navigation (all 6 routes functional)
+- Artist card click-through to profile
+- Filter bar on Artists page
+- Registration modal (3-step flow)
+- Login modal
+- Mobile responsive header with hamburger menu
+- Image carousel with navigation
+
+---
+
 ## Development Command
 
 ```bash
@@ -153,3 +179,4 @@ npm run dev
 ---
 
 *Document created: November 29, 2025*
+*Updated: December 1, 2025 - Added images and navigation fixes*
