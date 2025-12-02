@@ -1,34 +1,113 @@
-# Bloghead - Claude Code Context
-
-## Project Overview
-Bloghead is a German artist booking platform connecting performers (DJs, singers, musicians) with event organizers (Veranstalter). Built with React 19 + TypeScript + Vite 7 frontend, targeting Supabase PostgreSQL backend.
-
-## Current State
-- ✅ **Phase 1 Complete**: Project setup, Tailwind config, base components
-- ✅ **Phase 2 Complete**: All frontend pages and components (26 components, 7 pages)
-- ⏳ **Phase 3 Pending**: Backend and database (Supabase, Auth, API, Payments)
-
-## Key Documentation (READ THESE FIRST)
-1. `docs/SYSTEM-ARCHITECTURE.md` - All 6 core systems explained
-2. `docs/DATABASE-SCHEMA.md` - Complete Supabase schema (30+ tables)
-3. `docs/DESIGN-SPECS.md` - Colors, typography, component CSS
-4. `docs/PAGE-BY-PAGE-BREAKDOWN.md` - Every UI element documented
-
-## Design References
-- `pdf-pages/*.jpg` - Compressed screenshots of all 12 website designs
-- Original PDFs not in repo (too large) - available locally if needed
-
-## Tech Stack
-- Frontend: React 19, TypeScript, Vite 7, Tailwind CSS v4
-- Backend: Supabase (PostgreSQL, Auth, Storage, Edge Functions)
-- Payments: Stripe Connect (future)
+# Bloghead - Project Status
 
 ## Quick Start
 ```bash
-cd frontend && npm install && npm run dev
+cd ~/Developer/Bloghead/frontend
+npm run dev
+# Runs at http://localhost:5173
 ```
 
-## German Context
-- UI text is in German (KÜNSTLER, VERANSTALTER, BUCHEN, etc.)
-- Currency: EUR with custom "Coins" system
-- Legal: German business law (Impressum, Datenschutz, AGB)
+## Project Overview
+Artist booking platform connecting musicians/DJs with event organizers.
+- **Tech**: React + TypeScript + Vite + TailwindCSS
+- **Backend**: Supabase (Phase 3)
+- **Repo**: https://github.com/ElSalvatore-sys/Bloghead
+
+---
+
+## Phase Status
+
+### ✅ Phase 1: Project Setup (Complete)
+- React/Vite/TypeScript initialized
+- TailwindCSS configured
+- Folder structure created
+- Git repository connected
+- Fonts configured (Hyperwave One, Roboto)
+
+### ✅ Phase 2: Frontend (Complete)
+All pages and components built:
+
+**Pages (7):**
+- ✅ HomePage (`/`) - All sections polished
+- ✅ ArtistsPage (`/artists`) - Grid with filter bar
+- ✅ ArtistProfilePage (`/artists/:id`) - Full profile view
+- ✅ EventsPage (`/events`)
+- ✅ AboutPage (`/about`)
+- ✅ ProfileEditPage (`/profile/edit`)
+- ✅ ImpressumPage (`/impressum`) - German legal notice
+- ✅ KontaktPage (`/kontakt`) - Contact form
+- ✅ DatenschutzPage (`/datenschutz`) - GDPR privacy policy
+
+**Components (26+):**
+- Layout: Header, Footer, Layout
+- Sections: Hero, About, Features, Artists, MemberCTA, Vorteile, Events, VR
+- UI: Badge, Button, Card, Input, Modal, StarRating, CookieConsent
+- Auth: LoginModal, RegisterModal (3-step)
+- Artist: ArtistCalendar, AudioPlayer, FilterBar
+- Profile: ImageUpload, ProfileForm
+
+### ⏳ Phase 3: Backend (Pending)
+- [ ] Supabase project setup
+- [ ] Database tables (30+ from DATABASE-SCHEMA.md)
+- [ ] Authentication (email + OAuth)
+- [ ] API routes (users, artists, bookings)
+- [ ] File storage (images, audio)
+- [ ] Connect frontend forms to Supabase
+
+### ⏳ Phase 4+: Advanced Features (Future)
+See docs/PRODUCT-SPECIFICATIONS.md for full requirements:
+- 4 user types (Community, Artists, Service Providers, Event Organizers)
+- Event planning wizard with AI
+- Messagebox/chat system
+- SEPA payment with escrow
+- Rating and tipping system
+- Dispute resolution
+
+---
+
+## Deployment
+
+### Vercel (Auto-deploy)
+Connected to GitHub - auto-deploys on push to main
+
+### Strato (German Hosting)
+Domain: blog-head.com / blog-head.de
+```bash
+cd ~/Developer/Bloghead/frontend
+npm run build
+scp -r dist/* sysuser_5@h2976173.stratoserver.net:~/httpdocs/
+```
+
+---
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `docs/PRODUCT-SPECIFICATIONS.md` | Full product requirements |
+| `docs/DATABASE-SCHEMA.md` | Database table definitions |
+| `docs/PHASE-2-SUMMARY.md` | Frontend implementation details |
+| `BlogHead_Styleguide.pdf` | Design system (colors, fonts) |
+| `BlogHead-Website-Ansicht.pdf` | Designer mockups |
+
+---
+
+## Design System
+
+**Colors:**
+- Purple: #610AD1
+- Orange: #FB7A43
+- Red: #F92B02
+- Background: #171717
+
+**Fonts:**
+- Display: Hyperwave One (titles, logo)
+- Body: Roboto (text, buttons)
+
+---
+
+## Next Steps
+
+1. **Deploy current build** to Strato (blog-head.com)
+2. **Start Phase 3** - Supabase backend setup
+3. Read `docs/PRODUCT-SPECIFICATIONS.md` for Phase 4+ planning
