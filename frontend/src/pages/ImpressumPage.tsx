@@ -1,12 +1,6 @@
-import { Header } from '../components/layout/Header'
-import { Footer } from '../components/layout/Footer'
-
 export default function ImpressumPage() {
   return (
-    <div className="min-h-screen bg-bg-primary">
-      <Header />
-
-      <main className="pt-24 pb-16">
+    <div className="pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-4 md:px-8">
           {/* Title */}
           <div className="mb-12">
@@ -166,9 +160,6 @@ export default function ImpressumPage() {
 
           </div>
         </div>
-      </main>
-
-      <Footer />
     </div>
   )
 }

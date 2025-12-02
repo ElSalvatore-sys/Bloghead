@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { Header } from '../components/layout/Header'
-import { Footer } from '../components/layout/Footer'
 import { Link } from 'react-router-dom'
 
 export default function KontaktPage() {
@@ -30,10 +28,7 @@ export default function KontaktPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary">
-      <Header />
-
-      <main className="pt-24 pb-16">
+    <div className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
 
@@ -269,9 +264,6 @@ export default function KontaktPage() {
 
           </div>
         </div>
-      </main>
-
-      <Footer />
     </div>
   )
 }
