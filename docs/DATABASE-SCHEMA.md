@@ -80,6 +80,11 @@ CREATE TABLE users (
   email_verified BOOLEAN DEFAULT FALSE,
   phone_verified BOOLEAN DEFAULT FALSE,
 
+  -- Registration Consent
+  terms_accepted BOOLEAN DEFAULT FALSE,
+  terms_accepted_at TIMESTAMPTZ,
+  newsletter_subscribed BOOLEAN DEFAULT FALSE,
+
   -- Timestamps
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW(),
@@ -121,6 +126,7 @@ CREATE TABLE artist_profiles (
   steuernummer VARCHAR(100),
   ust_id VARCHAR(50),
   kleinunternehmerregelung BOOLEAN DEFAULT FALSE,
+  business_type VARCHAR(50), -- 'sole_trader', 'gbr', 'gmbh', 'ug', 'ag', 'other'
 
   -- Pricing
   preis_pro_stunde DECIMAL(10,2),
@@ -2037,7 +2043,7 @@ CREATE TRIGGER trigger_update_follower_count
 
 ---
 
-*Schema Version: 2.1*
+*Schema Version: 2.2*
 *Last Updated: December 3, 2025*
 *Compatible with: Supabase PostgreSQL 15+*
 
@@ -2058,3 +2064,7 @@ CREATE TRIGGER trigger_update_follower_count
 - Added `about_me`, `social_links`, `languages`, `location_city`, `location_country` to `fan_profiles`
 - Added `intro_video_url`, `instruments[]` to `artist_profiles`
 - Added `provider_availability` table for service provider calendars
+
+## Absolute Final Audit Fixes (v2.2)
+- Added `terms_accepted`, `terms_accepted_at`, `newsletter_subscribed` to `users`
+- Added `business_type` to `artist_profiles`
