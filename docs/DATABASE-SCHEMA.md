@@ -13,11 +13,11 @@ Complete PostgreSQL database schema for Supabase implementation.
 │                                                                                  │
 │  USER MANAGEMENT              BOOKING SYSTEM              FINANCE SYSTEM         │
 │  ├── users                    ├── artist_availability     ├── transactions       │
-│  ├── artist_profiles          ├── booking_requests        ├── subscriptions      │
-│  ├── veranstalter_profiles    ├── bookings                ├── invoices           │
-│  ├── fan_profiles             ├── booking_extensions      └── payouts            │
-│  ├── service_provider_profiles└── offers (Phase 3)                               │
-│  └── event_organizer_profiles                                                    │
+│  ├── artist_profiles          ├── provider_availability   ├── subscriptions      │
+│  ├── veranstalter_profiles    ├── booking_requests        ├── invoices           │
+│  ├── fan_profiles             ├── bookings                └── payouts            │
+│  ├── service_provider_profiles├── booking_extensions                             │
+│  └── event_organizer_profiles └── offers (Phase 3)                               │
 │                                                                                  │
 │  SERVICE PROVIDERS (Phase 3)  EVENT PLANNING (Phase 3)    SEARCH (Phase 3)       │
 │  └── service_categories       ├── events                  └── saved_searches     │
@@ -61,7 +61,7 @@ CREATE TABLE users (
   cover_image_url TEXT,
 
   -- Account Type
-  user_type VARCHAR(20) NOT NULL CHECK (user_type IN ('artist', 'customer', 'fan', 'veranstalter')),
+  user_type VARCHAR(20) NOT NULL CHECK (user_type IN ('artist', 'customer', 'fan', 'veranstalter', 'service_provider', 'event_organizer')),
 
   -- Membership
   membership_tier VARCHAR(20) DEFAULT 'basic' CHECK (membership_tier IN ('basic', 'premium')),
@@ -72,6 +72,7 @@ CREATE TABLE users (
   google_id VARCHAR(255),
   facebook_id VARCHAR(255),
   apple_id VARCHAR(255),
+  instagram_id VARCHAR(255),
 
   -- Status
   is_verified BOOLEAN DEFAULT FALSE,
@@ -143,6 +144,8 @@ CREATE TABLE artist_profiles (
   -- Content
   bio TEXT,
   something_about_me TEXT,
+  intro_video_url TEXT, -- Intro video upload
+  instruments VARCHAR(100)[], -- up to 8 instruments
 
   -- Social & Media Links
   social_media JSONB, -- {instagram: "", youtube: "", spotify: "", soundcloud: ""}
@@ -262,6 +265,13 @@ CREATE TABLE fan_profiles (
   favorite_genres VARCHAR(100)[],
   preferred_regions VARCHAR(100)[],
 
+  -- Profile Info (from Functions_Script requirements)
+  about_me VARCHAR(200),
+  social_links JSONB, -- {instagram, facebook, tiktok, snapchat, youtube, website}
+  languages VARCHAR(10)[], -- up to 5 languages
+  location_city VARCHAR(100),
+  location_country VARCHAR(100) DEFAULT 'Deutschland',
+
   -- Wallet
   coins_balance DECIMAL(15,2) DEFAULT 0,
 
@@ -293,7 +303,7 @@ CREATE TABLE artist_availability (
   time_slots JSONB, -- [{start: "10:00", end: "14:00", status: "available"}]
 
   -- Status
-  status VARCHAR(20) NOT NULL CHECK (status IN ('available', 'booked', 'pending', 'blocked')),
+  status VARCHAR(20) NOT NULL CHECK (status IN ('available', 'booked', 'pending', 'blocked', 'open_gig')),
 
   -- Visibility
   visibility VARCHAR(30) DEFAULT 'visible' CHECK (visibility IN (
@@ -317,6 +327,49 @@ CREATE TABLE artist_availability (
 
 CREATE INDEX idx_artist_availability_date ON artist_availability(artist_id, date);
 CREATE INDEX idx_artist_availability_status ON artist_availability(status);
+```
+
+### provider_availability
+
+```sql
+-- Generalized availability table for service providers
+-- (Artists can continue using artist_availability OR migrate to this)
+CREATE TABLE provider_availability (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Provider Reference (polymorphic)
+  provider_type VARCHAR(20) NOT NULL CHECK (provider_type IN ('artist', 'service_provider')),
+  provider_id UUID NOT NULL, -- References artist_profiles OR service_provider_profiles
+
+  -- Date/Time
+  date DATE NOT NULL,
+  time_slots JSONB, -- [{start: "10:00", end: "14:00", status: "available"}]
+
+  -- Status
+  status VARCHAR(20) NOT NULL CHECK (status IN ('available', 'booked', 'pending', 'blocked', 'open_gig')),
+
+  -- Visibility
+  visibility VARCHAR(30) DEFAULT 'visible' CHECK (visibility IN (
+    'visible',           -- Shows as available/booked
+    'visible_with_name', -- Shows event name/link
+    'hidden'             -- Not shown to public
+  )),
+
+  -- Booking Reference
+  booking_id UUID REFERENCES bookings(id),
+
+  -- Notes
+  notes TEXT,
+
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(provider_type, provider_id, date)
+);
+
+CREATE INDEX idx_provider_availability_lookup ON provider_availability(provider_type, provider_id, date);
+CREATE INDEX idx_provider_availability_status ON provider_availability(status);
 ```
 
 ### booking_requests
@@ -643,7 +696,8 @@ CREATE TABLE transactions (
     'subscription',      -- Membership payment
     'coin_purchase',     -- Buying coins
     'coin_transfer',     -- Coin transfer between users
-    'extension_payment'  -- Booking extension payment
+    'extension_payment', -- Booking extension payment
+    'tip'                -- Tip/gratuity after event
   )),
 
   -- Amount
@@ -1983,8 +2037,8 @@ CREATE TRIGGER trigger_update_follower_count
 
 ---
 
-*Schema Version: 2.0*
-*Last Updated: December 2024*
+*Schema Version: 2.1*
+*Last Updated: December 3, 2025*
 *Compatible with: Supabase PostgreSQL 15+*
 
 ## Phase 3 Tables Added (v2.0)
@@ -1995,3 +2049,12 @@ CREATE TRIGGER trigger_update_follower_count
 - `event_checklist_templates` - Static planning templates (wedding, corporate, birthday)
 - `offers` - Formal offer/negotiation system
 - `saved_searches` - User search persistence
+
+## Vision Audit Fixes (v2.1)
+- Added `instagram_id` to `users` for OAuth
+- Added `service_provider` and `event_organizer` to `user_type` constraint
+- Added `'tip'` to `transactions.transaction_type`
+- Added `'open_gig'` to `artist_availability.status`
+- Added `about_me`, `social_links`, `languages`, `location_city`, `location_country` to `fan_profiles`
+- Added `intro_video_url`, `instruments[]` to `artist_profiles`
+- Added `provider_availability` table for service provider calendars
