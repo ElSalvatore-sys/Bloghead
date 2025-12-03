@@ -7,27 +7,34 @@ Complete PostgreSQL database schema for Supabase implementation.
 ## Schema Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                           DATABASE SCHEMA                                │
-├─────────────────────────────────────────────────────────────────────────┤
-│                                                                          │
-│  USER MANAGEMENT          BOOKING SYSTEM           FINANCE SYSTEM        │
-│  ├── users                ├── artist_availability  ├── transactions      │
-│  ├── artist_profiles      ├── booking_requests     ├── subscriptions     │
-│  ├── veranstalter_profiles├── bookings             ├── invoices          │
-│  └── fan_profiles         └── booking_extensions   └── payouts           │
-│                                                                          │
-│  RATING SYSTEM            COIN SYSTEM              COMMUNICATION         │
-│  ├── ratings              ├── coin_types           ├── conversations     │
-│  └── friendliness_points  ├── coin_wallets         ├── messages          │
-│                           └── coin_transactions    └── notifications     │
-│                                                                          │
-│  SOCIAL                   CONTENT                                        │
-│  ├── favorites            ├── media_files                                │
-│  ├── followers            ├── ci_packages                                │
-│  └── blocks               └── artist_historie                            │
-│                                                                          │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                              DATABASE SCHEMA                                     │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                  │
+│  USER MANAGEMENT              BOOKING SYSTEM              FINANCE SYSTEM         │
+│  ├── users                    ├── artist_availability     ├── transactions       │
+│  ├── artist_profiles          ├── booking_requests        ├── subscriptions      │
+│  ├── veranstalter_profiles    ├── bookings                ├── invoices           │
+│  ├── fan_profiles             ├── booking_extensions      └── payouts            │
+│  ├── service_provider_profiles└── offers (Phase 3)                               │
+│  └── event_organizer_profiles                                                    │
+│                                                                                  │
+│  SERVICE PROVIDERS (Phase 3)  EVENT PLANNING (Phase 3)    SEARCH (Phase 3)       │
+│  └── service_categories       ├── events                  └── saved_searches     │
+│                               └── event_checklist_templates                      │
+│                                                                                  │
+│  RATING SYSTEM                COIN SYSTEM                 COMMUNICATION          │
+│  ├── ratings                  ├── coin_types              ├── conversations      │
+│  └── friendliness_history     ├── coin_wallets            ├── messages           │
+│                               ├── coin_transactions       └── notifications      │
+│                               └── coin_value_history                             │
+│                                                                                  │
+│  SOCIAL                       CONTENT                     SUPPORTING             │
+│  ├── favorites                ├── media_files             ├── report_tickets     │
+│  ├── followers                ├── ci_packages             └── audit_logs         │
+│  └── blocks                   └── artist_historie                                │
+│                                                                                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -1278,7 +1285,383 @@ CREATE INDEX idx_artist_historie_date ON artist_historie(event_date DESC);
 
 ---
 
-## 9. Supporting Tables
+## 9. Service Provider System (Phase 3)
+
+### service_categories
+
+```sql
+-- Service Categories (Waffle View categories)
+CREATE TABLE service_categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(100) NOT NULL UNIQUE,
+  name_de VARCHAR(100) NOT NULL, -- German name
+  slug VARCHAR(100) NOT NULL UNIQUE,
+  icon VARCHAR(50), -- icon name for UI
+  description TEXT,
+  parent_id UUID REFERENCES service_categories(id), -- for subcategories
+  display_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_service_categories_slug ON service_categories(slug);
+CREATE INDEX idx_service_categories_parent ON service_categories(parent_id);
+
+-- Seed default categories
+INSERT INTO service_categories (name, name_de, slug, icon, display_order) VALUES
+  ('Musician', 'Musiker', 'musician', 'music', 1),
+  ('DJ', 'DJ', 'dj', 'disc', 2),
+  ('Caterer', 'Caterer', 'caterer', 'utensils', 3),
+  ('Venue', 'Location', 'venue', 'building', 4),
+  ('Florist', 'Florist', 'florist', 'flower', 5),
+  ('Photographer', 'Fotograf', 'photographer', 'camera', 6),
+  ('Videographer', 'Videograf', 'videographer', 'video', 7),
+  ('Decorator', 'Dekorateur', 'decorator', 'palette', 8),
+  ('Hairdresser', 'Friseur', 'hairdresser', 'scissors', 9),
+  ('Makeup Artist', 'Visagist', 'makeup-artist', 'sparkles', 10),
+  ('Security', 'Security', 'security', 'shield', 11),
+  ('Lighting', 'Lichttechnik', 'lighting', 'lightbulb', 12),
+  ('Sound', 'Tontechnik', 'sound', 'speaker', 13),
+  ('Transportation', 'Transport', 'transportation', 'car', 14),
+  ('Entertainment', 'Entertainment', 'entertainment', 'star', 15);
+```
+
+### service_provider_profiles
+
+```sql
+-- Service Provider Profiles (Caterers, Florists, Security, Lighting, Sound, Decorators, Venues, Hairdressers)
+CREATE TABLE service_provider_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE NOT NULL,
+
+  -- Business info
+  business_name VARCHAR(255) NOT NULL,
+  service_category_id UUID REFERENCES service_categories(id),
+  description TEXT, -- max 500 chars enforced in app
+
+  -- Location
+  address TEXT,
+  city VARCHAR(100),
+  postal_code VARCHAR(20),
+  country VARCHAR(100) DEFAULT 'Deutschland',
+  coordinates POINT, -- for radius search
+  service_radius_km INTEGER DEFAULT 50, -- how far they travel
+
+  -- Business details
+  vat_id VARCHAR(50), -- USt-IdNr
+  business_type VARCHAR(50), -- Einzelunternehmer, GmbH, etc.
+  phone VARCHAR(30),
+  website_url TEXT,
+
+  -- Media
+  profile_image_url TEXT,
+  gallery_urls TEXT[], -- image gallery
+
+  -- Social
+  instagram_handle VARCHAR(100),
+  facebook_url TEXT,
+  linkedin_url TEXT,
+
+  -- Pricing
+  price_range VARCHAR(20), -- 'budget', 'mid', 'premium', 'luxury'
+  min_price DECIMAL(10,2),
+  max_price DECIMAL(10,2),
+  pricing_unit VARCHAR(50), -- 'per_event', 'per_hour', 'per_person'
+
+  -- Capacity
+  min_guests INTEGER,
+  max_guests INTEGER,
+
+  -- Ratings (cached for performance)
+  avg_rating DECIMAL(3,2) DEFAULT 0,
+  total_reviews INTEGER DEFAULT 0,
+
+  -- Status
+  is_verified BOOLEAN DEFAULT FALSE,
+  is_newcomer BOOLEAN DEFAULT TRUE, -- show in newcomer section
+  profile_completed BOOLEAN DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_service_provider_user ON service_provider_profiles(user_id);
+CREATE INDEX idx_service_provider_category ON service_provider_profiles(service_category_id);
+CREATE INDEX idx_service_provider_city ON service_provider_profiles(city);
+CREATE INDEX idx_service_provider_rating ON service_provider_profiles(avg_rating DESC);
+CREATE INDEX idx_service_provider_newcomer ON service_provider_profiles(is_newcomer) WHERE is_newcomer = TRUE;
+```
+
+### event_organizer_profiles
+
+```sql
+-- Event Organizer Profiles (people who hire services for events)
+CREATE TABLE event_organizer_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE UNIQUE NOT NULL,
+
+  -- Business info (optional - can be personal)
+  business_name VARCHAR(255),
+  is_business BOOLEAN DEFAULT FALSE,
+
+  -- Location
+  address TEXT,
+  city VARCHAR(100),
+  postal_code VARCHAR(20),
+  country VARCHAR(100) DEFAULT 'Deutschland',
+
+  -- Business details (if is_business = true)
+  vat_id VARCHAR(50),
+  business_type VARCHAR(50),
+  phone VARCHAR(30),
+
+  -- Media
+  profile_image_url TEXT,
+  event_gallery_urls TEXT[], -- past events gallery
+
+  -- Social
+  instagram_handle VARCHAR(100),
+  facebook_url TEXT,
+  linkedin_url TEXT,
+  website_url TEXT,
+
+  -- Stats
+  total_events_organized INTEGER DEFAULT 0,
+
+  -- Status
+  is_verified BOOLEAN DEFAULT FALSE,
+  profile_completed BOOLEAN DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_event_organizer_user ON event_organizer_profiles(user_id);
+CREATE INDEX idx_event_organizer_city ON event_organizer_profiles(city);
+```
+
+---
+
+## 10. Event Planning System (Phase 3)
+
+### events
+
+```sql
+-- Events (created by Event Organizers)
+CREATE TABLE events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  organizer_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+
+  -- Event basics
+  title VARCHAR(255) NOT NULL,
+  event_type VARCHAR(50) NOT NULL, -- 'wedding', 'corporate', 'birthday', 'concert', 'premiere', etc.
+  description TEXT,
+
+  -- Date/Time
+  event_date DATE NOT NULL,
+  start_time TIME,
+  end_time TIME,
+  is_flexible_date BOOLEAN DEFAULT FALSE,
+
+  -- Location
+  venue_name VARCHAR(255),
+  address TEXT,
+  city VARCHAR(100),
+  postal_code VARCHAR(20),
+  country VARCHAR(100) DEFAULT 'Deutschland',
+  is_indoor BOOLEAN DEFAULT TRUE,
+  is_outdoor BOOLEAN DEFAULT FALSE,
+
+  -- Details
+  expected_guests INTEGER,
+  budget_min DECIMAL(10,2),
+  budget_max DECIMAL(10,2),
+
+  -- Preferences
+  catering_preference VARCHAR(50), -- 'full_service', 'buffet', 'finger_food', 'none'
+  music_preference VARCHAR(50), -- 'live_band', 'dj', 'both', 'background', 'none'
+
+  -- Checklist (static templates, not AI)
+  checklist_template VARCHAR(50), -- template name
+  checklist_items JSONB DEFAULT '[]', -- [{task, completed, due_date}]
+
+  -- Status
+  status VARCHAR(20) DEFAULT 'draft', -- 'draft', 'planning', 'confirmed', 'completed', 'cancelled'
+  is_public BOOLEAN DEFAULT FALSE, -- show in events listing
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_events_organizer ON events(organizer_id);
+CREATE INDEX idx_events_date ON events(event_date);
+CREATE INDEX idx_events_type ON events(event_type);
+CREATE INDEX idx_events_city ON events(city);
+CREATE INDEX idx_events_status ON events(status);
+```
+
+### event_checklist_templates
+
+```sql
+-- Event Checklist Templates (static, no AI)
+CREATE TABLE event_checklist_templates (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type VARCHAR(50) NOT NULL, -- matches events.event_type
+  name VARCHAR(100) NOT NULL,
+  name_de VARCHAR(100) NOT NULL,
+
+  -- Template items
+  items JSONB NOT NULL,
+  -- Example: [
+  --   {"task": "Book venue", "task_de": "Location buchen", "months_before": 12, "category": "venue"},
+  --   {"task": "Hire caterer", "task_de": "Caterer beauftragen", "months_before": 6, "category": "catering"},
+  --   {"task": "Send invitations", "task_de": "Einladungen versenden", "months_before": 2, "category": "admin"}
+  -- ]
+
+  is_default BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_checklist_templates_type ON event_checklist_templates(event_type);
+
+-- Seed wedding template
+INSERT INTO event_checklist_templates (event_type, name, name_de, is_default, items) VALUES
+('wedding', 'Wedding Checklist', 'Hochzeits-Checkliste', TRUE, '[
+  {"task": "Set budget", "task_de": "Budget festlegen", "months_before": 12, "category": "planning"},
+  {"task": "Book venue", "task_de": "Location buchen", "months_before": 12, "category": "venue"},
+  {"task": "Hire photographer", "task_de": "Fotograf buchen", "months_before": 10, "category": "media"},
+  {"task": "Book caterer", "task_de": "Caterer buchen", "months_before": 8, "category": "catering"},
+  {"task": "Book DJ/Band", "task_de": "DJ/Band buchen", "months_before": 8, "category": "music"},
+  {"task": "Order flowers", "task_de": "Blumen bestellen", "months_before": 4, "category": "decoration"},
+  {"task": "Send invitations", "task_de": "Einladungen versenden", "months_before": 3, "category": "admin"},
+  {"task": "Final headcount", "task_de": "Finale Gästezahl", "months_before": 1, "category": "admin"},
+  {"task": "Confirm all vendors", "task_de": "Alle Dienstleister bestätigen", "months_before": 1, "category": "admin"}
+]');
+
+-- Seed corporate event template
+INSERT INTO event_checklist_templates (event_type, name, name_de, is_default, items) VALUES
+('corporate', 'Corporate Event Checklist', 'Firmenveranstaltung-Checkliste', TRUE, '[
+  {"task": "Define objectives", "task_de": "Ziele definieren", "months_before": 6, "category": "planning"},
+  {"task": "Set budget", "task_de": "Budget festlegen", "months_before": 6, "category": "planning"},
+  {"task": "Book venue", "task_de": "Location buchen", "months_before": 4, "category": "venue"},
+  {"task": "Arrange catering", "task_de": "Catering organisieren", "months_before": 3, "category": "catering"},
+  {"task": "Book AV equipment", "task_de": "Technik buchen", "months_before": 2, "category": "technical"},
+  {"task": "Send invitations", "task_de": "Einladungen versenden", "months_before": 2, "category": "admin"},
+  {"task": "Prepare presentations", "task_de": "Präsentationen vorbereiten", "months_before": 1, "category": "content"},
+  {"task": "Confirm attendees", "task_de": "Teilnehmer bestätigen", "weeks_before": 2, "category": "admin"}
+]');
+
+-- Seed birthday template
+INSERT INTO event_checklist_templates (event_type, name, name_de, is_default, items) VALUES
+('birthday', 'Birthday Party Checklist', 'Geburtstags-Checkliste', TRUE, '[
+  {"task": "Choose theme", "task_de": "Motto wählen", "months_before": 2, "category": "planning"},
+  {"task": "Book venue", "task_de": "Location buchen", "months_before": 2, "category": "venue"},
+  {"task": "Order cake", "task_de": "Torte bestellen", "weeks_before": 2, "category": "catering"},
+  {"task": "Send invitations", "task_de": "Einladungen versenden", "weeks_before": 3, "category": "admin"},
+  {"task": "Plan entertainment", "task_de": "Entertainment planen", "weeks_before": 2, "category": "entertainment"},
+  {"task": "Buy decorations", "task_de": "Dekoration kaufen", "weeks_before": 1, "category": "decoration"},
+  {"task": "Confirm guests", "task_de": "Gäste bestätigen", "days_before": 3, "category": "admin"}
+]');
+```
+
+---
+
+## 11. Offer & Negotiation System (Phase 3)
+
+### offers
+
+```sql
+-- Offers (formal proposals from Service Providers to Event Organizers)
+CREATE TABLE offers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  booking_request_id UUID REFERENCES booking_requests(id) ON DELETE CASCADE NOT NULL,
+  provider_id UUID REFERENCES users(id) NOT NULL, -- service provider or artist
+
+  -- Offer details
+  title VARCHAR(255) NOT NULL,
+  description TEXT NOT NULL,
+
+  -- Pricing
+  price DECIMAL(10,2) NOT NULL,
+  price_breakdown JSONB, -- [{item, amount}]
+  currency VARCHAR(3) DEFAULT 'EUR',
+  is_negotiable BOOLEAN DEFAULT TRUE,
+
+  -- Terms
+  terms_and_conditions TEXT,
+  cancellation_policy TEXT,
+  included_services TEXT[], -- what's included
+  excluded_services TEXT[], -- what's NOT included
+
+  -- Validity
+  valid_until TIMESTAMPTZ,
+
+  -- Status workflow
+  status VARCHAR(20) DEFAULT 'pending',
+  -- 'pending' -> waiting for organizer response
+  -- 'accepted' -> organizer accepted, becomes booking
+  -- 'declined' -> organizer declined
+  -- 'countered' -> organizer sent counter-offer
+  -- 'withdrawn' -> provider withdrew offer
+  -- 'expired' -> past valid_until date
+
+  -- Counter-offer tracking
+  parent_offer_id UUID REFERENCES offers(id), -- if this is a counter-offer
+  counter_offer_count INTEGER DEFAULT 0,
+
+  -- Timestamps
+  responded_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_offers_booking_request ON offers(booking_request_id);
+CREATE INDEX idx_offers_provider ON offers(provider_id);
+CREATE INDEX idx_offers_status ON offers(status);
+CREATE INDEX idx_offers_parent ON offers(parent_offer_id);
+```
+
+---
+
+## 12. Search & Discovery (Phase 3)
+
+### saved_searches
+
+```sql
+-- Saved Searches (for users to quickly repeat searches)
+CREATE TABLE saved_searches (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+
+  name VARCHAR(100) NOT NULL,
+  search_type VARCHAR(20) NOT NULL, -- 'artist', 'service_provider', 'venue'
+
+  -- Search criteria (stored as JSON for flexibility)
+  filters JSONB NOT NULL,
+  -- Example: {
+  --   "category": "caterer",
+  --   "city": "Frankfurt",
+  --   "radius_km": 100,
+  --   "min_guests": 50,
+  --   "max_guests": 200,
+  --   "price_range": "mid",
+  --   "date": "2025-06-15"
+  -- }
+
+  -- Usage
+  last_used_at TIMESTAMPTZ,
+  use_count INTEGER DEFAULT 0,
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_saved_searches_user ON saved_searches(user_id);
+CREATE INDEX idx_saved_searches_type ON saved_searches(search_type);
+```
+
+---
+
+## 13. Supporting Tables
 
 ### report_tickets
 
@@ -1352,17 +1735,25 @@ CREATE INDEX idx_audit_logs_created ON audit_logs(created_at);
 
 ---
 
-## 10. Row Level Security Policies
+## 14. Row Level Security Policies
 
 ```sql
 -- Enable RLS on all tables
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE artist_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE veranstalter_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE fan_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_provider_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_organizer_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE booking_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE offers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE saved_searches ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE event_checklist_templates ENABLE ROW LEVEL SECURITY;
 
 -- Users can read their own data
 CREATE POLICY users_select_own ON users
@@ -1411,11 +1802,67 @@ CREATE POLICY transactions_select ON transactions
   FOR SELECT USING (
     payer_id = auth.uid() OR payee_id = auth.uid()
   );
+
+-- =============================================
+-- Phase 3 RLS Policies (Service Providers, Events, Offers)
+-- =============================================
+
+-- Service Provider Profiles: Public read for completed profiles
+CREATE POLICY service_provider_profiles_select_public ON service_provider_profiles
+  FOR SELECT USING (profile_completed = TRUE);
+
+-- Service Provider Profiles: Users can manage own profile
+CREATE POLICY service_provider_profiles_manage_own ON service_provider_profiles
+  FOR ALL USING (auth.uid() = user_id);
+
+-- Event Organizer Profiles: Public read for completed profiles
+CREATE POLICY event_organizer_profiles_select_public ON event_organizer_profiles
+  FOR SELECT USING (profile_completed = TRUE);
+
+-- Event Organizer Profiles: Users can manage own profile
+CREATE POLICY event_organizer_profiles_manage_own ON event_organizer_profiles
+  FOR ALL USING (auth.uid() = user_id);
+
+-- Events: Users can view own events
+CREATE POLICY events_select_own ON events
+  FOR SELECT USING (auth.uid() = organizer_id);
+
+-- Events: Public events viewable by all
+CREATE POLICY events_select_public ON events
+  FOR SELECT USING (is_public = TRUE AND status = 'confirmed');
+
+-- Events: Users can manage own events
+CREATE POLICY events_manage_own ON events
+  FOR ALL USING (auth.uid() = organizer_id);
+
+-- Offers: Providers can view and manage own offers
+CREATE POLICY offers_manage_own ON offers
+  FOR ALL USING (auth.uid() = provider_id);
+
+-- Offers: Organizers can view offers for their booking requests
+CREATE POLICY offers_select_for_organizer ON offers
+  FOR SELECT USING (
+    booking_request_id IN (
+      SELECT id FROM booking_requests WHERE requester_id = auth.uid()
+    )
+  );
+
+-- Saved Searches: Users can manage own saved searches
+CREATE POLICY saved_searches_manage_own ON saved_searches
+  FOR ALL USING (auth.uid() = user_id);
+
+-- Service Categories: Anyone can read active categories
+CREATE POLICY service_categories_select_public ON service_categories
+  FOR SELECT USING (is_active = TRUE);
+
+-- Event Checklist Templates: Anyone can read templates
+CREATE POLICY event_checklist_templates_select_public ON event_checklist_templates
+  FOR SELECT USING (TRUE);
 ```
 
 ---
 
-## 11. Database Functions
+## 15. Database Functions
 
 ```sql
 -- Calculate artist rating
@@ -1489,7 +1936,7 @@ $$ LANGUAGE plpgsql;
 
 ---
 
-## 12. Triggers
+## 16. Triggers
 
 ```sql
 -- Auto-update updated_at timestamp
@@ -1536,6 +1983,15 @@ CREATE TRIGGER trigger_update_follower_count
 
 ---
 
-*Schema Version: 1.0*
-*Last Updated: November 2024*
+*Schema Version: 2.0*
+*Last Updated: December 2024*
 *Compatible with: Supabase PostgreSQL 15+*
+
+## Phase 3 Tables Added (v2.0)
+- `service_categories` - Service provider taxonomy (15 categories)
+- `service_provider_profiles` - Caterers, florists, security, etc.
+- `event_organizer_profiles` - Event planners profile data
+- `events` - Event planning and management
+- `event_checklist_templates` - Static planning templates (wedding, corporate, birthday)
+- `offers` - Formal offer/negotiation system
+- `saved_searches` - User search persistence
