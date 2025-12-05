@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ImageUpload,
@@ -16,56 +16,8 @@ import {
 import { ArtistCalendar } from '../components/artist/ArtistCalendar'
 import { Button } from '../components/ui'
 import { InstagramIcon } from '../components/icons'
-
-// Mock data for pre-filling the form
-const mockProfileData = {
-  // Cover and avatar
-  coverImage: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1200&q=80',
-  avatarImage: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&q=80',
-
-  // Personal data
-  firstName: 'Max',
-  lastName: 'Mustermann',
-  street: 'Musterstraße',
-  houseNumber: '123',
-  postalCode: '10115',
-  city: 'Berlin',
-  phone: '+49 123 456789',
-  email: 'max@example.com',
-  birthDate: '1990-05-15',
-
-  // Artist data
-  artistName: 'DJ Maximus',
-  location: 'Berlin',
-  genre: 'electronic',
-  region: 'berlin',
-  jobTitle: 'DJ / Producer',
-  technique: 'Pioneer CDJ-3000, DJM-900NXS2, Ableton Live, Native Instruments Traktor',
-  hourlyRate: '150',
-  eventRate: '800',
-
-  // Business data
-  companyName: 'Max Mustermann Entertainment',
-  companySeat: 'Berlin',
-  taxNumber: 'DE123456789',
-  smallBusiness: false,
-  tags: ['DJ', 'Electronic', 'House', 'Techno'],
-  socialLinks: [
-    { platform: 'instagram', url: 'https://instagram.com/djmaximus' },
-    { platform: 'soundcloud', url: 'https://soundcloud.com/djmaximus' },
-  ],
-
-  // Media
-  bio: 'Seit über 10 Jahren bringe ich Menschen mit meiner Musik zum Tanzen. Mein Stil verbindet melodischen House mit treibendem Techno. Ich habe auf Festivals wie dem Fusion und in Clubs wie dem Berghain aufgelegt.',
-  audioSample: '',
-  instagramHandle: 'djmaximus',
-
-  // Calendar - mock booked/pending dates
-  bookedDates: [5, 12, 19],
-  pendingDates: [8, 15],
-  eventDates: [5, 19],
-  availableDates: [1, 2, 3, 6, 7, 9, 10, 11, 13, 14, 16, 17, 18, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
-}
+import { useProfile } from '../hooks/useProfile'
+import { useAuth } from '../contexts/AuthContext'
 
 // Genre options
 const genreOptions = [
@@ -102,59 +54,135 @@ interface SocialLink {
 
 export function ProfileEditPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const {
+    userData,
+    profile,
+    userType,
+    loading,
+    saving,
+    error,
+    saveProfile,
+    uploadImage,
+    uploadAudio,
+  } = useProfile()
 
   // State for form data
-  const [coverImage, setCoverImage] = useState(mockProfileData.coverImage)
-  const [avatarImage, setAvatarImage] = useState(mockProfileData.avatarImage)
+  const [coverImage, setCoverImage] = useState('')
+  const [avatarImage, setAvatarImage] = useState('')
 
-  // Personal data
-  const [firstName, setFirstName] = useState(mockProfileData.firstName)
-  const [lastName, setLastName] = useState(mockProfileData.lastName)
-  const [street, setStreet] = useState(mockProfileData.street)
-  const [houseNumber, setHouseNumber] = useState(mockProfileData.houseNumber)
-  const [postalCode, setPostalCode] = useState(mockProfileData.postalCode)
-  const [city, setCity] = useState(mockProfileData.city)
-  const [phone, setPhone] = useState(mockProfileData.phone)
-  const [email, setEmail] = useState(mockProfileData.email)
-  const [birthDate, setBirthDate] = useState(mockProfileData.birthDate)
+  // Personal data (from users table)
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [birthDate, setBirthDate] = useState('')
 
-  // Artist data
-  const [artistName, setArtistName] = useState(mockProfileData.artistName)
-  const [location, setLocation] = useState(mockProfileData.location)
-  const [genre, setGenre] = useState(mockProfileData.genre)
-  const [region, setRegion] = useState(mockProfileData.region)
-  const [jobTitle, setJobTitle] = useState(mockProfileData.jobTitle)
-  const [technique, setTechnique] = useState(mockProfileData.technique)
-  const [hourlyRate, setHourlyRate] = useState(mockProfileData.hourlyRate)
-  const [eventRate, setEventRate] = useState(mockProfileData.eventRate)
+  // Artist data (from artist_profiles table)
+  const [artistName, setArtistName] = useState('')
+  const [location, setLocation] = useState('')
+  const [genre, setGenre] = useState('')
+  const [region, setRegion] = useState('')
+  const [jobTitle, setJobTitle] = useState('')
+  const [technique, setTechnique] = useState('')
+  const [hourlyRate, setHourlyRate] = useState('')
+  const [eventRate, setEventRate] = useState('')
 
   // Business data
-  const [companyName, setCompanyName] = useState(mockProfileData.companyName)
-  const [companySeat, setCompanySeat] = useState(mockProfileData.companySeat)
-  const [taxNumber, setTaxNumber] = useState(mockProfileData.taxNumber)
-  const [smallBusiness, setSmallBusiness] = useState(mockProfileData.smallBusiness)
-  const [tags, setTags] = useState(mockProfileData.tags)
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>(mockProfileData.socialLinks)
+  const [companyName, setCompanyName] = useState('')
+  const [companySeat, setCompanySeat] = useState('')
+  const [taxNumber, setTaxNumber] = useState('')
+  const [smallBusiness, setSmallBusiness] = useState(false)
+  const [tags, setTags] = useState<string[]>([])
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([])
   const [techRider, setTechRider] = useState<string>('')
 
   // Media
-  const [bio, setBio] = useState(mockProfileData.bio)
-  const [audioSample, setAudioSample] = useState(mockProfileData.audioSample)
-  const [instagramHandle, setInstagramHandle] = useState(mockProfileData.instagramHandle)
+  const [bio, setBio] = useState('')
+  const [audioSample, setAudioSample] = useState('')
+  const [instagramHandle, setInstagramHandle] = useState('')
 
   // Calendar
-  const [selectedDates, setSelectedDates] = useState<number[]>(mockProfileData.availableDates)
+  const [_selectedDates, setSelectedDates] = useState<number[]>([])
+  const [bookedDates] = useState<number[]>([])
+  const [pendingDates] = useState<number[]>([])
+  const [eventDates] = useState<number[]>([])
 
-  const handleCoverImageSelect = (_file: File, previewUrl: string) => {
+  // Form state
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+
+  // Populate form with loaded data
+  useEffect(() => {
+    if (userData) {
+      setCoverImage((userData.cover_image_url as string) || '')
+      setAvatarImage((userData.profile_image_url as string) || '')
+      setFirstName((userData.vorname as string) || '')
+      setLastName((userData.nachname as string) || '')
+      setPhone((userData.telefonnummer as string) || '')
+      setEmail((userData.email as string) || '')
+      setBirthDate((userData.geburtsdatum as string) || '')
+    }
+
+    if (profile && userType === 'artist') {
+      setArtistName((profile.kuenstlername as string) || '')
+      setLocation((profile.stadt as string) || '')
+      setGenre(((profile.genre as string[]) || [])[0] || '')
+      setRegion((profile.region as string) || '')
+      setJobTitle((profile.jobbezeichnung as string) || '')
+      setTechnique((profile.technik_vorhanden as string) || '')
+      setHourlyRate((profile.preis_pro_stunde as number)?.toString() || '')
+      setEventRate((profile.preis_pro_veranstaltung as number)?.toString() || '')
+      setCompanyName((profile.firmenname as string) || '')
+      setCompanySeat((profile.sitz_der_firma as string) || '')
+      setTaxNumber((profile.steuernummer as string) || '')
+      setSmallBusiness((profile.kleinunternehmerregelung as boolean) || false)
+      setTags((profile.tagged_with as string[]) || [])
+      setBio((profile.bio as string) || '')
+      setInstagramHandle((profile.instagram_profile as string) || '')
+
+      // Parse social media from JSONB
+      const socialMedia = profile.social_media as Record<string, string> | null
+      if (socialMedia) {
+        const links: SocialLink[] = Object.entries(socialMedia).map(([platform, url]) => ({
+          platform,
+          url,
+        }))
+        setSocialLinks(links)
+      }
+
+      // Parse audio URLs
+      const audioUrls = profile.audio_urls as string[] | null
+      if (audioUrls && audioUrls.length > 0) {
+        setAudioSample(audioUrls[0])
+      }
+
+      // Parse tech rider
+      setTechRider((profile.techwriter as string) || '')
+    }
+  }, [userData, profile, userType])
+
+  const handleCoverImageSelect = async (file: File, previewUrl: string) => {
     setCoverImage(previewUrl)
+    const url = await uploadImage(file, 'cover')
+    if (url) {
+      setCoverImage(url)
+    }
   }
 
-  const handleAvatarImageSelect = (_file: File, previewUrl: string) => {
+  const handleAvatarImageSelect = async (file: File, previewUrl: string) => {
     setAvatarImage(previewUrl)
+    const url = await uploadImage(file, 'avatar')
+    if (url) {
+      setAvatarImage(url)
+    }
   }
 
-  const handleAudioSelect = (_file: File, url: string) => {
-    setAudioSample(url)
+  const handleAudioSelect = async (file: File, _url: string) => {
+    const url = await uploadAudio(file)
+    if (url) {
+      setAudioSample(url)
+    }
   }
 
   const handleTechRiderSelect = (file: File) => {
@@ -167,50 +195,97 @@ export function ProfileEditPage() {
     )
   }
 
-  const handleSave = () => {
-    // Here we would save to Supabase
-    console.log('Saving profile...', {
-      coverImage,
-      avatarImage,
-      firstName,
-      lastName,
-      street,
-      houseNumber,
-      postalCode,
-      city,
-      phone,
-      email,
-      birthDate,
-      artistName,
-      location,
-      genre,
-      region,
-      jobTitle,
-      technique,
-      hourlyRate,
-      eventRate,
-      companyName,
-      companySeat,
-      taxNumber,
-      smallBusiness,
-      tags,
-      socialLinks,
-      techRider,
-      bio,
-      audioSample,
-      instagramHandle,
-      selectedDates,
-    })
-    // Show success message or navigate
-    alert('Profil gespeichert!')
+  const handleSave = async () => {
+    setSaveError(null)
+    setSaveSuccess(false)
+
+    // Build user data object
+    const userDataToSave = {
+      vorname: firstName,
+      nachname: lastName,
+      telefonnummer: phone,
+      geburtsdatum: birthDate || null,
+      profile_image_url: avatarImage || null,
+      cover_image_url: coverImage || null,
+    }
+
+    // Build profile data object (for artist)
+    const profileDataToSave: Record<string, unknown> = {}
+
+    if (userType === 'artist') {
+      Object.assign(profileDataToSave, {
+        kuenstlername: artistName,
+        stadt: location,
+        genre: genre ? [genre] : [],
+        region: region,
+        jobbezeichnung: jobTitle,
+        technik_vorhanden: technique,
+        preis_pro_stunde: hourlyRate ? parseFloat(hourlyRate) : null,
+        preis_pro_veranstaltung: eventRate ? parseFloat(eventRate) : null,
+        firmenname: companyName || null,
+        sitz_der_firma: companySeat || null,
+        steuernummer: taxNumber || null,
+        kleinunternehmerregelung: smallBusiness,
+        tagged_with: tags,
+        bio: bio || null,
+        instagram_profile: instagramHandle || null,
+        techwriter: techRider || null,
+        audio_urls: audioSample ? [audioSample] : [],
+        social_media: socialLinks.reduce((acc, link) => {
+          if (link.platform && link.url) {
+            acc[link.platform] = link.url
+          }
+          return acc
+        }, {} as Record<string, string>),
+      })
+    }
+
+    const success = await saveProfile(userDataToSave, profileDataToSave)
+
+    if (success) {
+      setSaveSuccess(true)
+      setTimeout(() => setSaveSuccess(false), 3000)
+    } else {
+      setSaveError('Profil konnte nicht gespeichert werden.')
+    }
   }
 
   const handleCancel = () => {
     navigate(-1)
   }
 
+  // Redirect if not logged in
+  if (!user && !loading) {
+    navigate('/login')
+    return null
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-white/60">Profil wird geladen...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-bg-primary">
+      {/* Error/Success Messages */}
+      {(error || saveError) && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-500/90 text-white px-6 py-3 rounded-lg shadow-lg">
+          {error || saveError}
+        </div>
+      )}
+      {saveSuccess && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500/90 text-white px-6 py-3 rounded-lg shadow-lg">
+          Profil erfolgreich gespeichert!
+        </div>
+      )}
+
       {/* Cover Photo Section */}
       <div className="relative">
         <ImageUpload
@@ -234,6 +309,15 @@ export function ProfileEditPage() {
         <h1 className="font-display text-4xl md:text-5xl text-white">
           PROFIL BEARBEITEN
         </h1>
+        {userType && (
+          <p className="text-white/60 mt-2 uppercase text-sm tracking-wider">
+            {userType === 'artist' && 'Künstler'}
+            {userType === 'fan' && 'Fan / Community'}
+            {userType === 'veranstalter' && 'Veranstalter'}
+            {userType === 'service_provider' && 'Dienstleister'}
+            {userType === 'event_organizer' && 'Event Organizer'}
+          </p>
+        )}
       </div>
 
       {/* Form Container */}
@@ -260,40 +344,6 @@ export function ProfileEditPage() {
 
             <FormRow>
               <FormInput
-                label="Straße"
-                required
-                value={street}
-                onChange={(e) => setStreet(e.target.value)}
-                placeholder="Straße"
-              />
-              <FormInput
-                label="Hausnummer"
-                required
-                value={houseNumber}
-                onChange={(e) => setHouseNumber(e.target.value)}
-                placeholder="Nr."
-              />
-            </FormRow>
-
-            <FormRow>
-              <FormInput
-                label="PLZ"
-                required
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                placeholder="PLZ"
-              />
-              <FormInput
-                label="Wohnort"
-                required
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Stadt"
-              />
-            </FormRow>
-
-            <FormRow>
-              <FormInput
                 label="Telefonnummer"
                 required
                 type="tel"
@@ -308,13 +358,13 @@ export function ProfileEditPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="email@example.com"
+                disabled
               />
             </FormRow>
 
             <FormRow columns={1}>
               <FormInput
                 label="Geburtsdatum"
-                required
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
@@ -322,213 +372,216 @@ export function ProfileEditPage() {
             </FormRow>
           </FormSection>
 
-          {/* Artist Data Section */}
-          <FormSection title="KÜNSTLER DATEN">
-            <FormRow>
-              <FormInput
-                label="Künstlername"
-                value={artistName}
-                onChange={(e) => setArtistName(e.target.value)}
-                placeholder="Dein Künstlername"
-              />
-              <FormInput
-                label="Standort"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Stadt"
-              />
-            </FormRow>
+          {/* Artist Data Section - Only show for artists */}
+          {userType === 'artist' && (
+            <>
+              <FormSection title="KÜNSTLER DATEN">
+                <FormRow>
+                  <FormInput
+                    label="Künstlername"
+                    value={artistName}
+                    onChange={(e) => setArtistName(e.target.value)}
+                    placeholder="Dein Künstlername"
+                  />
+                  <FormInput
+                    label="Standort"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Stadt"
+                  />
+                </FormRow>
 
-            <FormRow>
-              <FormSelect
-                label="Genre"
-                required
-                value={genre}
-                onChange={(e) => setGenre(e.target.value)}
-                options={genreOptions}
-              />
-              <FormSelect
-                label="Region"
-                required
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
-                options={regionOptions}
-              />
-            </FormRow>
+                <FormRow>
+                  <FormSelect
+                    label="Genre"
+                    required
+                    value={genre}
+                    onChange={(e) => setGenre(e.target.value)}
+                    options={genreOptions}
+                  />
+                  <FormSelect
+                    label="Region"
+                    required
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    options={regionOptions}
+                  />
+                </FormRow>
 
-            <FormRow columns={1}>
-              <FormInput
-                label="Jobbezeichnung"
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                placeholder="z.B. DJ, Sänger, Band"
-              />
-            </FormRow>
+                <FormRow columns={1}>
+                  <FormInput
+                    label="Jobbezeichnung"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    placeholder="z.B. DJ, Sänger, Band"
+                  />
+                </FormRow>
 
-            <FormRow columns={1}>
-              <FormTextarea
-                label="Technik"
-                value={technique}
-                onChange={(e) => setTechnique(e.target.value)}
-                placeholder="Welche Technik nutzt du?"
-                rows={3}
-              />
-            </FormRow>
+                <FormRow columns={1}>
+                  <FormTextarea
+                    label="Technik"
+                    value={technique}
+                    onChange={(e) => setTechnique(e.target.value)}
+                    placeholder="Welche Technik nutzt du?"
+                    rows={3}
+                  />
+                </FormRow>
 
-            <FormRow>
-              <FormInput
-                label="Preis pro Stunde"
-                required
-                type="number"
-                value={hourlyRate}
-                onChange={(e) => setHourlyRate(e.target.value)}
-                placeholder="EUR"
-              />
-              <FormInput
-                label="Preis pro Veranstaltung"
-                type="number"
-                value={eventRate}
-                onChange={(e) => setEventRate(e.target.value)}
-                placeholder="EUR"
-              />
-            </FormRow>
-          </FormSection>
+                <FormRow>
+                  <FormInput
+                    label="Preis pro Stunde"
+                    required
+                    type="number"
+                    value={hourlyRate}
+                    onChange={(e) => setHourlyRate(e.target.value)}
+                    placeholder="EUR"
+                  />
+                  <FormInput
+                    label="Preis pro Veranstaltung"
+                    type="number"
+                    value={eventRate}
+                    onChange={(e) => setEventRate(e.target.value)}
+                    placeholder="EUR"
+                  />
+                </FormRow>
+              </FormSection>
 
-          {/* Business Data Section */}
-          <FormSection title="GESCHÄFTSDATEN">
-            <FormRow>
-              <FormInput
-                label="Firmenname"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="Firmenname (optional)"
-              />
-              <FormInput
-                label="Sitz der Firma"
-                value={companySeat}
-                onChange={(e) => setCompanySeat(e.target.value)}
-                placeholder="Stadt"
-              />
-            </FormRow>
+              {/* Business Data Section */}
+              <FormSection title="GESCHÄFTSDATEN">
+                <FormRow>
+                  <FormInput
+                    label="Firmenname"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Firmenname (optional)"
+                  />
+                  <FormInput
+                    label="Sitz der Firma"
+                    value={companySeat}
+                    onChange={(e) => setCompanySeat(e.target.value)}
+                    placeholder="Stadt"
+                  />
+                </FormRow>
 
-            <FormRow columns={1}>
-              <FormInput
-                label="Steuernummer"
-                required
-                value={taxNumber}
-                onChange={(e) => setTaxNumber(e.target.value)}
-                placeholder="DE123456789"
-              />
-            </FormRow>
+                <FormRow columns={1}>
+                  <FormInput
+                    label="Steuernummer"
+                    value={taxNumber}
+                    onChange={(e) => setTaxNumber(e.target.value)}
+                    placeholder="DE123456789"
+                  />
+                </FormRow>
 
-            <FormRow columns={1}>
-              <FormCheckbox
-                label="Kleinunternehmerregelung (§ 19 UStG)"
-                checked={smallBusiness}
-                onChange={(e) => setSmallBusiness(e.target.checked)}
-              />
-            </FormRow>
+                <FormRow columns={1}>
+                  <FormCheckbox
+                    label="Kleinunternehmerregelung (§ 19 UStG)"
+                    checked={smallBusiness}
+                    onChange={(e) => setSmallBusiness(e.target.checked)}
+                  />
+                </FormRow>
 
-            <FormRow columns={1}>
-              <TagsInput
-                label="Tagged With"
-                tags={tags}
-                onTagsChange={setTags}
-                placeholder="Tag hinzufügen..."
-              />
-            </FormRow>
+                <FormRow columns={1}>
+                  <TagsInput
+                    label="Tagged With"
+                    tags={tags}
+                    onTagsChange={setTags}
+                    placeholder="Tag hinzufügen..."
+                  />
+                </FormRow>
 
-            <FormRow columns={1}>
-              <SocialLinksInput
-                label="Social Media"
-                links={socialLinks}
-                onLinksChange={setSocialLinks}
-              />
-            </FormRow>
+                <FormRow columns={1}>
+                  <SocialLinksInput
+                    label="Social Media"
+                    links={socialLinks}
+                    onLinksChange={setSocialLinks}
+                  />
+                </FormRow>
 
-            <FormRow columns={1}>
-              <FileUpload
-                label="Techwriter / Rider"
-                accept=".pdf,.doc,.docx"
-                currentFile={techRider}
-                onFileSelect={handleTechRiderSelect}
-              />
-            </FormRow>
-          </FormSection>
+                <FormRow columns={1}>
+                  <FileUpload
+                    label="Techwriter / Rider"
+                    accept=".pdf,.doc,.docx"
+                    currentFile={techRider}
+                    onFileSelect={handleTechRiderSelect}
+                  />
+                </FormRow>
+              </FormSection>
 
-          {/* Media Section */}
-          <FormSection title="ÜBER MICH">
-            <FormRow columns={1}>
-              <FormTextarea
-                label="Something About Me"
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Erzähle etwas über dich..."
-                rows={5}
-              />
-            </FormRow>
+              {/* Media Section */}
+              <FormSection title="ÜBER MICH">
+                <FormRow columns={1}>
+                  <FormTextarea
+                    label="Something About Me"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Erzähle etwas über dich..."
+                    rows={5}
+                  />
+                </FormRow>
 
-            <FormRow columns={1}>
-              <AudioUpload
-                label="Hörprobe hinzufügen"
-                audioUrl={audioSample}
-                onAudioSelect={handleAudioSelect}
-              />
-            </FormRow>
+                <FormRow columns={1}>
+                  <AudioUpload
+                    label="Hörprobe hinzufügen"
+                    audioUrl={audioSample}
+                    onAudioSelect={handleAudioSelect}
+                  />
+                </FormRow>
 
-            {/* Instagram Section */}
-            <div className="mt-8">
-              <div className="flex items-center gap-3 mb-4">
-                <InstagramIcon size={24} className="text-white/60" />
-                <label className="text-xs font-bold text-white/60 uppercase tracking-wider">
-                  Instagram Profil hinzufügen
-                </label>
-              </div>
-
-              <FormInput
-                label="Instagram Handle"
-                value={instagramHandle}
-                onChange={(e) => setInstagramHandle(e.target.value)}
-                placeholder="@username"
-              />
-
-              {/* Instagram Preview Grid - Mock */}
-              {instagramHandle && (
-                <div className="mt-4">
-                  <p className="text-xs text-white/40 mb-3">
-                    Vorschau von @{instagramHandle}
-                  </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div
-                        key={i}
-                        className="aspect-square bg-bg-card rounded overflow-hidden"
-                      >
-                        <img
-                          src={`https://picsum.photos/200?random=${i}`}
-                          alt={`Instagram post ${i}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
+                {/* Instagram Section */}
+                <div className="mt-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <InstagramIcon size={24} className="text-white/60" />
+                    <label className="text-xs font-bold text-white/60 uppercase tracking-wider">
+                      Instagram Profil hinzufügen
+                    </label>
                   </div>
-                </div>
-              )}
-            </div>
-          </FormSection>
 
-          {/* Calendar Section */}
-          <FormSection title="VERFÜGBARKEIT">
-            <p className="text-sm text-white/60 mb-4">
-              Klicke auf Tage, um deine Verfügbarkeit zu ändern.
-            </p>
-            <ArtistCalendar
-              bookedDates={mockProfileData.bookedDates}
-              pendingDates={mockProfileData.pendingDates}
-              eventDates={mockProfileData.eventDates}
-              onDateSelect={handleDateSelect}
-            />
-          </FormSection>
+                  <FormInput
+                    label="Instagram Handle"
+                    value={instagramHandle}
+                    onChange={(e) => setInstagramHandle(e.target.value)}
+                    placeholder="@username"
+                  />
+
+                  {/* Instagram Preview Grid - Mock */}
+                  {instagramHandle && (
+                    <div className="mt-4">
+                      <p className="text-xs text-white/40 mb-3">
+                        Vorschau von @{instagramHandle}
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                          <div
+                            key={i}
+                            className="aspect-square bg-bg-card rounded overflow-hidden"
+                          >
+                            <img
+                              src={`https://picsum.photos/200?random=${i}`}
+                              alt={`Instagram post ${i}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </FormSection>
+
+              {/* Calendar Section */}
+              <FormSection title="VERFÜGBARKEIT">
+                <p className="text-sm text-white/60 mb-4">
+                  Klicke auf Tage, um deine Verfügbarkeit zu ändern.
+                </p>
+                <ArtistCalendar
+                  bookedDates={bookedDates}
+                  pendingDates={pendingDates}
+                  eventDates={eventDates}
+                  onDateSelect={handleDateSelect}
+                />
+              </FormSection>
+            </>
+          )}
         </form>
       </div>
 
@@ -538,14 +591,26 @@ export function ProfileEditPage() {
           <Button
             variant="outline"
             onClick={handleCancel}
+            disabled={saving}
           >
             ABBRECHEN
           </Button>
           <Button
             variant="primary"
             onClick={handleSave}
+            disabled={saving}
           >
-            ÄNDERUNGEN SPEICHERN
+            {saving ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                WIRD GESPEICHERT...
+              </span>
+            ) : (
+              'ÄNDERUNGEN SPEICHERN'
+            )}
           </Button>
         </div>
       </div>
