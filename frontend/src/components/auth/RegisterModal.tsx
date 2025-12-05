@@ -1,5 +1,7 @@
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, useEffect } from 'react'
+import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
+import { useAuth } from '../../contexts/AuthContext'
 
 // Types
 export type AccountType = 'artist' | 'customer' | 'fan'
@@ -19,14 +21,15 @@ export interface RegistrationData {
 interface RegisterModalProps {
   isOpen: boolean
   onClose: () => void
-  onRegister: (data: RegistrationData) => void
   onLoginClick: () => void
 }
 
-type Step = 1 | 2 | 3
+type Step = 1 | 2 | 3 | 'success'
 
 // Step indicator component
 function StepIndicator({ currentStep }: { currentStep: Step }) {
+  if (currentStep === 'success') return null
+
   return (
     <div className="flex justify-center gap-2 mb-6">
       {[1, 2, 3].map((step) => (
@@ -48,8 +51,14 @@ function StepIndicator({ currentStep }: { currentStep: Step }) {
 // Step 1: Account Type Selection
 function AccountTypeStep({
   onSelect,
+  onGoogleSignUp,
+  onFacebookSignUp,
+  isLoading,
 }: {
   onSelect: (type: AccountType) => void
+  onGoogleSignUp: () => void
+  onFacebookSignUp: () => void
+  isLoading: boolean
 }) {
   return (
     <div className="text-center">
@@ -61,7 +70,8 @@ function AccountTypeStep({
         {/* Primary choice - gradient button */}
         <button
           onClick={() => onSelect('artist')}
-          className="w-full py-4 px-6 bg-gradient-to-r from-accent-red to-accent-salmon text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200"
+          disabled={isLoading}
+          className="w-full py-4 px-6 bg-gradient-to-r from-accent-red to-accent-salmon text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50"
         >
           ARTIST / VERANSTALTER
         </button>
@@ -69,16 +79,55 @@ function AccountTypeStep({
         {/* Secondary choices - outline buttons */}
         <button
           onClick={() => onSelect('customer')}
-          className="w-full py-4 px-6 bg-transparent border-2 border-accent-purple text-white font-bold uppercase tracking-wider rounded-full hover:bg-accent-purple/20 transition-all duration-200"
+          disabled={isLoading}
+          className="w-full py-4 px-6 bg-transparent border-2 border-accent-purple text-white font-bold uppercase tracking-wider rounded-full hover:bg-accent-purple/20 transition-all duration-200 disabled:opacity-50"
         >
           CUSTOMER
         </button>
 
         <button
           onClick={() => onSelect('fan')}
-          className="w-full py-4 px-6 bg-transparent border-2 border-accent-purple text-white font-bold uppercase tracking-wider rounded-full hover:bg-accent-purple/20 transition-all duration-200"
+          disabled={isLoading}
+          className="w-full py-4 px-6 bg-transparent border-2 border-accent-purple text-white font-bold uppercase tracking-wider rounded-full hover:bg-accent-purple/20 transition-all duration-200 disabled:opacity-50"
         >
           FAN
+        </button>
+      </div>
+
+      {/* Divider */}
+      <div className="my-6 flex items-center gap-4">
+        <div className="flex-1 h-px bg-white/20" />
+        <span className="text-white/60 text-xs uppercase tracking-wider">oder</span>
+        <div className="flex-1 h-px bg-white/20" />
+      </div>
+
+      {/* Social Sign Up */}
+      <div className="flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={onGoogleSignUp}
+          disabled={isLoading}
+          className="w-full rounded-full border border-white/30 bg-white py-3 text-sm font-medium text-gray-800 transition-all hover:bg-gray-100 disabled:opacity-50 flex items-center justify-center gap-3"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+          </svg>
+          Mit Google registrieren
+        </button>
+
+        <button
+          type="button"
+          onClick={onFacebookSignUp}
+          disabled={isLoading}
+          className="w-full rounded-full bg-[#1877F2] py-3 text-sm font-medium text-white transition-all hover:bg-[#166FE5] disabled:opacity-50 flex items-center justify-center gap-3"
+        >
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+          </svg>
+          Mit Facebook registrieren
         </button>
       </div>
     </div>
@@ -89,9 +138,11 @@ function AccountTypeStep({
 function MembershipStep({
   onSelect,
   onBack,
+  isLoading,
 }: {
   onSelect: (tier: MembershipTier) => void
   onBack: () => void
+  isLoading: boolean
 }) {
   return (
     <div>
@@ -111,18 +162,19 @@ function MembershipStep({
               <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              <span>Vorteil 1</span>
+              <span>Profil erstellen</span>
             </li>
             <li className="text-sm text-text-secondary flex items-start gap-2">
               <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              <span>Vorteil 2</span>
+              <span>Buchungsanfragen</span>
             </li>
           </ul>
           <button
             onClick={() => onSelect('basic')}
-            className="w-full py-3 px-4 bg-transparent border-2 border-white/30 text-white font-bold uppercase text-sm tracking-wider rounded-full hover:border-white/50 hover:bg-white/10 transition-all duration-200"
+            disabled={isLoading}
+            className="w-full py-3 px-4 bg-transparent border-2 border-white/30 text-white font-bold uppercase text-sm tracking-wider rounded-full hover:border-white/50 hover:bg-white/10 transition-all duration-200 disabled:opacity-50"
           >
             AUSWÄHLEN
           </button>
@@ -143,30 +195,31 @@ function MembershipStep({
               <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              <span>Vorteil 1</span>
+              <span>Alles aus Basic</span>
             </li>
             <li className="text-sm text-text-secondary flex items-start gap-2">
               <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              <span>Vorteil 2</span>
+              <span>Priority Listing</span>
             </li>
             <li className="text-sm text-text-secondary flex items-start gap-2">
               <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              <span>Vorteil 3</span>
+              <span>Analytics Dashboard</span>
             </li>
             <li className="text-sm text-text-secondary flex items-start gap-2">
               <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
               </svg>
-              <span>Vorteil 4</span>
+              <span>Verifiziertes Profil</span>
             </li>
           </ul>
           <button
             onClick={() => onSelect('premium')}
-            className="w-full py-3 px-4 bg-gradient-to-r from-accent-purple to-accent-red text-white font-bold uppercase text-sm tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200"
+            disabled={isLoading}
+            className="w-full py-3 px-4 bg-gradient-to-r from-accent-purple to-accent-red text-white font-bold uppercase text-sm tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50"
           >
             AUSWÄHLEN
           </button>
@@ -176,7 +229,8 @@ function MembershipStep({
       {/* Back button */}
       <button
         onClick={onBack}
-        className="w-full py-3 text-text-muted hover:text-white text-sm uppercase tracking-wider transition-colors duration-200"
+        disabled={isLoading}
+        className="w-full py-3 text-text-muted hover:text-white text-sm uppercase tracking-wider transition-colors duration-200 disabled:opacity-50"
       >
         ← Zurück
       </button>
@@ -188,9 +242,13 @@ function MembershipStep({
 function RegistrationFormStep({
   onSubmit,
   onBack,
+  isLoading,
+  error,
 }: {
   onSubmit: (data: Omit<RegistrationData, 'accountType' | 'membershipTier'>) => void
   onBack: () => void
+  isLoading: boolean
+  error: string | null
 }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -260,6 +318,7 @@ function RegistrationFormStep({
     text-white placeholder:text-text-muted placeholder:uppercase placeholder:text-xs placeholder:tracking-wider
     transition-colors duration-200
     focus:outline-none focus:border-accent-purple
+    disabled:opacity-50
   `
 
   return (
@@ -268,6 +327,13 @@ function RegistrationFormStep({
         REGISTRIEREN
       </h2>
 
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-500/20 border border-red-500/50 p-3 text-sm text-white">
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <input
@@ -275,6 +341,7 @@ function RegistrationFormStep({
             placeholder="NAME"
             value={formData.name}
             onChange={(e) => handleChange('name', e.target.value)}
+            disabled={isLoading}
             className={`${inputBaseClass} ${errors.name ? 'border-accent-red' : ''}`}
           />
           {errors.name && <p className="mt-1 text-xs text-accent-red">{errors.name}</p>}
@@ -286,6 +353,7 @@ function RegistrationFormStep({
             placeholder="VORNAME"
             value={formData.vorname}
             onChange={(e) => handleChange('vorname', e.target.value)}
+            disabled={isLoading}
             className={`${inputBaseClass} ${errors.vorname ? 'border-accent-red' : ''}`}
           />
           {errors.vorname && <p className="mt-1 text-xs text-accent-red">{errors.vorname}</p>}
@@ -297,6 +365,7 @@ function RegistrationFormStep({
             placeholder="EMAIL"
             value={formData.email}
             onChange={(e) => handleChange('email', e.target.value)}
+            disabled={isLoading}
             className={`${inputBaseClass} ${errors.email ? 'border-accent-red' : ''}`}
           />
           {errors.email && <p className="mt-1 text-xs text-accent-red">{errors.email}</p>}
@@ -308,6 +377,7 @@ function RegistrationFormStep({
             placeholder="TELEFONNUMMER"
             value={formData.telefonnummer}
             onChange={(e) => handleChange('telefonnummer', e.target.value)}
+            disabled={isLoading}
             className={`${inputBaseClass} ${errors.telefonnummer ? 'border-accent-red' : ''}`}
           />
           {errors.telefonnummer && <p className="mt-1 text-xs text-accent-red">{errors.telefonnummer}</p>}
@@ -319,6 +389,7 @@ function RegistrationFormStep({
             placeholder="MEMBERNAME"
             value={formData.membername}
             onChange={(e) => handleChange('membername', e.target.value)}
+            disabled={isLoading}
             className={`${inputBaseClass} ${errors.membername ? 'border-accent-red' : ''}`}
           />
           {errors.membername && <p className="mt-1 text-xs text-accent-red">{errors.membername}</p>}
@@ -330,6 +401,7 @@ function RegistrationFormStep({
             placeholder="PASSWORT"
             value={formData.password}
             onChange={(e) => handleChange('password', e.target.value)}
+            disabled={isLoading}
             className={`${inputBaseClass} ${errors.password ? 'border-accent-red' : ''}`}
           />
           {errors.password && <p className="mt-1 text-xs text-accent-red">{errors.password}</p>}
@@ -341,6 +413,7 @@ function RegistrationFormStep({
             placeholder="PASSWORT WIEDERHOLEN"
             value={formData.passwordConfirm}
             onChange={(e) => handleChange('passwordConfirm', e.target.value)}
+            disabled={isLoading}
             className={`${inputBaseClass} ${errors.passwordConfirm ? 'border-accent-red' : ''}`}
           />
           {errors.passwordConfirm && <p className="mt-1 text-xs text-accent-red">{errors.passwordConfirm}</p>}
@@ -356,6 +429,7 @@ function RegistrationFormStep({
                 setAcceptedTerms(e.target.checked)
                 if (errors.terms) setErrors((prev) => ({ ...prev, terms: '' }))
               }}
+              disabled={isLoading}
               className="mt-1 w-4 h-4 rounded border-white/30 bg-transparent text-accent-purple focus:ring-accent-purple focus:ring-offset-0"
             />
             <span className="text-sm text-text-secondary">
@@ -375,18 +449,55 @@ function RegistrationFormStep({
         {/* Submit button */}
         <button
           type="submit"
-          className="w-full py-4 mt-4 bg-gradient-to-r from-accent-purple to-accent-red text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200"
+          disabled={isLoading}
+          className="w-full py-4 mt-4 bg-gradient-to-r from-accent-purple to-accent-red text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
         >
-          REGISTRIEREN
+          {isLoading ? (
+            <>
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span>WIRD REGISTRIERT...</span>
+            </>
+          ) : (
+            'REGISTRIEREN'
+          )}
         </button>
       </form>
 
       {/* Back button */}
       <button
         onClick={onBack}
-        className="w-full py-3 mt-4 text-text-muted hover:text-white text-sm uppercase tracking-wider transition-colors duration-200"
+        disabled={isLoading}
+        className="w-full py-3 mt-4 text-text-muted hover:text-white text-sm uppercase tracking-wider transition-colors duration-200 disabled:opacity-50"
       >
         ← Zurück
+      </button>
+    </div>
+  )
+}
+
+// Success Step
+function SuccessStep({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="text-center py-8">
+      <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
+        <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h2 className="text-2xl font-bold text-white uppercase tracking-wide mb-4">
+        FAST GESCHAFFT!
+      </h2>
+      <p className="text-text-secondary mb-6">
+        Wir haben dir eine E-Mail geschickt. Bitte bestätige deine E-Mail-Adresse, um deine Registrierung abzuschließen.
+      </p>
+      <button
+        onClick={onClose}
+        className="px-8 py-3 bg-gradient-to-r from-accent-purple to-accent-red text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 transition-all duration-200"
+      >
+        VERSTANDEN
       </button>
     </div>
   )
@@ -396,24 +507,27 @@ function RegistrationFormStep({
 export function RegisterModal({
   isOpen,
   onClose,
-  onRegister,
   onLoginClick,
 }: RegisterModalProps) {
+  const { signUp, signInWithGoogle, signInWithFacebook } = useAuth()
   const [step, setStep] = useState<Step>(1)
   const [registrationData, setRegistrationData] = useState<Partial<RegistrationData>>({})
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setStep(1)
       setRegistrationData({})
+      setError(null)
     }
   }, [isOpen])
 
   // Close on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape' && !isLoading) onClose()
     }
 
     if (isOpen) {
@@ -425,7 +539,7 @@ export function RegisterModal({
       document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = ''
     }
-  }, [isOpen, onClose])
+  }, [isOpen, onClose, isLoading])
 
   const handleAccountTypeSelect = (type: AccountType) => {
     setRegistrationData((prev) => ({ ...prev, accountType: type }))
@@ -437,13 +551,70 @@ export function RegisterModal({
     setStep(3)
   }
 
-  const handleFormSubmit = (formData: Omit<RegistrationData, 'accountType' | 'membershipTier'>) => {
-    const completeData: RegistrationData = {
-      accountType: registrationData.accountType!,
-      membershipTier: registrationData.membershipTier!,
-      ...formData,
+  const handleGoogleSignUp = async () => {
+    setError(null)
+    setIsLoading(true)
+    try {
+      const { error } = await signInWithGoogle()
+      if (error) {
+        setError(error.message)
+      }
+    } catch {
+      setError('Google-Registrierung fehlgeschlagen.')
+    } finally {
+      setIsLoading(false)
     }
-    onRegister(completeData)
+  }
+
+  const handleFacebookSignUp = async () => {
+    setError(null)
+    setIsLoading(true)
+    try {
+      const { error } = await signInWithFacebook()
+      if (error) {
+        setError(error.message)
+      }
+    } catch {
+      setError('Facebook-Registrierung fehlgeschlagen.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleFormSubmit = async (formData: Omit<RegistrationData, 'accountType' | 'membershipTier'>) => {
+    setError(null)
+    setIsLoading(true)
+
+    try {
+      const metadata = {
+        user_type: registrationData.accountType,
+        membership_tier: registrationData.membershipTier,
+        full_name: `${formData.vorname} ${formData.name}`,
+        first_name: formData.vorname,
+        last_name: formData.name,
+        phone: formData.telefonnummer,
+        membername: formData.membername,
+      }
+
+      const { error } = await signUp(formData.email, formData.password, metadata)
+
+      if (error) {
+        // Map Supabase error messages to German
+        if (error.message.includes('already registered')) {
+          setError('Diese E-Mail-Adresse ist bereits registriert.')
+        } else if (error.message.includes('Password')) {
+          setError('Das Passwort muss mindestens 6 Zeichen lang sein.')
+        } else {
+          setError(error.message)
+        }
+      } else {
+        setStep('success')
+      }
+    } catch {
+      setError('Ein unerwarteter Fehler ist aufgetreten.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (!isOpen) return null
@@ -453,7 +624,7 @@ export function RegisterModal({
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-        onClick={onClose}
+        onClick={() => !isLoading && onClose()}
       />
 
       {/* Modal Content */}
@@ -471,7 +642,8 @@ export function RegisterModal({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-text-muted hover:text-text-primary transition-colors z-10"
+          disabled={isLoading}
+          className="absolute top-4 right-4 p-2 text-text-muted hover:text-text-primary transition-colors z-10 disabled:opacity-50"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -481,35 +653,58 @@ export function RegisterModal({
         {/* Step Indicator */}
         <StepIndicator currentStep={step} />
 
+        {/* Global Error */}
+        {error && step === 1 && (
+          <div className="mb-4 rounded-lg bg-red-500/20 border border-red-500/50 p-3 text-sm text-white">
+            {error}
+          </div>
+        )}
+
         {/* Step Content with transition */}
         <div className="transition-all duration-300 ease-out">
-          {step === 1 && <AccountTypeStep onSelect={handleAccountTypeSelect} />}
+          {step === 1 && (
+            <AccountTypeStep
+              onSelect={handleAccountTypeSelect}
+              onGoogleSignUp={handleGoogleSignUp}
+              onFacebookSignUp={handleFacebookSignUp}
+              isLoading={isLoading}
+            />
+          )}
           {step === 2 && (
             <MembershipStep
               onSelect={handleMembershipSelect}
               onBack={() => setStep(1)}
+              isLoading={isLoading}
             />
           )}
           {step === 3 && (
             <RegistrationFormStep
               onSubmit={handleFormSubmit}
               onBack={() => setStep(2)}
+              isLoading={isLoading}
+              error={error}
             />
+          )}
+          {step === 'success' && (
+            <SuccessStep onClose={onClose} />
           )}
         </div>
 
         {/* Login link */}
-        <div className="mt-6 text-center border-t border-white/10 pt-6">
-          <p className="text-sm text-text-muted">
-            Bereits registriert?{' '}
-            <button
-              onClick={onLoginClick}
-              className="text-accent-purple hover:underline font-medium"
-            >
-              Anmelden
-            </button>
-          </p>
-        </div>
+        {step !== 'success' && (
+          <div className="mt-6 text-center border-t border-white/10 pt-6">
+            <p className="text-sm text-text-muted">
+              Bereits registriert?{' '}
+              <button
+                onClick={onLoginClick}
+                disabled={isLoading}
+                className="text-accent-purple hover:underline font-medium disabled:opacity-50"
+              >
+                Anmelden
+              </button>
+            </p>
+          </div>
+        )}
       </div>
     </div>,
     document.body

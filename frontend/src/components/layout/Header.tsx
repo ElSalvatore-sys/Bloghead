@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { HeartIcon, UserIcon, InstagramIcon, FacebookIcon, MenuIcon, CloseIcon } from '../icons'
 import { LoginModal, RegisterModal } from '../auth'
+import { useAuth } from '../../contexts/AuthContext'
 
 // Types
 interface NavDropdownItem {
@@ -19,11 +20,6 @@ interface UserMenuItem {
   label: string
   href: string
   icon?: React.ReactNode
-}
-
-interface HeaderProps {
-  isLoggedIn?: boolean
-  onLogout?: () => void
 }
 
 // Navigation configuration
@@ -367,7 +363,9 @@ function MobileMenu({
 }
 
 // Main Header Component
-export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
+export function Header() {
+  const { user, signOut } = useAuth()
+  const isLoggedIn = !!user
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -390,9 +388,9 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
     setShowLoginModal(true)
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setUserDropdownOpen(false)
-    onLogout?.()
+    await signOut()
   }
 
   // Check if a nav link is active (from footer-layout-router branch)
@@ -559,10 +557,6 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
       <LoginModal
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        onLogin={(membername, _password) => {
-          console.log('Login:', membername)
-          setShowLoginModal(false)
-        }}
         onRegisterClick={() => {
           setShowLoginModal(false)
           setShowRegisterModal(true)
@@ -573,10 +567,6 @@ export function Header({ isLoggedIn = false, onLogout }: HeaderProps) {
       <RegisterModal
         isOpen={showRegisterModal}
         onClose={() => setShowRegisterModal(false)}
-        onRegister={(data) => {
-          console.log('Register:', data)
-          setShowRegisterModal(false)
-        }}
         onLoginClick={() => {
           setShowRegisterModal(false)
           setShowLoginModal(true)

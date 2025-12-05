@@ -48,10 +48,6 @@ export function HomePage() {
       <RegisterModal
         isOpen={showRegisterModal}
         onClose={() => setShowRegisterModal(false)}
-        onRegister={(data) => {
-          console.log('Register:', data)
-          setShowRegisterModal(false)
-        }}
         onLoginClick={() => {
           setShowRegisterModal(false)
           // Could open login modal here if needed
