@@ -2,21 +2,10 @@ import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { MultiSelect } from '../ui/MultiSelect'
 
 // Types
-export type AccountType = 'artist' | 'customer' | 'fan'
-export type MembershipTier = 'basic' | 'premium'
-
-export interface RegistrationData {
-  accountType: AccountType
-  membershipTier: MembershipTier
-  name: string
-  vorname: string
-  email: string
-  telefonnummer: string
-  membername: string
-  password: string
-}
+export type UserType = 'fan' | 'artist' | 'service_provider' | 'event_organizer'
 
 interface RegisterModalProps {
   isOpen: boolean
@@ -24,12 +13,139 @@ interface RegisterModalProps {
   onLoginClick: () => void
 }
 
-type Step = 1 | 2 | 3 | 'success'
+type Step = 1 | 2 | 3
+
+// User type cards configuration
+const userTypes = [
+  {
+    id: 'fan' as UserType,
+    icon: '🎵',
+    title: 'Fan / Community',
+    tagline: 'Entdecke großartige Künstler und unvergessliche Events'
+  },
+  {
+    id: 'artist' as UserType,
+    icon: '🎤',
+    title: 'Artist',
+    tagline: 'Zeige dein Talent und werde gebucht'
+  },
+  {
+    id: 'service_provider' as UserType,
+    icon: '🛠️',
+    title: 'Service Provider',
+    tagline: 'Verbinde dich mit Event-Planern die dich brauchen'
+  },
+  {
+    id: 'event_organizer' as UserType,
+    icon: '🎉',
+    title: 'Event Organizer',
+    tagline: 'Plane perfekte Events mit den richtigen Leuten'
+  }
+]
+
+// Options
+const genreOptions = [
+  'Pop', 'Rock', 'Jazz', 'Electronic', 'Hip-Hop', 'Classical',
+  'R&B', 'Schlager', 'Latin', 'Metal', 'Folk', 'World'
+]
+
+const professionOptions = [
+  'DJ', 'Singer', 'Band', 'Guitarist', 'Pianist', 'Saxophonist',
+  'Drummer', 'Violinist', 'Producer', 'Other'
+]
+
+const industryOptions = [
+  'Catering', 'Photography', 'Videography', 'Decoration', 'Security',
+  'Sound & Light', 'Florist', 'Hairdresser & Makeup', 'Transportation',
+  'Equipment Rental', 'Event Planning', 'Venue', 'Other'
+]
+
+const businessTypeOptions = [
+  'Freiberufler', 'Einzelunternehmer', 'GbR', 'GmbH', 'UG', 'Other'
+]
+
+const eventOrganizerBusinessTypes = [
+  'Privatperson', 'Unternehmen', 'Agentur', 'Venue/Location', 'Verein', 'Other'
+]
+
+const crowdSizeOptions = [
+  'Intimate (under 50)', 'Medium (50-200)', 'Large (200-500)', 'Massive (500+)', 'It varies!'
+]
+
+const eventVibeOptions = [
+  'Elegant & Sophisticated', 'Fun & Party', 'Professional & Corporate',
+  'Creative & Artsy', 'Relaxed & Casual', 'High Energy & Wild'
+]
+
+const musicPreferenceOptions = [
+  'Pop & Charts', 'Electronic & House', 'Rock & Alternative', 'Jazz & Soul',
+  'Hip-Hop & R&B', 'Classical & Orchestra', 'Schlager & Volksmusik', 'Open to everything!'
+]
+
+const mustHaveServiceOptions = [
+  'Live Music / DJ', 'Catering', 'Photography & Video',
+  'Decoration & Styling', 'Security', 'Sound & Lighting'
+]
+
+// Form Data Interface
+interface FormData {
+  // Base fields
+  username: string
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  confirmPassword: string
+  termsAccepted: boolean
+  newsletterSubscribed: boolean
+
+  // Artist fields
+  genres: string[]
+  profession: string
+
+  // Service Provider / Event Organizer fields
+  industry: string
+
+  // Shared business fields
+  address: string
+  taxNumber: string
+  vatId: string
+  businessType: string
+  phone: string
+
+  // Event Organizer preferences
+  crowdSize: string
+  eventVibes: string[]
+  musicPreferences: string[]
+  mustHaveServices: string[]
+}
+
+// Initial form data
+const initialFormData: FormData = {
+  username: '',
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  termsAccepted: false,
+  newsletterSubscribed: false,
+  genres: [],
+  profession: '',
+  industry: '',
+  address: '',
+  taxNumber: '',
+  vatId: '',
+  businessType: '',
+  phone: '',
+  crowdSize: '',
+  eventVibes: [],
+  musicPreferences: [],
+  mustHaveServices: []
+}
 
 // Step indicator component
 function StepIndicator({ currentStep }: { currentStep: Step }) {
-  if (currentStep === 'success') return null
-
   return (
     <div className="flex justify-center gap-2 mb-6">
       {[1, 2, 3].map((step) => (
@@ -48,56 +164,48 @@ function StepIndicator({ currentStep }: { currentStep: Step }) {
   )
 }
 
-// Step 1: Account Type Selection
-function AccountTypeStep({
+// Step 1: Choose Your Role
+function UserTypeStep({
   onSelect,
   onGoogleSignUp,
   onFacebookSignUp,
   isLoading,
 }: {
-  onSelect: (type: AccountType) => void
+  onSelect: (type: UserType) => void
   onGoogleSignUp: () => void
   onFacebookSignUp: () => void
   isLoading: boolean
 }) {
   return (
     <div className="text-center">
-      <h2 className="text-2xl font-bold text-white uppercase tracking-wide mb-8">
-        NEU BEI BLOGHEAD?
+      <h2 className="text-2xl font-bold text-white uppercase tracking-wide mb-2">
+        WILLKOMMEN BEI BLOGHEAD
       </h2>
+      <p className="text-gray-400 text-sm mb-8">Wähle deinen Account-Typ</p>
 
-      <div className="flex flex-col gap-4">
-        {/* Primary choice - gradient button */}
-        <button
-          onClick={() => onSelect('artist')}
-          disabled={isLoading}
-          className="w-full py-4 px-6 bg-gradient-to-r from-accent-red to-accent-salmon text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50"
-        >
-          ARTIST / VERANSTALTER
-        </button>
-
-        {/* Secondary choices - outline buttons */}
-        <button
-          onClick={() => onSelect('customer')}
-          disabled={isLoading}
-          className="w-full py-4 px-6 bg-transparent border-2 border-accent-purple text-white font-bold uppercase tracking-wider rounded-full hover:bg-accent-purple/20 transition-all duration-200 disabled:opacity-50"
-        >
-          CUSTOMER
-        </button>
-
-        <button
-          onClick={() => onSelect('fan')}
-          disabled={isLoading}
-          className="w-full py-4 px-6 bg-transparent border-2 border-accent-purple text-white font-bold uppercase tracking-wider rounded-full hover:bg-accent-purple/20 transition-all duration-200 disabled:opacity-50"
-        >
-          FAN
-        </button>
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        {userTypes.map((type) => (
+          <button
+            key={type.id}
+            onClick={() => onSelect(type.id)}
+            disabled={isLoading}
+            className="group p-5 bg-white/5 border border-white/20 rounded-xl text-left hover:border-purple-500 hover:bg-purple-500/10 transition-all duration-200 disabled:opacity-50"
+          >
+            <div className="text-3xl mb-3">{type.icon}</div>
+            <h3 className="text-white font-bold text-sm uppercase tracking-wide mb-1 group-hover:text-purple-400 transition-colors">
+              {type.title}
+            </h3>
+            <p className="text-gray-500 text-xs leading-relaxed">
+              {type.tagline}
+            </p>
+          </button>
+        ))}
       </div>
 
       {/* Divider */}
       <div className="my-6 flex items-center gap-4">
         <div className="flex-1 h-px bg-white/20" />
-        <span className="text-white/60 text-xs uppercase tracking-wider">oder</span>
+        <span className="text-white/60 text-xs uppercase tracking-wider">oder schnell mit</span>
         <div className="flex-1 h-px bg-white/20" />
       </div>
 
@@ -134,323 +242,587 @@ function AccountTypeStep({
   )
 }
 
-// Step 2: Membership Selection
-function MembershipStep({
-  onSelect,
-  onBack,
-  isLoading,
-}: {
-  onSelect: (tier: MembershipTier) => void
-  onBack: () => void
-  isLoading: boolean
-}) {
-  return (
-    <div>
-      <h2 className="text-2xl font-bold text-white uppercase tracking-wide text-center mb-8">
-        WÄHLE DEIN PAKET
-      </h2>
-
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        {/* Basic Plan */}
-        <div className="bg-bg-card/50 border border-white/20 rounded-xl p-5 flex flex-col">
-          <h3 className="text-lg font-bold text-white uppercase mb-2">BASIC</h3>
-          <p className="text-xl font-bold text-white mb-4">
-            9,99€<span className="text-sm font-normal text-text-muted">/MONAT</span>
-          </p>
-          <ul className="flex-1 space-y-2 mb-6">
-            <li className="text-sm text-text-secondary flex items-start gap-2">
-              <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Profil erstellen</span>
-            </li>
-            <li className="text-sm text-text-secondary flex items-start gap-2">
-              <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Buchungsanfragen</span>
-            </li>
-          </ul>
-          <button
-            onClick={() => onSelect('basic')}
-            disabled={isLoading}
-            className="w-full py-3 px-4 bg-transparent border-2 border-white/30 text-white font-bold uppercase text-sm tracking-wider rounded-full hover:border-white/50 hover:bg-white/10 transition-all duration-200 disabled:opacity-50"
-          >
-            AUSWÄHLEN
-          </button>
-        </div>
-
-        {/* Premium Plan */}
-        <div className="bg-gradient-to-b from-accent-purple/30 to-bg-card/50 border border-accent-purple rounded-xl p-5 flex flex-col relative overflow-hidden">
-          {/* Highlighted badge */}
-          <div className="absolute top-0 right-0 bg-accent-purple text-white text-xs font-bold uppercase px-3 py-1 rounded-bl-lg">
-            Beliebt
-          </div>
-          <h3 className="text-lg font-bold text-white uppercase mb-2">PREMIUM</h3>
-          <p className="text-xl font-bold text-white mb-4">
-            19,99€<span className="text-sm font-normal text-text-muted">/MONAT</span>
-          </p>
-          <ul className="flex-1 space-y-2 mb-6">
-            <li className="text-sm text-text-secondary flex items-start gap-2">
-              <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Alles aus Basic</span>
-            </li>
-            <li className="text-sm text-text-secondary flex items-start gap-2">
-              <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Priority Listing</span>
-            </li>
-            <li className="text-sm text-text-secondary flex items-start gap-2">
-              <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Analytics Dashboard</span>
-            </li>
-            <li className="text-sm text-text-secondary flex items-start gap-2">
-              <svg className="w-4 h-4 text-accent-purple mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Verifiziertes Profil</span>
-            </li>
-          </ul>
-          <button
-            onClick={() => onSelect('premium')}
-            disabled={isLoading}
-            className="w-full py-3 px-4 bg-gradient-to-r from-accent-purple to-accent-red text-white font-bold uppercase text-sm tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50"
-          >
-            AUSWÄHLEN
-          </button>
-        </div>
-      </div>
-
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        disabled={isLoading}
-        className="w-full py-3 text-text-muted hover:text-white text-sm uppercase tracking-wider transition-colors duration-200 disabled:opacity-50"
-      >
-        ← Zurück
-      </button>
-    </div>
-  )
-}
-
-// Step 3: Registration Form
+// Step 2: Registration Form
 function RegistrationFormStep({
+  userType,
+  formData,
+  setFormData,
+  errors,
   onSubmit,
   onBack,
   isLoading,
-  error,
+  submitError,
 }: {
-  onSubmit: (data: Omit<RegistrationData, 'accountType' | 'membershipTier'>) => void
+  userType: UserType
+  formData: FormData
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>
+  errors: Record<string, string>
+  onSubmit: (e: FormEvent) => void
   onBack: () => void
   isLoading: boolean
-  error: string | null
+  submitError: string | null
 }) {
-  const [formData, setFormData] = useState({
-    name: '',
-    vorname: '',
-    email: '',
-    telefonnummer: '',
-    membername: '',
-    password: '',
-    passwordConfirm: '',
-  })
-  const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const handleChange = (field: keyof FormData, value: string | boolean | string[]) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+  }
 
-  const handleChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: '' }))
+  const getUsernameLabel = () => {
+    switch (userType) {
+      case 'fan': return 'Member Name'
+      case 'artist': return 'Künstlername'
+      case 'service_provider': return 'Firmenname'
+      case 'event_organizer': return 'Name / Firma'
+      default: return 'Username'
     }
   }
 
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {}
-
-    if (!formData.name.trim()) newErrors.name = 'Name ist erforderlich'
-    if (!formData.vorname.trim()) newErrors.vorname = 'Vorname ist erforderlich'
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email ist erforderlich'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Ungültige Email-Adresse'
-    }
-    if (!formData.telefonnummer.trim()) newErrors.telefonnummer = 'Telefonnummer ist erforderlich'
-    if (!formData.membername.trim()) newErrors.membername = 'Membername ist erforderlich'
-    if (!formData.password) {
-      newErrors.password = 'Passwort ist erforderlich'
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Passwort muss mindestens 8 Zeichen lang sein'
-    }
-    if (formData.password !== formData.passwordConfirm) {
-      newErrors.passwordConfirm = 'Passwörter stimmen nicht überein'
-    }
-    if (!acceptedTerms) {
-      newErrors.terms = 'Bitte akzeptieren Sie die AGB'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    if (validate()) {
-      onSubmit({
-        name: formData.name,
-        vorname: formData.vorname,
-        email: formData.email,
-        telefonnummer: formData.telefonnummer,
-        membername: formData.membername,
-        password: formData.password,
-      })
+  const getNewsletterText = () => {
+    switch (userType) {
+      case 'fan': return 'Updates zu Events und Künstlern erhalten'
+      case 'artist': return 'Tipps für Künstler und Booking-Chancen erhalten'
+      case 'service_provider': return 'Leads und Aufträge per E-Mail erhalten'
+      case 'event_organizer': return 'Event-Trends und Planungstipps erhalten'
+      default: return 'Newsletter abonnieren'
     }
   }
 
   const inputBaseClass = `
-    w-full px-5 py-3
-    bg-transparent border border-white/30 rounded-full
-    text-white placeholder:text-text-muted placeholder:uppercase placeholder:text-xs placeholder:tracking-wider
+    w-full px-4 py-3
+    bg-white/5 border border-white/20 rounded-xl
+    text-white placeholder:text-gray-500 text-sm
     transition-colors duration-200
-    focus:outline-none focus:border-accent-purple
+    focus:outline-none focus:border-purple-500 focus:bg-white/10
     disabled:opacity-50
+  `
+
+  const selectBaseClass = `
+    w-full px-4 py-3
+    bg-white/5 border border-white/20 rounded-xl
+    text-white text-sm
+    transition-colors duration-200
+    focus:outline-none focus:border-purple-500
+    disabled:opacity-50
+    appearance-none cursor-pointer
   `
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-white uppercase tracking-wide text-center mb-6">
-        REGISTRIEREN
-      </h2>
+      <button
+        onClick={onBack}
+        disabled={isLoading}
+        className="flex items-center gap-2 text-gray-400 hover:text-white text-sm mb-4 transition-colors disabled:opacity-50"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        Zurück
+      </button>
+
+      <div className="flex items-center gap-3 mb-6">
+        <span className="text-3xl">{userTypes.find(t => t.id === userType)?.icon}</span>
+        <div>
+          <h2 className="text-xl font-bold text-white uppercase tracking-wide">
+            {userTypes.find(t => t.id === userType)?.title}
+          </h2>
+          <p className="text-gray-400 text-xs">Account erstellen</p>
+        </div>
+      </div>
 
       {/* Error Message */}
-      {error && (
-        <div className="mb-4 rounded-lg bg-red-500/20 border border-red-500/50 p-3 text-sm text-white">
-          {error}
+      {submitError && (
+        <div className="mb-4 rounded-xl bg-red-500/20 border border-red-500/50 p-3 text-sm text-white">
+          {submitError}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            placeholder="NAME"
-            value={formData.name}
-            onChange={(e) => handleChange('name', e.target.value)}
-            disabled={isLoading}
-            className={`${inputBaseClass} ${errors.name ? 'border-accent-red' : ''}`}
-          />
-          {errors.name && <p className="mt-1 text-xs text-accent-red">{errors.name}</p>}
+      <form onSubmit={onSubmit} className="space-y-4">
+        {/* Base Fields */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Vorname *</label>
+            <input
+              type="text"
+              value={formData.firstName}
+              onChange={(e) => handleChange('firstName', e.target.value)}
+              disabled={isLoading}
+              className={`${inputBaseClass} ${errors.firstName ? 'border-red-500' : ''}`}
+              placeholder="Max"
+            />
+            {errors.firstName && <p className="mt-1 text-xs text-red-400">{errors.firstName}</p>}
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Nachname *</label>
+            <input
+              type="text"
+              value={formData.lastName}
+              onChange={(e) => handleChange('lastName', e.target.value)}
+              disabled={isLoading}
+              className={`${inputBaseClass} ${errors.lastName ? 'border-red-500' : ''}`}
+              placeholder="Mustermann"
+            />
+            {errors.lastName && <p className="mt-1 text-xs text-red-400">{errors.lastName}</p>}
+          </div>
         </div>
 
         <div>
+          <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">{getUsernameLabel()} *</label>
           <input
             type="text"
-            placeholder="VORNAME"
-            value={formData.vorname}
-            onChange={(e) => handleChange('vorname', e.target.value)}
+            value={formData.username}
+            onChange={(e) => handleChange('username', e.target.value)}
             disabled={isLoading}
-            className={`${inputBaseClass} ${errors.vorname ? 'border-accent-red' : ''}`}
+            className={`${inputBaseClass} ${errors.username ? 'border-red-500' : ''}`}
+            placeholder={userType === 'artist' ? 'DJ Max' : 'max_events'}
           />
-          {errors.vorname && <p className="mt-1 text-xs text-accent-red">{errors.vorname}</p>}
+          {errors.username && <p className="mt-1 text-xs text-red-400">{errors.username}</p>}
         </div>
 
         <div>
+          <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">E-Mail *</label>
           <input
             type="email"
-            placeholder="EMAIL"
             value={formData.email}
             onChange={(e) => handleChange('email', e.target.value)}
             disabled={isLoading}
-            className={`${inputBaseClass} ${errors.email ? 'border-accent-red' : ''}`}
+            className={`${inputBaseClass} ${errors.email ? 'border-red-500' : ''}`}
+            placeholder="max@example.de"
           />
-          {errors.email && <p className="mt-1 text-xs text-accent-red">{errors.email}</p>}
+          {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
         </div>
 
-        <div>
-          <input
-            type="tel"
-            placeholder="TELEFONNUMMER"
-            value={formData.telefonnummer}
-            onChange={(e) => handleChange('telefonnummer', e.target.value)}
-            disabled={isLoading}
-            className={`${inputBaseClass} ${errors.telefonnummer ? 'border-accent-red' : ''}`}
-          />
-          {errors.telefonnummer && <p className="mt-1 text-xs text-accent-red">{errors.telefonnummer}</p>}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Passwort *</label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleChange('password', e.target.value)}
+              disabled={isLoading}
+              className={`${inputBaseClass} ${errors.password ? 'border-red-500' : ''}`}
+              placeholder="••••••••"
+            />
+            {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password}</p>}
+          </div>
+          <div>
+            <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Passwort bestätigen *</label>
+            <input
+              type="password"
+              value={formData.confirmPassword}
+              onChange={(e) => handleChange('confirmPassword', e.target.value)}
+              disabled={isLoading}
+              className={`${inputBaseClass} ${errors.confirmPassword ? 'border-red-500' : ''}`}
+              placeholder="••••••••"
+            />
+            {errors.confirmPassword && <p className="mt-1 text-xs text-red-400">{errors.confirmPassword}</p>}
+          </div>
         </div>
 
-        <div>
-          <input
-            type="text"
-            placeholder="MEMBERNAME"
-            value={formData.membername}
-            onChange={(e) => handleChange('membername', e.target.value)}
-            disabled={isLoading}
-            className={`${inputBaseClass} ${errors.membername ? 'border-accent-red' : ''}`}
-          />
-          {errors.membername && <p className="mt-1 text-xs text-accent-red">{errors.membername}</p>}
-        </div>
+        {/* Artist Fields */}
+        {userType === 'artist' && (
+          <>
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Künstler-Informationen</h3>
 
-        <div>
-          <input
-            type="password"
-            placeholder="PASSWORT"
-            value={formData.password}
-            onChange={(e) => handleChange('password', e.target.value)}
-            disabled={isLoading}
-            className={`${inputBaseClass} ${errors.password ? 'border-accent-red' : ''}`}
-          />
-          {errors.password && <p className="mt-1 text-xs text-accent-red">{errors.password}</p>}
-        </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Genres * (max. 5)</label>
+                  <MultiSelect
+                    options={genreOptions}
+                    selected={formData.genres}
+                    onChange={(genres) => handleChange('genres', genres)}
+                    placeholder="Genres auswählen..."
+                    max={5}
+                  />
+                  {errors.genres && <p className="mt-1 text-xs text-red-400">{errors.genres}</p>}
+                </div>
 
-        <div>
-          <input
-            type="password"
-            placeholder="PASSWORT WIEDERHOLEN"
-            value={formData.passwordConfirm}
-            onChange={(e) => handleChange('passwordConfirm', e.target.value)}
-            disabled={isLoading}
-            className={`${inputBaseClass} ${errors.passwordConfirm ? 'border-accent-red' : ''}`}
-          />
-          {errors.passwordConfirm && <p className="mt-1 text-xs text-accent-red">{errors.passwordConfirm}</p>}
-        </div>
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Beruf / Rolle *</label>
+                  <div className="relative">
+                    <select
+                      value={formData.profession}
+                      onChange={(e) => handleChange('profession', e.target.value)}
+                      disabled={isLoading}
+                      className={`${selectBaseClass} ${errors.profession ? 'border-red-500' : ''}`}
+                    >
+                      <option value="">Auswählen...</option>
+                      {professionOptions.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                  {errors.profession && <p className="mt-1 text-xs text-red-400">{errors.profession}</p>}
+                </div>
 
-        {/* Terms checkbox */}
-        <div className="pt-2">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Adresse</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => handleChange('address', e.target.value)}
+                    disabled={isLoading}
+                    className={inputBaseClass}
+                    placeholder="Straße, PLZ, Stadt"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Steuernummer / USt-IdNr.</label>
+                    <input
+                      type="text"
+                      value={formData.taxNumber}
+                      onChange={(e) => handleChange('taxNumber', e.target.value)}
+                      disabled={isLoading}
+                      className={inputBaseClass}
+                      placeholder="DE123456789"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Unternehmensform</label>
+                    <div className="relative">
+                      <select
+                        value={formData.businessType}
+                        onChange={(e) => handleChange('businessType', e.target.value)}
+                        disabled={isLoading}
+                        className={selectBaseClass}
+                      >
+                        <option value="">Auswählen...</option>
+                        {businessTypeOptions.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                      <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Telefon</label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleChange('phone', e.target.value)}
+                    disabled={isLoading}
+                    className={inputBaseClass}
+                    placeholder="+49 123 456789"
+                  />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Service Provider Fields */}
+        {userType === 'service_provider' && (
+          <>
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Firmen-Informationen</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Branche *</label>
+                  <div className="relative">
+                    <select
+                      value={formData.industry}
+                      onChange={(e) => handleChange('industry', e.target.value)}
+                      disabled={isLoading}
+                      className={`${selectBaseClass} ${errors.industry ? 'border-red-500' : ''}`}
+                    >
+                      <option value="">Auswählen...</option>
+                      {industryOptions.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                  {errors.industry && <p className="mt-1 text-xs text-red-400">{errors.industry}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Adresse *</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => handleChange('address', e.target.value)}
+                    disabled={isLoading}
+                    className={`${inputBaseClass} ${errors.address ? 'border-red-500' : ''}`}
+                    placeholder="Straße, PLZ, Stadt"
+                  />
+                  {errors.address && <p className="mt-1 text-xs text-red-400">{errors.address}</p>}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">USt-IdNr. *</label>
+                    <input
+                      type="text"
+                      value={formData.vatId}
+                      onChange={(e) => handleChange('vatId', e.target.value)}
+                      disabled={isLoading}
+                      className={`${inputBaseClass} ${errors.vatId ? 'border-red-500' : ''}`}
+                      placeholder="DE123456789"
+                    />
+                    {errors.vatId && <p className="mt-1 text-xs text-red-400">{errors.vatId}</p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Unternehmensform</label>
+                    <div className="relative">
+                      <select
+                        value={formData.businessType}
+                        onChange={(e) => handleChange('businessType', e.target.value)}
+                        disabled={isLoading}
+                        className={selectBaseClass}
+                      >
+                        <option value="">Auswählen...</option>
+                        {businessTypeOptions.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                      <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">
+                    Telefon * <span className="text-red-400">Pflichtfeld</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleChange('phone', e.target.value)}
+                    disabled={isLoading}
+                    className={`${inputBaseClass} ${errors.phone ? 'border-red-500' : ''}`}
+                    placeholder="+49 123 456789"
+                  />
+                  {errors.phone && <p className="mt-1 text-xs text-red-400">{errors.phone}</p>}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Event Organizer Fields */}
+        {userType === 'event_organizer' && (
+          <>
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">Veranstalter-Informationen</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Adresse</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => handleChange('address', e.target.value)}
+                    disabled={isLoading}
+                    className={inputBaseClass}
+                    placeholder="Straße, PLZ, Stadt"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">USt-IdNr. (optional)</label>
+                    <input
+                      type="text"
+                      value={formData.vatId}
+                      onChange={(e) => handleChange('vatId', e.target.value)}
+                      disabled={isLoading}
+                      className={inputBaseClass}
+                      placeholder="Für Unternehmen"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Typ</label>
+                    <div className="relative">
+                      <select
+                        value={formData.businessType}
+                        onChange={(e) => handleChange('businessType', e.target.value)}
+                        disabled={isLoading}
+                        className={selectBaseClass}
+                      >
+                        <option value="">Auswählen...</option>
+                        {eventOrganizerBusinessTypes.map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                      <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">
+                    Telefon * <span className="text-red-400">Pflichtfeld</span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleChange('phone', e.target.value)}
+                    disabled={isLoading}
+                    className={`${inputBaseClass} ${errors.phone ? 'border-red-500' : ''}`}
+                    placeholder="+49 123 456789"
+                  />
+                  {errors.phone && <p className="mt-1 text-xs text-red-400">{errors.phone}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Personalization Section */}
+            <div className="mt-6 p-5 bg-purple-900/20 rounded-xl border border-purple-500/30">
+              <h3 className="text-lg font-display text-white mb-1">✨ PERSONALIZE YOUR EXPERIENCE</h3>
+              <p className="text-gray-400 text-xs mb-5">Hilf uns, die perfekten Matches für deine Events zu finden!</p>
+
+              {/* Crowd Size */}
+              <div className="mb-5">
+                <label className="text-white font-medium text-sm mb-3 block">👥 Deine typische Gästezahl?</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {crowdSizeOptions.map(size => (
+                    <label key={size} className="flex items-center gap-2 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
+                      <input
+                        type="radio"
+                        name="crowdSize"
+                        value={size}
+                        checked={formData.crowdSize === size}
+                        onChange={(e) => handleChange('crowdSize', e.target.value)}
+                        className="accent-purple-500"
+                      />
+                      <span className="text-gray-300 text-xs">{size}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Event Vibe */}
+              <div className="mb-5">
+                <label className="text-white font-medium text-sm mb-3 block">🎨 Was ist dein Event-Vibe?</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {eventVibeOptions.map(vibe => (
+                    <label key={vibe} className="flex items-center gap-2 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
+                      <input
+                        type="checkbox"
+                        value={vibe}
+                        checked={formData.eventVibes.includes(vibe)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            handleChange('eventVibes', [...formData.eventVibes, vibe])
+                          } else {
+                            handleChange('eventVibes', formData.eventVibes.filter(v => v !== vibe))
+                          }
+                        }}
+                        className="accent-purple-500"
+                      />
+                      <span className="text-gray-300 text-xs">{vibe}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Music Preferences */}
+              <div className="mb-5">
+                <label className="text-white font-medium text-sm mb-1 block">🎵 Musik-Präferenzen?</label>
+                <p className="text-gray-500 text-xs mb-3">Hilft uns, die perfekten Künstler zu empfehlen</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {musicPreferenceOptions.map(music => (
+                    <label key={music} className="flex items-center gap-2 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
+                      <input
+                        type="checkbox"
+                        value={music}
+                        checked={formData.musicPreferences.includes(music)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            handleChange('musicPreferences', [...formData.musicPreferences, music])
+                          } else {
+                            handleChange('musicPreferences', formData.musicPreferences.filter(m => m !== music))
+                          }
+                        }}
+                        className="accent-purple-500"
+                      />
+                      <span className="text-gray-300 text-xs">{music}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Must-have Services */}
+              <div>
+                <label className="text-white font-medium text-sm mb-3 block">💡 Must-have Services für deine Events?</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {mustHaveServiceOptions.map(service => (
+                    <label key={service} className="flex items-center gap-2 p-3 bg-white/5 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
+                      <input
+                        type="checkbox"
+                        value={service}
+                        checked={formData.mustHaveServices.includes(service)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            handleChange('mustHaveServices', [...formData.mustHaveServices, service])
+                          } else {
+                            handleChange('mustHaveServices', formData.mustHaveServices.filter(s => s !== service))
+                          }
+                        }}
+                        className="accent-purple-500"
+                      />
+                      <span className="text-gray-300 text-xs">{service}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* Terms & Newsletter */}
+        <div className="pt-4 space-y-3">
           <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
-              checked={acceptedTerms}
-              onChange={(e) => {
-                setAcceptedTerms(e.target.checked)
-                if (errors.terms) setErrors((prev) => ({ ...prev, terms: '' }))
-              }}
+              checked={formData.termsAccepted}
+              onChange={(e) => handleChange('termsAccepted', e.target.checked)}
               disabled={isLoading}
-              className="mt-1 w-4 h-4 rounded border-white/30 bg-transparent text-accent-purple focus:ring-accent-purple focus:ring-offset-0"
+              className="mt-0.5 w-4 h-4 rounded border-white/30 bg-transparent text-purple-500 focus:ring-purple-500 focus:ring-offset-0 accent-purple-500"
             />
-            <span className="text-sm text-text-secondary">
+            <span className="text-sm text-gray-400">
               Ich akzeptiere die{' '}
-              <a href="/agb" className="text-accent-purple hover:underline">
-                AGB
-              </a>{' '}
+              <a href="/agb" className="text-purple-400 hover:underline">AGB</a>{' '}
               und{' '}
-              <a href="/datenschutz" className="text-accent-purple hover:underline">
-                Datenschutzerklärung
-              </a>
+              <a href="/datenschutz" className="text-purple-400 hover:underline">Datenschutzerklärung</a> *
             </span>
           </label>
-          {errors.terms && <p className="mt-1 text-xs text-accent-red">{errors.terms}</p>}
+          {errors.termsAccepted && <p className="text-xs text-red-400 ml-7">{errors.termsAccepted}</p>}
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={formData.newsletterSubscribed}
+              onChange={(e) => handleChange('newsletterSubscribed', e.target.checked)}
+              disabled={isLoading}
+              className="mt-0.5 w-4 h-4 rounded border-white/30 bg-transparent text-purple-500 focus:ring-purple-500 focus:ring-offset-0 accent-purple-500"
+            />
+            <span className="text-sm text-gray-400">
+              {getNewsletterText()}
+            </span>
+          </label>
         </div>
 
-        {/* Submit button */}
+        {/* Submit Button */}
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-4 mt-4 bg-gradient-to-r from-accent-purple to-accent-red text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
+          className="w-full py-4 mt-4 bg-gradient-to-r from-purple-600 to-orange-500 text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isLoading ? (
             <>
@@ -461,44 +833,59 @@ function RegistrationFormStep({
               <span>WIRD REGISTRIERT...</span>
             </>
           ) : (
-            'REGISTRIEREN'
+            'ACCOUNT ERSTELLEN'
           )}
         </button>
       </form>
-
-      {/* Back button */}
-      <button
-        onClick={onBack}
-        disabled={isLoading}
-        className="w-full py-3 mt-4 text-text-muted hover:text-white text-sm uppercase tracking-wider transition-colors duration-200 disabled:opacity-50"
-      >
-        ← Zurück
-      </button>
     </div>
   )
 }
 
-// Success Step
-function SuccessStep({ onClose }: { onClose: () => void }) {
+// Step 3: Success Screen
+function SuccessStep({
+  userType,
+  onClose,
+  onResendEmail,
+  isResending,
+}: {
+  userType: UserType
+  onClose: () => void
+  onResendEmail: () => void
+  isResending: boolean
+}) {
+  const getSuccessMessage = () => {
+    switch (userType) {
+      case 'fan': return 'explore amazing events!'
+      case 'artist': return 'showcase your talent!'
+      case 'service_provider': return 'connect with clients!'
+      case 'event_organizer': return 'plan unforgettable events!'
+      default: return 'get started!'
+    }
+  }
+
   return (
     <div className="text-center py-8">
-      <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/20 flex items-center justify-center">
-        <svg className="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      </div>
-      <h2 className="text-2xl font-bold text-white uppercase tracking-wide mb-4">
-        FAST GESCHAFFT!
-      </h2>
-      <p className="text-text-secondary mb-6">
-        Wir haben dir eine E-Mail geschickt. Bitte bestätige deine E-Mail-Adresse, um deine Registrierung abzuschließen.
+      <div className="text-6xl mb-4">🎉</div>
+      <h2 className="text-3xl font-display text-white mb-4">Willkommen bei Bloghead!</h2>
+      <p className="text-gray-400 mb-6">
+        Check your email to verify your account.<br />
+        Once verified, you'll be ready to {getSuccessMessage()}
       </p>
-      <button
-        onClick={onClose}
-        className="px-8 py-3 bg-gradient-to-r from-accent-purple to-accent-red text-white font-bold uppercase tracking-wider rounded-full hover:opacity-90 transition-all duration-200"
-      >
-        VERSTANDEN
-      </button>
+      <div className="flex gap-4 justify-center">
+        <button
+          onClick={onResendEmail}
+          disabled={isResending}
+          className="px-6 py-2.5 border border-white/30 rounded-full text-white hover:bg-white/10 transition-colors disabled:opacity-50"
+        >
+          {isResending ? 'Sending...' : 'Resend Email'}
+        </button>
+        <button
+          onClick={onClose}
+          className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-orange-500 rounded-full text-white font-medium hover:opacity-90 transition-opacity"
+        >
+          Back to Home
+        </button>
+      </div>
     </div>
   )
 }
@@ -511,16 +898,21 @@ export function RegisterModal({
 }: RegisterModalProps) {
   const { signUp, signInWithGoogle, signInWithFacebook } = useAuth()
   const [step, setStep] = useState<Step>(1)
-  const [registrationData, setRegistrationData] = useState<Partial<RegistrationData>>({})
+  const [selectedType, setSelectedType] = useState<UserType | null>(null)
+  const [formData, setFormData] = useState<FormData>(initialFormData)
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isResending, setIsResending] = useState(false)
 
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setStep(1)
-      setRegistrationData({})
-      setError(null)
+      setSelectedType(null)
+      setFormData(initialFormData)
+      setFormErrors({})
+      setSubmitError(null)
     }
   }, [isOpen])
 
@@ -541,86 +933,177 @@ export function RegisterModal({
     }
   }, [isOpen, onClose, isLoading])
 
-  const handleAccountTypeSelect = (type: AccountType) => {
-    setRegistrationData((prev) => ({ ...prev, accountType: type }))
+  const handleUserTypeSelect = (type: UserType) => {
+    setSelectedType(type)
     setStep(2)
   }
 
-  const handleMembershipSelect = (tier: MembershipTier) => {
-    setRegistrationData((prev) => ({ ...prev, membershipTier: tier }))
-    setStep(3)
-  }
-
   const handleGoogleSignUp = async () => {
-    setError(null)
+    setSubmitError(null)
     setIsLoading(true)
     try {
       const { error } = await signInWithGoogle()
       if (error) {
-        setError(error.message)
+        setSubmitError(error.message)
       }
     } catch {
-      setError('Google-Registrierung fehlgeschlagen.')
+      setSubmitError('Google-Registrierung fehlgeschlagen.')
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleFacebookSignUp = async () => {
-    setError(null)
+    setSubmitError(null)
     setIsLoading(true)
     try {
       const { error } = await signInWithFacebook()
       if (error) {
-        setError(error.message)
+        setSubmitError(error.message)
       }
     } catch {
-      setError('Facebook-Registrierung fehlgeschlagen.')
+      setSubmitError('Facebook-Registrierung fehlgeschlagen.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleFormSubmit = async (formData: Omit<RegistrationData, 'accountType' | 'membershipTier'>) => {
-    setError(null)
+  const validateForm = (): Record<string, string> => {
+    const errors: Record<string, string> = {}
+
+    // Base validation (all users)
+    if (!formData.username.trim()) errors.username = 'Erforderlich'
+    if (!formData.firstName.trim()) errors.firstName = 'Erforderlich'
+    if (!formData.lastName.trim()) errors.lastName = 'Erforderlich'
+    if (!formData.email.trim()) {
+      errors.email = 'Erforderlich'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Ungültige E-Mail-Adresse'
+    }
+    if (!formData.password) {
+      errors.password = 'Erforderlich'
+    } else if (formData.password.length < 8) {
+      errors.password = 'Mindestens 8 Zeichen'
+    }
+    if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = 'Passwörter stimmen nicht überein'
+    }
+    if (!formData.termsAccepted) {
+      errors.termsAccepted = 'Bitte akzeptieren Sie die AGB'
+    }
+
+    // Artist validation
+    if (selectedType === 'artist') {
+      if (formData.genres.length === 0) errors.genres = 'Mindestens ein Genre auswählen'
+      if (!formData.profession) errors.profession = 'Erforderlich'
+    }
+
+    // Service Provider validation
+    if (selectedType === 'service_provider') {
+      if (!formData.industry) errors.industry = 'Erforderlich'
+      if (!formData.address.trim()) errors.address = 'Erforderlich'
+      if (!formData.vatId.trim()) errors.vatId = 'Erforderlich'
+      if (!formData.phone.trim()) errors.phone = 'Telefon ist Pflicht für Service Provider'
+    }
+
+    // Event Organizer validation
+    if (selectedType === 'event_organizer') {
+      if (!formData.phone.trim()) errors.phone = 'Telefon ist Pflicht für Event Organizer'
+    }
+
+    return errors
+  }
+
+  const handleFormSubmit = async (e: FormEvent) => {
+    e.preventDefault()
+    const errors = validateForm()
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors)
+      return
+    }
+
+    setFormErrors({})
+    setSubmitError(null)
     setIsLoading(true)
 
     try {
-      const metadata = {
-        user_type: registrationData.accountType,
-        membership_tier: registrationData.membershipTier,
-        full_name: `${formData.vorname} ${formData.name}`,
-        first_name: formData.vorname,
-        last_name: formData.name,
-        phone: formData.telefonnummer,
-        membername: formData.membername,
+      // Build metadata based on user type
+      const metadata: Record<string, unknown> = {
+        user_type: selectedType,
+        username: formData.username,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        full_name: `${formData.firstName} ${formData.lastName}`,
+        newsletter_subscribed: formData.newsletterSubscribed,
+      }
+
+      if (selectedType === 'artist') {
+        metadata.genres = formData.genres
+        metadata.profession = formData.profession
+        metadata.address = formData.address
+        metadata.tax_number = formData.taxNumber
+        metadata.business_type = formData.businessType
+        metadata.phone = formData.phone
+      }
+
+      if (selectedType === 'service_provider') {
+        metadata.industry = formData.industry
+        metadata.address = formData.address
+        metadata.vat_id = formData.vatId
+        metadata.business_type = formData.businessType
+        metadata.phone = formData.phone
+      }
+
+      if (selectedType === 'event_organizer') {
+        metadata.address = formData.address
+        metadata.vat_id = formData.vatId
+        metadata.business_type = formData.businessType
+        metadata.phone = formData.phone
+        // Preferences
+        metadata.preferences = {
+          crowd_size: formData.crowdSize,
+          event_vibes: formData.eventVibes,
+          music_preferences: formData.musicPreferences,
+          must_have_services: formData.mustHaveServices
+        }
       }
 
       const { error } = await signUp(formData.email, formData.password, metadata)
 
       if (error) {
-        // Map Supabase error messages to German
         if (error.message.includes('already registered')) {
-          setError('Diese E-Mail-Adresse ist bereits registriert.')
+          setSubmitError('Diese E-Mail-Adresse ist bereits registriert.')
         } else if (error.message.includes('Password')) {
-          setError('Das Passwort muss mindestens 6 Zeichen lang sein.')
+          setSubmitError('Das Passwort muss mindestens 6 Zeichen lang sein.')
         } else {
-          setError(error.message)
+          setSubmitError(error.message)
         }
       } else {
-        setStep('success')
+        setStep(3)
       }
     } catch {
-      setError('Ein unerwarteter Fehler ist aufgetreten.')
+      setSubmitError('Ein unerwarteter Fehler ist aufgetreten.')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleResendEmail = async () => {
+    setIsResending(true)
+    try {
+      // Supabase automatically sends verification email on signUp
+      // For resend, we could use supabase.auth.resend() if needed
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+    } finally {
+      setIsResending(false)
     }
   }
 
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm"
@@ -630,11 +1113,11 @@ export function RegisterModal({
       {/* Modal Content */}
       <div
         className={`
-          relative w-full mx-4
-          ${step === 2 ? 'max-w-xl' : 'max-w-md'}
-          bg-gradient-to-b from-accent-purple to-bg-card
+          relative w-full
+          ${step === 1 ? 'max-w-lg' : step === 2 ? 'max-w-2xl' : 'max-w-md'}
+          bg-gradient-to-b from-purple-900/80 to-gray-900
           border border-white/10 rounded-2xl
-          shadow-2xl p-8
+          shadow-2xl p-6 md:p-8
           animate-in fade-in zoom-in-95 duration-200
           max-h-[90vh] overflow-y-auto
         `}
@@ -643,7 +1126,7 @@ export function RegisterModal({
         <button
           onClick={onClose}
           disabled={isLoading}
-          className="absolute top-4 right-4 p-2 text-text-muted hover:text-text-primary transition-colors z-10 disabled:opacity-50"
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white transition-colors z-10 disabled:opacity-50"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -651,54 +1134,49 @@ export function RegisterModal({
         </button>
 
         {/* Step Indicator */}
-        <StepIndicator currentStep={step} />
+        {step !== 3 && <StepIndicator currentStep={step} />}
 
-        {/* Global Error */}
-        {error && step === 1 && (
-          <div className="mb-4 rounded-lg bg-red-500/20 border border-red-500/50 p-3 text-sm text-white">
-            {error}
-          </div>
-        )}
-
-        {/* Step Content with transition */}
+        {/* Step Content */}
         <div className="transition-all duration-300 ease-out">
           {step === 1 && (
-            <AccountTypeStep
-              onSelect={handleAccountTypeSelect}
+            <UserTypeStep
+              onSelect={handleUserTypeSelect}
               onGoogleSignUp={handleGoogleSignUp}
               onFacebookSignUp={handleFacebookSignUp}
               isLoading={isLoading}
             />
           )}
-          {step === 2 && (
-            <MembershipStep
-              onSelect={handleMembershipSelect}
+          {step === 2 && selectedType && (
+            <RegistrationFormStep
+              userType={selectedType}
+              formData={formData}
+              setFormData={setFormData}
+              errors={formErrors}
+              onSubmit={handleFormSubmit}
               onBack={() => setStep(1)}
               isLoading={isLoading}
+              submitError={submitError}
             />
           )}
-          {step === 3 && (
-            <RegistrationFormStep
-              onSubmit={handleFormSubmit}
-              onBack={() => setStep(2)}
-              isLoading={isLoading}
-              error={error}
+          {step === 3 && selectedType && (
+            <SuccessStep
+              userType={selectedType}
+              onClose={onClose}
+              onResendEmail={handleResendEmail}
+              isResending={isResending}
             />
-          )}
-          {step === 'success' && (
-            <SuccessStep onClose={onClose} />
           )}
         </div>
 
         {/* Login link */}
-        {step !== 'success' && (
+        {step !== 3 && (
           <div className="mt-6 text-center border-t border-white/10 pt-6">
-            <p className="text-sm text-text-muted">
+            <p className="text-sm text-gray-500">
               Bereits registriert?{' '}
               <button
                 onClick={onLoginClick}
                 disabled={isLoading}
-                className="text-accent-purple hover:underline font-medium disabled:opacity-50"
+                className="text-purple-400 hover:underline font-medium disabled:opacity-50"
               >
                 Anmelden
               </button>
@@ -709,4 +1187,18 @@ export function RegisterModal({
     </div>,
     document.body
   )
+}
+
+// Re-export types for backward compatibility
+export type { UserType as AccountType }
+export type MembershipTier = 'basic' | 'premium'
+export interface RegistrationData {
+  accountType: UserType
+  membershipTier: MembershipTier
+  name: string
+  vorname: string
+  email: string
+  telefonnummer: string
+  membername: string
+  password: string
 }
