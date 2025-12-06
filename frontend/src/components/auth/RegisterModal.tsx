@@ -25,8 +25,7 @@ const userTypes = [
     gradient: 'from-blue-500/20 to-purple-500/20',
     hoverGradient: 'hover:from-blue-500/30 hover:to-purple-500/30',
     borderColor: 'border-blue-500/30',
-    hoverBorder: 'hover:border-blue-400',
-    recommended: false
+    hoverBorder: 'hover:border-blue-400'
   },
   {
     id: 'artist' as UserType,
@@ -36,8 +35,7 @@ const userTypes = [
     gradient: 'from-purple-500/20 to-pink-500/20',
     hoverGradient: 'hover:from-purple-500/30 hover:to-pink-500/30',
     borderColor: 'border-purple-500/30',
-    hoverBorder: 'hover:border-purple-400',
-    recommended: false
+    hoverBorder: 'hover:border-purple-400'
   },
   {
     id: 'service_provider' as UserType,
@@ -47,8 +45,7 @@ const userTypes = [
     gradient: 'from-orange-500/20 to-yellow-500/20',
     hoverGradient: 'hover:from-orange-500/30 hover:to-yellow-500/30',
     borderColor: 'border-orange-500/30',
-    hoverBorder: 'hover:border-orange-400',
-    recommended: false
+    hoverBorder: 'hover:border-orange-400'
   },
   {
     id: 'event_organizer' as UserType,
@@ -58,9 +55,7 @@ const userTypes = [
     gradient: 'from-emerald-500/20 to-teal-500/20',
     hoverGradient: 'hover:from-emerald-500/30 hover:to-teal-500/30',
     borderColor: 'border-emerald-500/30',
-    hoverBorder: 'hover:border-emerald-400',
-    recommended: true,
-    recommendedText: 'Empfohlen'
+    hoverBorder: 'hover:border-emerald-400'
   }
 ]
 
@@ -192,7 +187,6 @@ function ProgressBar({ step }: { step: Step }) {
           />
         ))}
       </div>
-      <span className="text-xs text-gray-500 ml-2">Schritt {step} von 2</span>
     </div>
   )
 }
@@ -241,13 +235,6 @@ function UserTypeStep({
               opacity: 0
             }}
           >
-            {/* Recommended Badge */}
-            {type.recommended && (
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full text-xs font-bold text-black whitespace-nowrap shadow-lg flex items-center gap-1">
-                <span>⭐</span> {type.recommendedText}
-              </div>
-            )}
-
             {/* Icon with hover animation */}
             <div className="text-4xl mb-4 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
               {type.icon}
@@ -687,7 +674,12 @@ function RegistrationFormStep({
             <div className="absolute top-4 right-4 text-2xl animate-pulse">✨</div>
             <div className="absolute bottom-4 left-4 text-lg opacity-50">🎯</div>
 
-            <h4 className="text-lg font-display text-white mb-1">Personalisiere dein Erlebnis</h4>
+            <div className="flex items-center gap-3 mb-2">
+              <h4 className="text-lg font-display text-white">Personalisiere dein Erlebnis</h4>
+              <span className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full text-xs font-bold text-black">
+                Empfohlen
+              </span>
+            </div>
             <p className="text-gray-400 text-sm mb-6">Hilf uns, die perfekten Matches zu finden! (Optional)</p>
 
             {/* Crowd Size */}
