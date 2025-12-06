@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
@@ -7,6 +7,8 @@ interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
+  needsOnboarding: boolean
+  completeOnboarding: () => void
   signUp: (email: string, password: string, metadata?: object) => Promise<{ error: Error | null }>
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signInWithGoogle: () => Promise<{ error: Error | null }>
@@ -20,12 +22,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
+
+  // Check if user needs onboarding (no user_type set)
+  const checkOnboardingNeeded = useCallback((currentUser: User | null) => {
+    if (!currentUser) {
+      setNeedsOnboarding(false)
+      return
+    }
+    // Check if user has a user_type in their metadata
+    const userType = currentUser.user_metadata?.user_type
+    const onboardingCompleted = currentUser.user_metadata?.onboarding_completed
+    setNeedsOnboarding(!userType && !onboardingCompleted)
+  }, [])
+
+  // Called when onboarding is completed
+  const completeOnboarding = useCallback(() => {
+    setNeedsOnboarding(false)
+  }, [])
 
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
+      checkOnboardingNeeded(session?.user ?? null)
       setLoading(false)
     })
 
@@ -34,12 +55,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       async (_event: AuthChangeEvent, session: Session | null) => {
         setSession(session)
         setUser(session?.user ?? null)
+        checkOnboardingNeeded(session?.user ?? null)
         setLoading(false)
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [checkOnboardingNeeded])
 
   const signUp = async (email: string, password: string, metadata?: object) => {
     const { error } = await supabase.auth.signUp({
@@ -90,6 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       loading,
+      needsOnboarding,
+      completeOnboarding,
       signUp,
       signIn,
       signInWithGoogle,
