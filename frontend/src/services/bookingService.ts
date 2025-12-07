@@ -2,34 +2,51 @@ import { supabase } from '../lib/supabase'
 
 export interface BookingRequest {
   id: string
-  requester_id: string
-  recipient_id: string
-  recipient_type: 'artist' | 'service_provider'
-  event_name: string
+  artist_id: string | null
+  requester_id: string | null
+  veranstalter_id: string | null
   event_date: string
-  event_time?: string
-  location?: string
-  expected_guests?: number
-  budget_min?: number
-  budget_max?: number
-  message?: string
-  response_message?: string
-  status: 'pending' | 'accepted' | 'declined' | 'negotiating' | 'cancelled'
+  event_time_start: string | null
+  event_time_end: string | null
+  event_type: string | null
+  event_location_name: string | null
+  event_location_address: string | null
+  event_location_maps_link: string | null
+  event_size: number | null
+  event_description: string | null
+  equipment_available: string | null
+  equipment_needed: string | null
+  hospitality_unterbringung: boolean | null
+  hospitality_verpflegung: boolean | null
+  transport_type: string | null
+  proposed_budget: number | null
+  agreed_price: number | null
+  deposit_amount: number | null
+  message: string | null
+  status: 'pending' | 'accepted' | 'declined' | 'negotiating' | 'cancelled' | 'expired'
+  rejection_reason: string | null
+  expires_at: string | null
+  responded_at: string | null
   created_at: string
-  updated_at: string
+  updated_at: string | null
   // Joined data
   requester?: {
-    full_name: string
-    email: string
-    company_name?: string
+    id: string
+    membername: string
+    vorname: string
+    nachname: string
+    profile_image_url: string | null
   }
-  recipient_artist?: {
-    artist_name?: string
-    profile_image_url?: string
+  artist?: {
+    id: string
+    kuenstlername: string
+    jobbezeichnung: string | null
+    star_rating: number | null
   }
-  recipient_provider?: {
-    business_name?: string
-    profile_image_url?: string
+  veranstalter?: {
+    id: string
+    membername: string
+    profile_image_url: string | null
   }
 }
 
@@ -50,7 +67,7 @@ export interface Booking {
   created_at: string
   // Joined data
   artist_profile?: {
-    artist_name: string
+    kuenstlername: string
     profile_image_url?: string
   }
   provider_profile?: {
@@ -69,18 +86,32 @@ export async function getBookingRequests(
   direction: 'incoming' | 'outgoing',
   status?: string
 ) {
+  console.log('[bookingService] Fetching requests:', { userId, direction, status })
+
   let query = supabase
     .from('booking_requests')
     .select(`
       *,
-      requester:users!requester_id(full_name, email),
-      recipient_artist:artist_profiles!recipient_id(artist_name, profile_image_url),
-      recipient_provider:service_provider_profiles!recipient_id(business_name, profile_image_url)
+      requester:users!requester_id(
+        id,
+        membername,
+        vorname,
+        nachname,
+        profile_image_url
+      ),
+      artist:artist_profiles!artist_id(
+        id,
+        kuenstlername,
+        jobbezeichnung,
+        star_rating
+      )
     `)
 
   if (direction === 'incoming') {
-    query = query.eq('recipient_id', userId)
+    // Incoming: I'm the artist receiving requests
+    query = query.eq('artist_id', userId)
   } else {
+    // Outgoing: I'm the requester sending requests
     query = query.eq('requester_id', userId)
   }
 
@@ -91,14 +122,63 @@ export async function getBookingRequests(
   query = query.order('created_at', { ascending: false })
 
   const { data, error } = await query
+
+  console.log('[bookingService] Query result:', { data, error, count: data?.length })
+
   return { data, error }
+}
+
+// Get request stats for dashboard
+export async function getRequestStats(userId: string) {
+  // Get pending incoming count
+  const { count: pendingCount } = await supabase
+    .from('booking_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('artist_id', userId)
+    .eq('status', 'pending')
+
+  // Get total incoming count
+  const { count: totalIncoming } = await supabase
+    .from('booking_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('artist_id', userId)
+
+  // Get accepted count
+  const { count: acceptedCount } = await supabase
+    .from('booking_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('artist_id', userId)
+    .eq('status', 'accepted')
+
+  // Get outgoing count
+  const { count: outgoingCount } = await supabase
+    .from('booking_requests')
+    .select('id', { count: 'exact', head: true })
+    .eq('requester_id', userId)
+
+  // Calculate response rate
+  const responseRate = totalIncoming && totalIncoming > 0
+    ? Math.round(((acceptedCount || 0) / totalIncoming) * 100)
+    : 0
+
+  return {
+    pending: pendingCount || 0,
+    totalIncoming: totalIncoming || 0,
+    accepted: acceptedCount || 0,
+    outgoing: outgoingCount || 0,
+    responseRate
+  }
 }
 
 // Create a new booking request
 export async function createBookingRequest(request: Partial<BookingRequest>) {
   const { data, error } = await supabase
     .from('booking_requests')
-    .insert(request)
+    .insert({
+      ...request,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    })
     .select()
     .single()
 
@@ -109,16 +189,40 @@ export async function createBookingRequest(request: Partial<BookingRequest>) {
 export async function updateBookingRequestStatus(
   requestId: string,
   status: BookingRequest['status'],
-  responseMessage?: string
+  rejectionReason?: string
 ) {
+  const updateData: Record<string, unknown> = {
+    status,
+    updated_at: new Date().toISOString(),
+    responded_at: new Date().toISOString()
+  }
+
+  if (rejectionReason) {
+    updateData.rejection_reason = rejectionReason
+  }
+
+  const { data, error } = await supabase
+    .from('booking_requests')
+    .update(updateData)
+    .eq('id', requestId)
+    .select()
+    .single()
+
+  return { data, error }
+}
+
+// Cancel an outgoing request
+export async function cancelBookingRequest(requestId: string, userId: string, reason?: string) {
   const { data, error } = await supabase
     .from('booking_requests')
     .update({
-      status,
-      response_message: responseMessage,
+      status: 'cancelled',
+      cancelled_by: userId,
+      cancellation_reason: reason,
       updated_at: new Date().toISOString()
     })
     .eq('id', requestId)
+    .eq('requester_id', userId) // Only requester can cancel their own request
     .select()
     .single()
 
@@ -133,9 +237,9 @@ export async function getBookings(userId: string, type: 'upcoming' | 'past') {
     .from('bookings')
     .select(`
       *,
-      artist_profile:artist_profiles(artist_name, profile_image_url),
+      artist_profile:artist_profiles(kuenstlername, profile_image_url),
       provider_profile:service_provider_profiles(business_name, profile_image_url),
-      organizer:users!organizer_id(full_name)
+      organizer:users!organizer_id(membername, vorname, nachname)
     `)
     .or(`artist_id.eq.${userId},provider_id.eq.${userId},organizer_id.eq.${userId}`)
 
@@ -221,4 +325,71 @@ export function generateBookingNumber(): string {
   const year = new Date().getFullYear()
   const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0')
   return `BH-${year}-${random}`
+}
+
+// Event type icons mapping
+export const EVENT_TYPE_ICONS: Record<string, string> = {
+  'konzert': '🎵',
+  'hochzeit': '💒',
+  'firmenfeier': '🏢',
+  'geburtstag': '🎂',
+  'festival': '🎪',
+  'club': '🎧',
+  'privat': '🏠',
+  'messe': '📊',
+  'gala': '✨',
+  'other': '📅'
+}
+
+// Get event type icon
+export function getEventTypeIcon(eventType: string | null): string {
+  if (!eventType) return EVENT_TYPE_ICONS.other
+  const key = eventType.toLowerCase()
+  return EVENT_TYPE_ICONS[key] || EVENT_TYPE_ICONS.other
+}
+
+// Format time range
+export function formatTimeRange(start: string | null, end: string | null): string {
+  if (!start) return 'Zeit nicht angegeben'
+  const startFormatted = start.slice(0, 5) // HH:MM
+  if (!end) return `ab ${startFormatted} Uhr`
+  const endFormatted = end.slice(0, 5)
+  return `${startFormatted} - ${endFormatted} Uhr`
+}
+
+// Calculate expiration status
+export function getExpirationStatus(expiresAt: string | null): {
+  isExpired: boolean
+  isExpiringSoon: boolean
+  daysLeft: number | null
+  text: string
+} {
+  if (!expiresAt) {
+    return { isExpired: false, isExpiringSoon: false, daysLeft: null, text: '' }
+  }
+
+  const now = new Date()
+  const expiry = new Date(expiresAt)
+  const diffMs = expiry.getTime() - now.getTime()
+  const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+
+  if (diffMs <= 0) {
+    return { isExpired: true, isExpiringSoon: false, daysLeft: 0, text: 'Abgelaufen' }
+  }
+
+  if (daysLeft <= 2) {
+    return {
+      isExpired: false,
+      isExpiringSoon: true,
+      daysLeft,
+      text: daysLeft === 1 ? 'Läuft morgen ab' : `Läuft in ${daysLeft} Tagen ab`
+    }
+  }
+
+  return {
+    isExpired: false,
+    isExpiringSoon: false,
+    daysLeft,
+    text: `Gültig noch ${daysLeft} Tage`
+  }
 }

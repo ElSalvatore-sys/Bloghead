@@ -4,7 +4,9 @@ import {
   getBookingRequests,
   getBookings,
   getBookingStats,
+  getRequestStats,
   updateBookingRequestStatus,
+  cancelBookingRequest,
   type BookingRequest,
   type Booking
 } from '../services/bookingService'
@@ -51,13 +53,53 @@ export function useBookingRequests(direction: 'incoming' | 'outgoing') {
     return { error: updateError }
   }
 
+  const cancelRequest = async (requestId: string, reason?: string) => {
+    if (!user) return { error: new Error('Not logged in') }
+
+    const { error: cancelError } = await cancelBookingRequest(requestId, user.id, reason)
+    if (!cancelError) {
+      await fetchRequests() // Refresh list
+    }
+    return { error: cancelError }
+  }
+
   return {
     requests,
     loading,
     error,
     refetch: fetchRequests,
-    updateStatus
+    updateStatus,
+    cancelRequest
   }
+}
+
+export function useRequestStats() {
+  const { user } = useAuth()
+  const [stats, setStats] = useState({
+    pending: 0,
+    totalIncoming: 0,
+    accepted: 0,
+    outgoing: 0,
+    responseRate: 0
+  })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchStats() {
+      if (!user) {
+        setLoading(false)
+        return
+      }
+
+      const data = await getRequestStats(user.id)
+      setStats(data)
+      setLoading(false)
+    }
+
+    fetchStats()
+  }, [user])
+
+  return { stats, loading }
 }
 
 export function useBookings(type: 'upcoming' | 'past') {
