@@ -41,6 +41,8 @@ function getPlaceholderImage(name: string, size = 400): string {
 
 // Get list of artists with filters
 export async function getArtists(filters: ArtistFilters = {}) {
+  console.log('[artistService] Fetching artists with filters:', filters)
+
   let query = supabase
     .from('artist_profiles')
     .select(`
@@ -102,8 +104,10 @@ export async function getArtists(filters: ArtistFilters = {}) {
 
   const { data, error, count } = await query
 
+  console.log('[artistService] Query result:', { data, error, count, dataLength: data?.length })
+
   if (error) {
-    console.error('Error fetching artists:', error)
+    console.error('[artistService] Error fetching artists:', error)
     return { data: null, error, count: 0 }
   }
 
