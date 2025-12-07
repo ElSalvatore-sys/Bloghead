@@ -400,12 +400,22 @@ export default function MyCalendarPage() {
   // Fetch artist ID
   useEffect(() => {
     async function fetchArtistId() {
-      if (!user) return
+      // If no user, use mock data immediately
+      if (!user) {
+        setUseMockData(true)
+        return
+      }
 
-      const { data: artist } = await getArtistByUserId(user.id)
-      if (artist) {
-        setArtistId(artist.id)
-      } else {
+      try {
+        const { data: artist } = await getArtistByUserId(user.id)
+        if (artist) {
+          setArtistId(artist.id)
+        } else {
+          // User exists but is not an artist - use mock data
+          setUseMockData(true)
+        }
+      } catch (error) {
+        console.error('Error fetching artist ID:', error)
         setUseMockData(true)
       }
     }
@@ -420,7 +430,43 @@ export default function MyCalendarPage() {
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`
     const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
-    if (useMockData) {
+    try {
+      if (useMockData) {
+        setAvailabilityState(generateMockAvailability(year, month))
+        setStats({
+          availableDays: 8,
+          bookedDays: 3,
+          pendingDays: 2,
+          blockedDays: 4,
+          openGigDays: 1,
+          upcomingBookings: 2
+        })
+      } else if (artistId) {
+        const { data, error } = await getAvailability(artistId, startDate, endDate)
+
+        if (error) {
+          console.error('Error fetching availability:', error)
+          // Fall back to mock data on error
+          setUseMockData(true)
+          setAvailabilityState(generateMockAvailability(year, month))
+          setStats({
+            availableDays: 8,
+            bookedDays: 3,
+            pendingDays: 2,
+            blockedDays: 4,
+            openGigDays: 1,
+            upcomingBookings: 2
+          })
+        } else {
+          setAvailabilityState(data || [])
+          const statsData = await getCalendarStats(artistId, month, year)
+          setStats(statsData)
+        }
+      }
+    } catch (error) {
+      console.error('Error in fetchAvailability:', error)
+      // Fall back to mock data on any error
+      setUseMockData(true)
       setAvailabilityState(generateMockAvailability(year, month))
       setStats({
         availableDays: 8,
@@ -430,15 +476,9 @@ export default function MyCalendarPage() {
         openGigDays: 1,
         upcomingBookings: 2
       })
-    } else if (artistId) {
-      const { data } = await getAvailability(artistId, startDate, endDate)
-      setAvailabilityState(data || [])
-
-      const statsData = await getCalendarStats(artistId, month, year)
-      setStats(statsData)
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }, [artistId, year, month, useMockData])
 
   useEffect(() => {
