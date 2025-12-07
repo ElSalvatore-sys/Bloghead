@@ -13,14 +13,15 @@ export interface ArtistFilters {
 
 export interface ArtistListItem {
   id: string
-  user_id: string
+  user_id: string | null
   kuenstlername: string
   genre: string[]
   stadt: string
   region: string
   land: string
   bio: string
-  preis_pro_stunde: number | null
+  preis_minimum: number | null
+  preis_pro_stunde: number | null // Mapped from preis_minimum for UI compatibility
   preis_pro_veranstaltung: number | null
   star_rating: number
   total_ratings: number
@@ -28,9 +29,14 @@ export interface ArtistListItem {
   is_bookable: boolean
   tagged_with: string[]
   jobbezeichnung: string
-  // From users table via join
+  // From users table via join (or placeholder)
   profile_image_url?: string
   cover_image_url?: string
+}
+
+// Generate placeholder image URL based on artist name
+function getPlaceholderImage(name: string, size = 400): string {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Artist')}&background=610AD1&color=fff&size=${size}&bold=true`
 }
 
 // Get list of artists with filters
@@ -46,7 +52,7 @@ export async function getArtists(filters: ArtistFilters = {}) {
       region,
       land,
       bio,
-      preis_pro_stunde,
+      preis_minimum,
       preis_pro_veranstaltung,
       star_rating,
       total_ratings,
@@ -54,7 +60,7 @@ export async function getArtists(filters: ArtistFilters = {}) {
       is_bookable,
       tagged_with,
       jobbezeichnung,
-      users!inner (
+      users (
         profile_image_url,
         cover_image_url
       )
@@ -75,11 +81,11 @@ export async function getArtists(filters: ArtistFilters = {}) {
   }
 
   if (filters.priceMin !== undefined) {
-    query = query.gte('preis_pro_stunde', filters.priceMin)
+    query = query.gte('preis_minimum', filters.priceMin)
   }
 
   if (filters.priceMax !== undefined) {
-    query = query.lte('preis_pro_stunde', filters.priceMax)
+    query = query.lte('preis_pro_veranstaltung', filters.priceMax)
   }
 
   if (filters.searchQuery) {
@@ -101,13 +107,18 @@ export async function getArtists(filters: ArtistFilters = {}) {
     return { data: null, error, count: 0 }
   }
 
-  // Flatten the users data into the artist object
-  const flattenedData = data?.map(artist => ({
-    ...artist,
-    profile_image_url: (artist.users as { profile_image_url?: string })?.profile_image_url,
-    cover_image_url: (artist.users as { cover_image_url?: string })?.cover_image_url,
-    users: undefined,
-  })) || []
+  // Flatten the users data into the artist object, with placeholder fallbacks
+  const flattenedData = data?.map(artist => {
+    const userData = artist.users as { profile_image_url?: string; cover_image_url?: string } | null
+    return {
+      ...artist,
+      profile_image_url: userData?.profile_image_url || getPlaceholderImage(artist.kuenstlername),
+      cover_image_url: userData?.cover_image_url,
+      // Map preis_minimum to preis_pro_stunde for backward compatibility with UI
+      preis_pro_stunde: artist.preis_minimum,
+      users: undefined,
+    }
+  }) || []
 
   return { data: flattenedData, error: null, count }
 }
@@ -118,7 +129,7 @@ export async function getArtistById(artistId: string) {
     .from('artist_profiles')
     .select(`
       *,
-      users!inner (
+      users (
         id,
         email,
         vorname,
@@ -137,15 +148,26 @@ export async function getArtistById(artistId: string) {
     return { data: null, error }
   }
 
-  // Flatten user data
+  // Flatten user data with placeholder fallbacks
+  const userData = data.users as {
+    profile_image_url?: string
+    cover_image_url?: string
+    vorname?: string
+    nachname?: string
+    is_verified?: boolean
+    created_at?: string
+  } | null
+
   const flattenedData = {
     ...data,
-    profile_image_url: data.users?.profile_image_url,
-    cover_image_url: data.users?.cover_image_url,
-    vorname: data.users?.vorname,
-    nachname: data.users?.nachname,
-    is_verified: data.users?.is_verified,
-    member_since: data.users?.created_at,
+    profile_image_url: userData?.profile_image_url || getPlaceholderImage(data.kuenstlername),
+    cover_image_url: userData?.cover_image_url,
+    vorname: userData?.vorname,
+    nachname: userData?.nachname,
+    is_verified: userData?.is_verified || false,
+    member_since: userData?.created_at,
+    // Map preis_minimum to preis_pro_stunde for backward compatibility
+    preis_pro_stunde: data.preis_minimum,
   }
 
   return { data: flattenedData, error: null }
