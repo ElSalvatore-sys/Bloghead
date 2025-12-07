@@ -53,31 +53,75 @@ export interface BookingRequest {
 export interface Booking {
   id: string
   booking_number: string
-  request_id: string
-  artist_id?: string
-  provider_id?: string
-  organizer_id: string
-  event_name: string
+  request_id: string | null
+  artist_id: string | null
+  client_id: string | null
+  veranstalter_id: string | null
+  // Event details
   event_date: string
-  event_time: string
-  location: string
-  expected_guests: number
-  agreed_price: number
-  status: 'confirmed' | 'completed' | 'cancelled'
+  event_time_start: string | null
+  event_time_end: string | null
+  event_type: string | null
+  event_location_name: string | null
+  event_location_address: string | null
+  event_size: number | null
+  // Contract
+  contract_url: string | null
+  contract_signed_artist: boolean
+  contract_signed_artist_at: string | null
+  contract_signed_client: boolean
+  contract_signed_client_at: string | null
+  // Financials
+  total_price: number
+  deposit_amount: number | null
+  deposit_due_date: string | null
+  deposit_paid_at: string | null
+  final_payment_amount: number | null
+  final_payment_due_date: string | null
+  final_payment_paid_at: string | null
+  // Platform fees
+  platform_fee_percentage: number | null
+  platform_fee_amount: number | null
+  artist_payout_amount: number | null
+  // Payout
+  payout_status: 'pending' | 'scheduled' | 'processing' | 'completed' | 'failed' | null
+  payout_scheduled_date: string | null
+  payout_completed_at: string | null
+  // Status
+  status: 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'disputed' | 'refunded'
+  // Cancellation
+  cancellation_policy: string | null
+  cancellation_fee_percentage: number | null
+  cancelled_at: string | null
+  cancelled_by: string | null
+  cancellation_reason: string | null
+  // Calendar
+  google_calendar_event_id: string | null
+  apple_calendar_event_id: string | null
+  ical_uid: string | null
+  // Timestamps
   created_at: string
+  updated_at: string | null
   // Joined data
   artist_profile?: {
+    id: string
     kuenstlername: string
-    profile_image_url?: string
-  }
-  provider_profile?: {
-    business_name: string
-    profile_image_url?: string
-  }
-  organizer?: {
-    full_name: string
-    company_name?: string
-  }
+    jobbezeichnung: string | null
+    star_rating: number | null
+  } | null
+  client?: {
+    id: string
+    membername: string
+    vorname: string
+    nachname: string
+    profile_image_url: string | null
+  } | null
+  veranstalter?: {
+    id: string
+    company_name: string | null
+    location_name: string | null
+  } | null
+  request?: BookingRequest | null
 }
 
 // Get booking requests for current user (incoming or outgoing)
@@ -237,11 +281,27 @@ export async function getBookings(userId: string, type: 'upcoming' | 'past') {
     .from('bookings')
     .select(`
       *,
-      artist_profile:artist_profiles(kuenstlername, profile_image_url),
-      provider_profile:service_provider_profiles(business_name, profile_image_url),
-      organizer:users!organizer_id(membername, vorname, nachname)
+      artist_profile:artist_profiles!artist_id(
+        id,
+        kuenstlername,
+        jobbezeichnung,
+        star_rating
+      ),
+      client:users!client_id(
+        id,
+        membername,
+        vorname,
+        nachname,
+        profile_image_url
+      ),
+      veranstalter:veranstalter_profiles!veranstalter_id(
+        id,
+        company_name,
+        location_name
+      ),
+      request:booking_requests!request_id(*)
     `)
-    .or(`artist_id.eq.${userId},provider_id.eq.${userId},organizer_id.eq.${userId}`)
+    .or(`artist_id.eq.${userId},client_id.eq.${userId},veranstalter_id.eq.${userId}`)
 
   if (type === 'upcoming') {
     query = query.gte('event_date', today).neq('status', 'cancelled')
@@ -261,10 +321,28 @@ export async function getBookingById(bookingId: string) {
     .from('bookings')
     .select(`
       *,
-      artist_profile:artist_profiles(*),
-      provider_profile:service_provider_profiles(*),
-      organizer:users!organizer_id(*),
-      request:booking_requests(*)
+      artist_profile:artist_profiles!artist_id(
+        id,
+        kuenstlername,
+        jobbezeichnung,
+        star_rating,
+        user_id
+      ),
+      client:users!client_id(
+        id,
+        membername,
+        vorname,
+        nachname,
+        profile_image_url,
+        email
+      ),
+      veranstalter:veranstalter_profiles!veranstalter_id(
+        id,
+        company_name,
+        location_name,
+        address
+      ),
+      request:booking_requests!request_id(*)
     `)
     .eq('id', bookingId)
     .single()
@@ -280,7 +358,7 @@ export async function getBookingStats(userId: string) {
   const { count: upcomingCount } = await supabase
     .from('bookings')
     .select('id', { count: 'exact', head: true })
-    .or(`artist_id.eq.${userId},provider_id.eq.${userId},organizer_id.eq.${userId}`)
+    .or(`artist_id.eq.${userId},client_id.eq.${userId},veranstalter_id.eq.${userId}`)
     .gte('event_date', today)
     .neq('status', 'cancelled')
 
@@ -288,17 +366,25 @@ export async function getBookingStats(userId: string) {
   const { count: completedCount } = await supabase
     .from('bookings')
     .select('id', { count: 'exact', head: true })
-    .or(`artist_id.eq.${userId},provider_id.eq.${userId}`)
+    .or(`artist_id.eq.${userId},client_id.eq.${userId},veranstalter_id.eq.${userId}`)
     .eq('status', 'completed')
 
-  // Get total revenue
+  // Get total revenue (for artists: artist_payout_amount, for clients: total_price)
   const { data: revenueData } = await supabase
     .from('bookings')
-    .select('agreed_price')
-    .or(`artist_id.eq.${userId},provider_id.eq.${userId}`)
+    .select('total_price, artist_payout_amount, artist_id')
+    .or(`artist_id.eq.${userId},client_id.eq.${userId}`)
     .eq('status', 'completed')
 
-  const totalRevenue = revenueData?.reduce((sum, b) => sum + (b.agreed_price || 0), 0) || 0
+  // Calculate revenue based on user role
+  const totalRevenue = revenueData?.reduce((sum, b) => {
+    // If user is the artist, show payout amount
+    if (b.artist_id === userId) {
+      return sum + (b.artist_payout_amount || b.total_price || 0)
+    }
+    // If user is the client, show total price they paid
+    return sum + (b.total_price || 0)
+  }, 0) || 0
 
   // Get this month's bookings count
   const startOfMonth = new Date()
@@ -308,15 +394,26 @@ export async function getBookingStats(userId: string) {
   const { count: thisMonthCount } = await supabase
     .from('bookings')
     .select('id', { count: 'exact', head: true })
-    .or(`artist_id.eq.${userId},provider_id.eq.${userId},organizer_id.eq.${userId}`)
+    .or(`artist_id.eq.${userId},client_id.eq.${userId},veranstalter_id.eq.${userId}`)
     .gte('event_date', startOfMonth.toISOString().split('T')[0])
     .lte('event_date', today)
+
+  // Get pending payout amount (for artists)
+  const { data: pendingPayoutData } = await supabase
+    .from('bookings')
+    .select('artist_payout_amount')
+    .eq('artist_id', userId)
+    .eq('status', 'completed')
+    .is('payout_completed_at', null)
+
+  const pendingPayout = pendingPayoutData?.reduce((sum, b) => sum + (b.artist_payout_amount || 0), 0) || 0
 
   return {
     upcoming: upcomingCount || 0,
     completed: completedCount || 0,
     thisMonth: thisMonthCount || 0,
-    totalRevenue
+    totalRevenue,
+    pendingPayout
   }
 }
 
@@ -391,5 +488,209 @@ export function getExpirationStatus(expiresAt: string | null): {
     isExpiringSoon: false,
     daysLeft,
     text: `Gültig noch ${daysLeft} Tage`
+  }
+}
+
+// Payment milestone status
+export interface PaymentMilestone {
+  label: string
+  amount: number | null
+  dueDate: string | null
+  paidAt: string | null
+  isPaid: boolean
+  isOverdue: boolean
+  daysUntilDue: number | null
+}
+
+// Get payment milestones for a booking
+export function getPaymentMilestones(booking: Booking): PaymentMilestone[] {
+  const today = new Date()
+  const milestones: PaymentMilestone[] = []
+
+  // Deposit milestone
+  if (booking.deposit_amount) {
+    const depositDue = booking.deposit_due_date ? new Date(booking.deposit_due_date) : null
+    const daysUntilDeposit = depositDue ? Math.ceil((depositDue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null
+
+    milestones.push({
+      label: 'Anzahlung',
+      amount: booking.deposit_amount,
+      dueDate: booking.deposit_due_date,
+      paidAt: booking.deposit_paid_at,
+      isPaid: !!booking.deposit_paid_at,
+      isOverdue: !booking.deposit_paid_at && depositDue ? depositDue < today : false,
+      daysUntilDue: booking.deposit_paid_at ? null : daysUntilDeposit
+    })
+  }
+
+  // Final payment milestone
+  if (booking.final_payment_amount) {
+    const finalDue = booking.final_payment_due_date ? new Date(booking.final_payment_due_date) : null
+    const daysUntilFinal = finalDue ? Math.ceil((finalDue.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : null
+
+    milestones.push({
+      label: 'Restzahlung',
+      amount: booking.final_payment_amount,
+      dueDate: booking.final_payment_due_date,
+      paidAt: booking.final_payment_paid_at,
+      isPaid: !!booking.final_payment_paid_at,
+      isOverdue: !booking.final_payment_paid_at && finalDue ? finalDue < today : false,
+      daysUntilDue: booking.final_payment_paid_at ? null : daysUntilFinal
+    })
+  }
+
+  return milestones
+}
+
+// Contract status helper
+export interface ContractStatus {
+  label: string
+  color: 'green' | 'yellow' | 'gray' | 'red'
+  artistSigned: boolean
+  clientSigned: boolean
+  fullyExecuted: boolean
+  pendingParty: 'artist' | 'client' | null
+}
+
+export function getContractStatus(booking: Booking): ContractStatus {
+  const artistSigned = booking.contract_signed_artist
+  const clientSigned = booking.contract_signed_client
+
+  if (!booking.contract_url) {
+    return {
+      label: 'Kein Vertrag',
+      color: 'gray',
+      artistSigned: false,
+      clientSigned: false,
+      fullyExecuted: false,
+      pendingParty: null
+    }
+  }
+
+  if (artistSigned && clientSigned) {
+    return {
+      label: 'Vollständig unterschrieben',
+      color: 'green',
+      artistSigned: true,
+      clientSigned: true,
+      fullyExecuted: true,
+      pendingParty: null
+    }
+  }
+
+  if (!artistSigned && !clientSigned) {
+    return {
+      label: 'Warten auf Unterschriften',
+      color: 'yellow',
+      artistSigned: false,
+      clientSigned: false,
+      fullyExecuted: false,
+      pendingParty: 'artist'
+    }
+  }
+
+  return {
+    label: artistSigned ? 'Warten auf Kunde' : 'Warten auf Künstler',
+    color: 'yellow',
+    artistSigned,
+    clientSigned,
+    fullyExecuted: false,
+    pendingParty: artistSigned ? 'client' : 'artist'
+  }
+}
+
+// Payout status helper
+export interface PayoutStatus {
+  label: string
+  color: 'green' | 'yellow' | 'blue' | 'red' | 'gray'
+  amount: number | null
+  scheduledDate: string | null
+  completedAt: string | null
+}
+
+export function getPayoutStatus(booking: Booking): PayoutStatus {
+  if (!booking.artist_payout_amount) {
+    return {
+      label: 'Nicht festgelegt',
+      color: 'gray',
+      amount: null,
+      scheduledDate: null,
+      completedAt: null
+    }
+  }
+
+  if (booking.payout_completed_at) {
+    return {
+      label: 'Ausgezahlt',
+      color: 'green',
+      amount: booking.artist_payout_amount,
+      scheduledDate: booking.payout_scheduled_date,
+      completedAt: booking.payout_completed_at
+    }
+  }
+
+  if (booking.payout_status === 'failed') {
+    return {
+      label: 'Fehlgeschlagen',
+      color: 'red',
+      amount: booking.artist_payout_amount,
+      scheduledDate: booking.payout_scheduled_date,
+      completedAt: null
+    }
+  }
+
+  if (booking.payout_status === 'processing') {
+    return {
+      label: 'In Bearbeitung',
+      color: 'blue',
+      amount: booking.artist_payout_amount,
+      scheduledDate: booking.payout_scheduled_date,
+      completedAt: null
+    }
+  }
+
+  if (booking.payout_scheduled_date) {
+    return {
+      label: 'Geplant',
+      color: 'yellow',
+      amount: booking.artist_payout_amount,
+      scheduledDate: booking.payout_scheduled_date,
+      completedAt: null
+    }
+  }
+
+  return {
+    label: 'Ausstehend',
+    color: 'yellow',
+    amount: booking.artist_payout_amount,
+    scheduledDate: null,
+    completedAt: null
+  }
+}
+
+// Booking status configuration
+export const BOOKING_STATUS_CONFIG: Record<Booking['status'], { label: string; color: string; bgColor: string }> = {
+  confirmed: { label: 'Bestätigt', color: 'text-green-400', bgColor: 'bg-green-500/20' },
+  in_progress: { label: 'Läuft', color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+  completed: { label: 'Abgeschlossen', color: 'text-gray-400', bgColor: 'bg-gray-500/20' },
+  cancelled: { label: 'Storniert', color: 'text-red-400', bgColor: 'bg-red-500/20' },
+  disputed: { label: 'Streitfall', color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
+  refunded: { label: 'Erstattet', color: 'text-purple-400', bgColor: 'bg-purple-500/20' }
+}
+
+// Calendar sync status
+export interface CalendarSyncStatus {
+  hasGoogleSync: boolean
+  hasAppleSync: boolean
+  hasIcalSync: boolean
+  anySync: boolean
+}
+
+export function getCalendarSyncStatus(booking: Booking): CalendarSyncStatus {
+  return {
+    hasGoogleSync: !!booking.google_calendar_event_id,
+    hasAppleSync: !!booking.apple_calendar_event_id,
+    hasIcalSync: !!booking.ical_uid,
+    anySync: !!(booking.google_calendar_event_id || booking.apple_calendar_event_id || booking.ical_uid)
   }
 }

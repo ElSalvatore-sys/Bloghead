@@ -146,7 +146,8 @@ export function useBookingStats() {
     upcoming: 0,
     completed: 0,
     thisMonth: 0,
-    totalRevenue: 0
+    totalRevenue: 0,
+    pendingPayout: 0
   })
   const [loading, setLoading] = useState(true)
 
