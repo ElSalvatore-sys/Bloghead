@@ -5,7 +5,7 @@ import ImpressumPage from './pages/ImpressumPage'
 import KontaktPage from './pages/KontaktPage'
 import DatenschutzPage from './pages/DatenschutzPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
-import { MyProfilePage, MyRequestsPage, MyBookingsPage, MyCalendarPage, MyCommunityPage, MyChatPage } from './pages/dashboard'
+import { MyProfilePage, MyRequestsPage, MyBookingsPage, MyCalendarPage, MyCommunityPage, MyChatPage, MyCoinsPage } from './pages/dashboard'
 import { CookieConsent } from './components/ui/CookieConsent'
 import { AuthProvider } from './contexts/AuthContext'
 
@@ -32,6 +32,7 @@ function App() {
             <Route path="/dashboard/calendar" element={<MyCalendarPage />} />
             <Route path="/dashboard/community" element={<MyCommunityPage />} />
             <Route path="/dashboard/chat" element={<MyChatPage />} />
+            <Route path="/dashboard/coins" element={<MyCoinsPage />} />
           </Routes>
         </Layout>
         <CookieConsent />
