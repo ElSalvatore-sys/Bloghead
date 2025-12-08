@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   getConversations,
@@ -11,6 +11,8 @@ import {
   formatMessageTime,
   formatMessageDate,
   getOtherParticipant,
+  subscribeToMessages,
+  subscribeToConversations,
   type Conversation,
   type Message,
   type ChatStats
@@ -633,6 +635,61 @@ export default function MyChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Scroll to bottom helper
+  const scrollToBottom = useCallback(() => {
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
+  }, [])
+
+  // Real-time subscription for new messages
+  useEffect(() => {
+    if (!selectedConversation?.id || isDemoMode) return
+
+    const unsubscribe = subscribeToMessages(
+      selectedConversation.id,
+      (newMessage) => {
+        setMessages(prev => {
+          // Avoid duplicates
+          if (prev.find(m => m.id === newMessage.id)) return prev
+          return [...prev, newMessage]
+        })
+        scrollToBottom()
+
+        // If message is from someone else, mark it as read
+        if (newMessage.sender_id !== currentUserId) {
+          markMessagesAsRead(selectedConversation.id, currentUserId)
+        }
+      }
+    )
+
+    return () => unsubscribe()
+  }, [selectedConversation?.id, currentUserId, isDemoMode, scrollToBottom])
+
+  // Real-time subscription for conversation updates
+  useEffect(() => {
+    if (isDemoMode) return
+
+    const unsubscribe = subscribeToConversations(
+      currentUserId,
+      (updatedConversation) => {
+        setConversations(prev => {
+          const index = prev.findIndex(c => c.id === updatedConversation.id)
+          if (index >= 0) {
+            // Update existing conversation
+            const updated = [...prev]
+            updated[index] = { ...updated[index], ...updatedConversation }
+            return updated
+          }
+          // New conversation - add to list
+          return [updatedConversation, ...prev]
+        })
+      }
+    )
+
+    return () => unsubscribe()
+  }, [currentUserId, isDemoMode])
 
   // Handle search
   async function handleSearch(term: string) {

@@ -30,18 +30,18 @@ export function Footer() {
       <div style={{ backgroundColor: '#610AD1' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-10">
           {/* Navigation Links - Centered with separators */}
-          <nav className="flex items-center justify-center gap-8 sm:gap-12">
+          <nav className="flex items-center justify-center gap-2 sm:gap-4">
             {footerLinks.map((link, index) => (
-              <span key={link.href} className="flex items-center">
+              <span key={link.href} className="flex items-center gap-2 sm:gap-4">
                 <Link
                   to={link.href}
-                  className="text-white hover:text-white/80 text-xs sm:text-sm font-medium tracking-widest uppercase transition-colors"
-                  style={{ fontFamily: 'Roboto, sans-serif' }}
+                  className="hover:opacity-80 text-xs sm:text-sm font-medium tracking-widest uppercase transition-opacity"
+                  style={{ fontFamily: 'Roboto, sans-serif', color: '#FFFFFF' }}
                 >
                   {link.label}
                 </Link>
                 {index < footerLinks.length - 1 && (
-                  <span className="text-white/40 ml-8 sm:ml-12">|</span>
+                  <span style={{ color: 'rgba(255,255,255,0.4)' }}>|</span>
                 )}
               </span>
             ))}
