@@ -42,6 +42,7 @@ function getPlaceholderImage(name: string, size = 400): string {
 // Get list of artists with filters
 export async function getArtists(filters: ArtistFilters = {}) {
   console.log('[artistService] Fetching artists with filters:', filters)
+  console.log('[artistService] Environment check - URL:', import.meta.env.VITE_SUPABASE_URL ? 'set' : 'MISSING')
 
   let query = supabase
     .from('artist_profiles')

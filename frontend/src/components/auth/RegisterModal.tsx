@@ -396,7 +396,7 @@ function RegistrationFormStep({
   `
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col">
       {/* Header with back button */}
       <div className="flex items-center justify-between mb-6">
         <button
@@ -429,8 +429,8 @@ function RegistrationFormStep({
         </div>
       )}
 
-      {/* Scrollable form content */}
-      <form onSubmit={onSubmit} className="flex-1 overflow-y-auto pr-2 space-y-8 custom-scrollbar">
+      {/* Form content */}
+      <form onSubmit={onSubmit} className="space-y-8">
 
         {/* SECTION 1: Account */}
         <div>
@@ -1254,10 +1254,10 @@ export function RegisterModal({
           </svg>
         </button>
 
-        {/* Content with padding */}
-        <div className="p-6 md:p-8 flex-1 overflow-hidden flex flex-col">
+        {/* Content with padding - scrollable */}
+        <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
           {/* Step Content */}
-          <div className="flex-1 overflow-hidden">
+          <div className="min-h-0">
             {step === 1 && (
               <UserTypeStep
                 onSelect={handleUserTypeSelect}
