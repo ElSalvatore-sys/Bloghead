@@ -1020,12 +1020,12 @@ export function RegisterModal({
 
     if (isOpen) {
       document.addEventListener('keydown', handleEscape)
-      document.body.style.overflow = 'hidden'
+      // NOTE: Removed document.body.style.overflow = 'hidden' - it breaks mobile scrolling!
+      // The modal's own scroll container handles overflow properly
     }
 
     return () => {
       document.removeEventListener('keydown', handleEscape)
-      document.body.style.overflow = ''
     }
   }, [isOpen, onClose, isLoading])
 
@@ -1196,7 +1196,7 @@ export function RegisterModal({
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <>
       {/* CSS for animations */}
       <style>{`
         @keyframes fadeInUp {
@@ -1225,25 +1225,27 @@ export function RegisterModal({
         }
       `}</style>
 
-      {/* Backdrop */}
+      {/* Backdrop - SEPARATE from scroll container */}
       <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
         onClick={() => !isLoading && onClose()}
       />
 
-      {/* Centered container */}
-      <div className="min-h-full flex items-center justify-center p-4">
-        {/* Modal Content */}
-        <div
-          className={`
-            relative w-full my-8
-            ${step === 1 ? 'max-w-xl' : step === 2 ? 'max-w-2xl' : 'max-w-md'}
-            bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950
-            border border-white/10 rounded-2xl
-            shadow-2xl shadow-purple-500/10
-            animate-in fade-in zoom-in-95 duration-300
-          `}
-        >
+      {/* Scrollable container - THIS IS THE KEY */}
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4">
+          {/* Modal box - no fixed height, grows naturally */}
+          <div
+            className={`
+              relative w-full my-8
+              ${step === 1 ? 'max-w-xl' : step === 2 ? 'max-w-2xl' : 'max-w-md'}
+              bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950
+              border border-white/10 rounded-2xl
+              shadow-2xl shadow-purple-500/10
+              animate-in fade-in zoom-in-95 duration-300
+            `}
+            onClick={(e) => e.stopPropagation()}
+          >
           {/* Close Button */}
           <button
             onClick={onClose}
@@ -1306,8 +1308,9 @@ export function RegisterModal({
             </div>
           )}
         </div>
+        </div>
       </div>
-    </div>,
+    </>,
     document.body
   )
 }
