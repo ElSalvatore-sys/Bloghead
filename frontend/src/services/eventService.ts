@@ -11,8 +11,11 @@ export interface Event {
   end_time?: string
   venue_name?: string
   city: string
+  postal_code?: string
   country: string
   address?: string
+  is_indoor?: boolean
+  is_outdoor?: boolean
   expected_guests?: number
   budget_min?: number
   budget_max?: number
@@ -20,9 +23,11 @@ export interface Event {
   is_public: boolean
   cover_image_url?: string
   created_at: string
+  updated_at?: string
   organizer?: {
-    full_name: string
-    company_name?: string
+    membername?: string
+    vorname?: string
+    nachname?: string
   }
 }
 
@@ -42,11 +47,10 @@ export async function getEvents(filters: EventFilters = {}) {
     .from('events')
     .select(`
       *,
-      organizer:users!organizer_id(full_name)
+      organizer:users!organizer_id(membername, vorname, nachname)
     `, { count: 'exact' })
     .eq('is_public', true)
     .eq('status', 'published')
-    .gte('event_date', new Date().toISOString().split('T')[0])
 
   if (filters.city) {
     query = query.ilike('city', `%${filters.city}%`)
@@ -85,7 +89,7 @@ export async function getEventById(eventId: string) {
     .from('events')
     .select(`
       *,
-      organizer:users!organizer_id(full_name, email)
+      organizer:users!organizer_id(membername, vorname, nachname, email)
     `)
     .eq('id', eventId)
     .single()

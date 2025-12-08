@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout } from './components/layout'
-import { HomePage, ArtistsPage, ArtistProfilePage, EventsPage, AboutPage, ProfileEditPage } from './pages'
+import { HomePage, ArtistsPage, ArtistProfilePage, EventsPage, EventDetailPage, AboutPage, ProfileEditPage } from './pages'
 import ImpressumPage from './pages/ImpressumPage'
 import KontaktPage from './pages/KontaktPage'
 import DatenschutzPage from './pages/DatenschutzPage'
@@ -20,6 +20,7 @@ function App() {
             <Route path="/artists" element={<ArtistsPage />} />
             <Route path="/artists/:id" element={<ArtistProfilePage />} />
             <Route path="/events" element={<EventsPage />} />
+            <Route path="/events/:id" element={<EventDetailPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
             <Route path="/impressum" element={<ImpressumPage />} />
