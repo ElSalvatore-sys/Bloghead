@@ -131,6 +131,7 @@ interface FormData {
   firstName: string
   lastName: string
   email: string
+  confirmEmail: string
   password: string
   confirmPassword: string
   termsAccepted: boolean
@@ -155,6 +156,7 @@ const initialFormData: FormData = {
   firstName: '',
   lastName: '',
   email: '',
+  confirmEmail: '',
   password: '',
   confirmPassword: '',
   termsAccepted: false,
@@ -461,18 +463,37 @@ function RegistrationFormStep({
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">{getUsernameLabel()} *</label>
-              <input
-                type="text"
-                value={formData.username}
-                onChange={(e) => handleChange('username', e.target.value)}
-                disabled={isLoading}
-                className={`${inputBaseClass} ${errors.username ? 'border-red-500 focus:border-red-500' : ''}`}
-                placeholder={userType === 'artist' ? 'DJ Max' : 'max_events'}
-              />
-              {errors.username && <p className="mt-1 text-xs text-red-400">{errors.username}</p>}
-            </div>
+            {/* Mitgliedsname directly after name for Fan users */}
+            {userType === 'fan' && (
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">{getUsernameLabel()} *</label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => handleChange('username', e.target.value)}
+                  disabled={isLoading}
+                  className={`${inputBaseClass} ${errors.username ? 'border-red-500 focus:border-red-500' : ''}`}
+                  placeholder="max_fan"
+                />
+                {errors.username && <p className="mt-1 text-xs text-red-400">{errors.username}</p>}
+              </div>
+            )}
+
+            {/* Username for non-fan users */}
+            {userType !== 'fan' && (
+              <div>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">{getUsernameLabel()} *</label>
+                <input
+                  type="text"
+                  value={formData.username}
+                  onChange={(e) => handleChange('username', e.target.value)}
+                  disabled={isLoading}
+                  className={`${inputBaseClass} ${errors.username ? 'border-red-500 focus:border-red-500' : ''}`}
+                  placeholder={userType === 'artist' ? 'DJ Max' : 'max_events'}
+                />
+                {errors.username && <p className="mt-1 text-xs text-red-400">{errors.username}</p>}
+              </div>
+            )}
 
             <div>
               <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">E-Mail *</label>
@@ -485,6 +506,19 @@ function RegistrationFormStep({
                 placeholder="max@example.de"
               />
               {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">E-Mail bestätigen *</label>
+              <input
+                type="email"
+                value={formData.confirmEmail}
+                onChange={(e) => handleChange('confirmEmail', e.target.value)}
+                disabled={isLoading}
+                className={`${inputBaseClass} ${errors.confirmEmail ? 'border-red-500 focus:border-red-500' : ''}`}
+                placeholder="max@example.de"
+              />
+              {errors.confirmEmail && <p className="mt-1 text-xs text-red-400">{errors.confirmEmail}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -501,7 +535,7 @@ function RegistrationFormStep({
                 {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password}</p>}
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Bestätigen *</label>
+                <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Passwort bestätigen *</label>
                 <input
                   type="password"
                   value={formData.confirmPassword}
@@ -868,31 +902,69 @@ function SuccessStep({
 
   return (
     <div
-      className="text-center py-8"
+      className="text-center py-6"
       style={{
         animation: 'fadeInUp 0.5s ease-out forwards'
       }}
     >
-      {/* Celebration animation */}
-      <div className="relative inline-block mb-6">
-        <div className="text-7xl animate-bounce">🎉</div>
-        <div className="absolute -top-2 -left-4 text-2xl animate-pulse">✨</div>
-        <div className="absolute -top-2 -right-4 text-2xl animate-pulse" style={{ animationDelay: '0.2s' }}>✨</div>
+      {/* Success checkmark */}
+      <div className="relative inline-block mb-4">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto shadow-lg shadow-green-500/30">
+          <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <div className="absolute -top-1 -right-1 text-2xl animate-bounce">✨</div>
       </div>
 
-      <h2 className="text-3xl font-display text-white mb-4">Willkommen bei Bloghead!</h2>
-      <p className="text-gray-400 mb-8 max-w-sm mx-auto">
-        Wir haben dir eine E-Mail geschickt. Bestätige deine E-Mail-Adresse und du bist bereit, {getSuccessMessage()}
+      <h2 className="text-2xl font-display text-white mb-2">Registrierung erfolgreich!</h2>
+      <p className="text-gray-400 text-sm mb-6">
+        Du bist fast bereit, {getSuccessMessage()}
       </p>
 
-      <div className="flex gap-4 justify-center">
+      {/* Email confirmation box */}
+      <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-6 text-left">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+            <span className="text-xl">📧</span>
+          </div>
+          <div>
+            <h3 className="text-white font-medium mb-1">Bestätigungs-E-Mail gesendet</h3>
+            <p className="text-gray-400 text-sm">
+              Bitte klicke auf den Link in der E-Mail, um dein Konto zu aktivieren.
+            </p>
+          </div>
+        </div>
+
+        {/* Help section */}
+        <div className="border-t border-white/10 pt-4">
+          <p className="text-gray-500 text-xs uppercase tracking-wider mb-3">Keine E-Mail erhalten?</p>
+          <ul className="space-y-2 text-sm text-gray-400">
+            <li className="flex items-center gap-2">
+              <span className="text-purple-400">•</span>
+              Prüfe deinen Spam-Ordner
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-purple-400">•</span>
+              Warte ein paar Minuten
+            </li>
+            <li className="flex items-center gap-2">
+              <span className="text-purple-400">•</span>
+              Kontaktiere uns: <a href="mailto:support@bloghead.de" className="text-purple-400 hover:underline">support@bloghead.de</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <button
           onClick={onResendEmail}
           disabled={isResending}
-          className="px-6 py-3 border border-white/30 rounded-xl text-white hover:bg-white/10 hover:scale-[1.02] transition-all disabled:opacity-50"
+          className="px-5 py-2.5 border border-white/30 rounded-xl text-white text-sm hover:bg-white/10 hover:scale-[1.02] transition-all disabled:opacity-50"
         >
           {isResending ? (
-            <span className="flex items-center gap-2">
+            <span className="flex items-center justify-center gap-2">
               <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
@@ -905,7 +977,7 @@ function SuccessStep({
         </button>
         <button
           onClick={onClose}
-          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-orange-500 rounded-xl text-white font-medium hover:opacity-90 hover:scale-[1.02] transition-all"
+          className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-orange-500 rounded-xl text-white text-sm font-medium hover:opacity-90 hover:scale-[1.02] transition-all"
         >
           Zur Startseite
         </button>
@@ -1002,6 +1074,11 @@ export function RegisterModal({
       errors.email = 'Erforderlich'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = 'Ungültige E-Mail-Adresse'
+    }
+    if (!formData.confirmEmail.trim()) {
+      errors.confirmEmail = 'Erforderlich'
+    } else if (formData.email !== formData.confirmEmail) {
+      errors.confirmEmail = 'E-Mail-Adressen stimmen nicht überein'
     }
     if (!formData.password) {
       errors.password = 'Erforderlich'
