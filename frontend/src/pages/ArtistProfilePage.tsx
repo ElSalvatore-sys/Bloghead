@@ -7,9 +7,8 @@ import {
   InstagramIcon,
   PlayIcon,
   CameraIcon,
-  HeartIcon,
-  HeartFilledIcon,
 } from '../components/icons'
+import { FavoriteButton } from '../components/ui/FavoriteButton'
 import { getArtistById } from '../services/artistService'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -137,7 +136,6 @@ export function ArtistProfilePage() {
   const [artist, setArtist] = useState<ArtistData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isFavorite, setIsFavorite] = useState(false)
   const [isEditMode] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
@@ -273,17 +271,11 @@ export function ArtistProfilePage() {
 
           {/* Action Buttons */}
           <div className="absolute top-4 right-4 flex gap-2">
-            <button
-              onClick={() => setIsFavorite(!isFavorite)}
-              className="w-10 h-10 rounded-full bg-black/50 backdrop-blur flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-              aria-label={isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
-            >
-              {isFavorite ? (
-                <HeartFilledIcon size={20} className="text-accent-purple" />
-              ) : (
-                <HeartIcon size={20} />
-              )}
-            </button>
+            <FavoriteButton
+              itemId={artist?.id || ''}
+              type="artist"
+              size="md"
+            />
             <button
               onClick={handleShare}
               className="w-10 h-10 rounded-full bg-black/50 backdrop-blur flex items-center justify-center text-white hover:bg-black/70 transition-colors"

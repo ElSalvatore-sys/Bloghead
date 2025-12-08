@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
+import { FavoriteButton } from '../components/ui/FavoriteButton'
 import { getServiceProviderById } from '../services/serviceProviderService'
 import type { ServiceProviderListItem } from '../services/serviceProviderService'
 
@@ -190,6 +191,15 @@ export function ServiceProviderProfilePage() {
           <ArrowLeftIcon className="w-5 h-5" />
           <span>Zurück</span>
         </Link>
+
+        {/* Favorite button */}
+        <div className="absolute top-6 right-6">
+          <FavoriteButton
+            itemId={provider?.id || id || ''}
+            type="provider"
+            size="md"
+          />
+        </div>
       </div>
 
       {/* Content */}

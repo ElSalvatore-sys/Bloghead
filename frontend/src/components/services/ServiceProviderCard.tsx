@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/Button'
 import { StarRating } from '../ui/StarRating'
+import { FavoriteButton } from '../ui/FavoriteButton'
 import type { ServiceProviderListItem } from '../../services/serviceProviderService'
 
 // Location icon
@@ -96,15 +97,23 @@ export function ServiceProviderCard({ provider }: ServiceProviderCardProps) {
           )}
         </div>
 
-        {/* Verified Badge */}
-        {provider.is_verified && (
-          <div className="absolute top-3 right-3">
+        {/* Right side: Verified Badge and Favorite Button */}
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+          {/* Verified Badge */}
+          {provider.is_verified && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-500/90 rounded-full text-xs font-medium text-white">
               <VerifiedIcon className="w-3.5 h-3.5" />
               Verifiziert
             </span>
-          </div>
-        )}
+          )}
+
+          {/* Favorite Button */}
+          <FavoriteButton
+            itemId={provider.id}
+            type="provider"
+            size="sm"
+          />
+        </div>
       </div>
 
       {/* Content */}

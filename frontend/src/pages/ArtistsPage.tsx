@@ -2,24 +2,10 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
+import { FavoriteButton } from '../components/ui/FavoriteButton'
 import { FilterBar, type FilterBarFilters } from '../components/filters'
 import { useArtists } from '../hooks/useArtists'
 import type { ArtistListItem } from '../services/artistService'
-
-// Heart icon for favorite button
-function HeartIcon({ className = '', filled = false }: { className?: string; filled?: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill={filled ? 'currentColor' : 'none'}
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  )
-}
 
 // Location icon
 function LocationIcon({ className = '' }: { className?: string }) {
@@ -34,11 +20,9 @@ function LocationIcon({ className = '' }: { className?: string }) {
 // Artist Card Component - adapted for Supabase data
 interface ArtistCardProps {
   artist: ArtistListItem
-  isFavorite: boolean
-  onFavoriteToggle: (id: string) => void
 }
 
-function ArtistCard({ artist, isFavorite, onFavoriteToggle }: ArtistCardProps) {
+function ArtistCard({ artist }: ArtistCardProps) {
   // Format price range
   const priceRange = useMemo(() => {
     if (artist.preis_pro_stunde && artist.preis_pro_veranstaltung) {
@@ -65,17 +49,12 @@ function ArtistCard({ artist, isFavorite, onFavoriteToggle }: ArtistCardProps) {
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         {/* Favorite Button */}
-        <button
-          onClick={() => onFavoriteToggle(artist.id)}
-          className={`
-            absolute top-3 right-3 w-8 h-8 flex items-center justify-center
-            transition-colors duration-200
-            ${isFavorite ? 'text-accent-purple' : 'text-white/70 hover:text-accent-purple'}
-          `}
-          aria-label={isFavorite ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
-        >
-          <HeartIcon className="w-6 h-6" filled={isFavorite} />
-        </button>
+        <FavoriteButton
+          itemId={artist.id}
+          type="artist"
+          size="sm"
+          className="absolute top-3 right-3"
+        />
       </div>
 
       {/* Content */}
@@ -173,28 +152,12 @@ export function ArtistsPage() {
     category: '',
   })
 
-  // Favorites state (local for now, could be connected to Supabase later)
-  const [favorites, setFavorites] = useState<Set<string>>(new Set())
-
   // Handle filter application
   const handleApplyFilters = () => {
     updateFilters({
       searchQuery: filterBarFilters.name || undefined,
       genre: filterBarFilters.genre || undefined,
       city: filterBarFilters.location || undefined,
-    })
-  }
-
-  // Handle favorite toggle
-  const handleFavoriteToggle = (id: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev)
-      if (newFavorites.has(id)) {
-        newFavorites.delete(id)
-      } else {
-        newFavorites.add(id)
-      }
-      return newFavorites
     })
   }
 
@@ -278,8 +241,6 @@ export function ArtistsPage() {
                 <ArtistCard
                   key={artist.id}
                   artist={artist}
-                  isFavorite={favorites.has(artist.id)}
-                  onFavoriteToggle={handleFavoriteToggle}
                 />
               ))}
             </div>
