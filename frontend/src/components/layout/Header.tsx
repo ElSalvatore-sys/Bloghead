@@ -38,6 +38,10 @@ const navItems: NavItem[] = [
     href: '/artists',
   },
   {
+    label: 'SERVICES',
+    href: '/services',
+  },
+  {
     label: 'EVENTS',
     href: '/events',
     dropdown: [

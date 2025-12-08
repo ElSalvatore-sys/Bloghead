@@ -76,8 +76,8 @@ export async function getServiceProviders(filters: ServiceProviderFilters = {}) 
 
   // Apply filters
   if (filters.category) {
-    // Need to filter by category slug via the joined table
-    query = query.eq('service_categories.slug', filters.category)
+    // Filter by category ID
+    query = query.eq('service_category_id', filters.category)
   }
 
   if (filters.city) {
