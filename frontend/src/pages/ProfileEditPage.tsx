@@ -102,11 +102,8 @@ export function ProfileEditPage() {
   const [audioSample, setAudioSample] = useState('')
   const [instagramHandle, setInstagramHandle] = useState('')
 
-  // Calendar
-  const [_selectedDates, setSelectedDates] = useState<number[]>([])
-  const [bookedDates] = useState<number[]>([])
-  const [pendingDates] = useState<number[]>([])
-  const [eventDates] = useState<number[]>([])
+  // Calendar - selected date for potential editing
+  const [_selectedCalendarDate, setSelectedCalendarDate] = useState<string | null>(null)
 
   // Form state
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -189,10 +186,9 @@ export function ProfileEditPage() {
     setTechRider(file.name)
   }
 
-  const handleDateSelect = (date: number) => {
-    setSelectedDates((prev) =>
-      prev.includes(date) ? prev.filter((d) => d !== date) : [...prev, date]
-    )
+  const handleCalendarDateSelect = (date: string) => {
+    setSelectedCalendarDate(date)
+    // TODO: Open a modal to set availability status for this date
   }
 
   const handleSave = async () => {
@@ -571,14 +567,16 @@ export function ProfileEditPage() {
               {/* Calendar Section */}
               <FormSection title="VERFÜGBARKEIT">
                 <p className="text-sm text-white/60 mb-4">
-                  Klicke auf Tage, um deine Verfügbarkeit zu ändern.
+                  Klicke auf Tage, um deine Verfügbarkeit anzusehen. Bearbeitungsfunktion kommt bald.
                 </p>
-                <ArtistCalendar
-                  bookedDates={bookedDates}
-                  pendingDates={pendingDates}
-                  eventDates={eventDates}
-                  onDateSelect={handleDateSelect}
-                />
+                {profile?.id ? (
+                  <ArtistCalendar
+                    artistId={profile.id as string}
+                    onDateSelect={handleCalendarDateSelect}
+                  />
+                ) : (
+                  <p className="text-white/40 text-sm">Lade Kalender...</p>
+                )}
               </FormSection>
             </>
           )}

@@ -10,7 +10,7 @@ import {
   HeartIcon,
   HeartFilledIcon,
 } from '../components/icons'
-import { getArtistById, getArtistAvailability } from '../services/artistService'
+import { getArtistById } from '../services/artistService'
 import { useAuth } from '../contexts/AuthContext'
 
 interface ArtistData {
@@ -49,11 +49,6 @@ interface ArtistData {
   member_since?: string
 }
 
-interface AvailabilityData {
-  id: string
-  date: string
-  status: 'available' | 'booked' | 'pending' | 'blocked' | 'open_gig'
-}
 
 // Share icon component
 function ShareIcon({ className = '' }: { className?: string }) {
@@ -140,12 +135,12 @@ export function ArtistProfilePage() {
   const { user } = useAuth()
 
   const [artist, setArtist] = useState<ArtistData | null>(null)
-  const [availability, setAvailability] = useState<AvailabilityData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isEditMode] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   // Handle booking button click
   const handleBookingClick = () => {
@@ -170,20 +165,13 @@ export function ArtistProfilePage() {
       setError(null)
 
       try {
-        const [artistResult, availabilityResult] = await Promise.all([
-          getArtistById(artistId),
-          getArtistAvailability(artistId),
-        ])
+        const artistResult = await getArtistById(artistId)
 
         if (artistResult.error) {
           setError('Künstler konnte nicht geladen werden')
           console.error('Artist fetch error:', artistResult.error)
         } else {
           setArtist(artistResult.data as ArtistData)
-        }
-
-        if (availabilityResult.data) {
-          setAvailability(availabilityResult.data as AvailabilityData[])
         }
       } catch (err) {
         console.error('Unexpected error:', err)
@@ -196,24 +184,11 @@ export function ArtistProfilePage() {
     fetchArtist()
   }, [artistId])
 
-  // Calculate calendar dates from availability
-  const calendarDates = useMemo(() => {
-    const bookedDates: number[] = []
-    const pendingDates: number[] = []
-    const eventDates: number[] = []
+  // Handle calendar date selection
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date)
+  }
 
-    availability.forEach(a => {
-      const day = new Date(a.date).getDate()
-      if (a.status === 'booked') {
-        bookedDates.push(day)
-        eventDates.push(day)
-      } else if (a.status === 'pending') {
-        pendingDates.push(day)
-      }
-    })
-
-    return { bookedDates, pendingDates, eventDates }
-  }, [availability])
 
   // Format price display
   const priceDisplay = useMemo(() => {
@@ -467,9 +442,8 @@ export function ArtistProfilePage() {
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <ArtistCalendar
-                bookedDates={calendarDates.bookedDates}
-                pendingDates={calendarDates.pendingDates}
-                eventDates={calendarDates.eventDates}
+                artistId={artist.id}
+                onDateSelect={handleDateSelect}
               />
 
               {/* Book Now Button (Desktop - in sidebar) */}
@@ -520,7 +494,10 @@ export function ArtistProfilePage() {
       {artist && (
         <BookingRequestModal
           isOpen={showBookingModal}
-          onClose={() => setShowBookingModal(false)}
+          onClose={() => {
+            setShowBookingModal(false)
+            setSelectedDate(null)
+          }}
           artist={{
             id: artist.id,
             kuenstlername: artist.kuenstlername,
@@ -529,6 +506,7 @@ export function ArtistProfilePage() {
             preis_pro_veranstaltung: artist.preis_pro_veranstaltung,
             profile_image_url: artist.profile_image_url,
           }}
+          preSelectedDate={selectedDate}
         />
       )}
     </div>

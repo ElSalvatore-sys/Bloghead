@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../ui'
 import { createBookingRequest } from '../../services/bookingService'
@@ -15,6 +15,7 @@ interface BookingRequestModalProps {
     preis_pro_veranstaltung?: number | null
     profile_image_url?: string
   }
+  preSelectedDate?: string | null
 }
 
 const EVENT_TYPES = [
@@ -30,7 +31,7 @@ const EVENT_TYPES = [
   { value: 'other', label: 'Sonstiges' },
 ]
 
-export function BookingRequestModal({ isOpen, onClose, artist }: BookingRequestModalProps) {
+export function BookingRequestModal({ isOpen, onClose, artist, preSelectedDate }: BookingRequestModalProps) {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [step, setStep] = useState(1)
@@ -38,10 +39,10 @@ export function BookingRequestModal({ isOpen, onClose, artist }: BookingRequestM
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Form state
+  // Form state - initialize with preSelectedDate if provided
   const [formData, setFormData] = useState({
     event_type: '',
-    event_date: '',
+    event_date: preSelectedDate || '',
     event_time_start: '',
     event_time_end: '',
     event_size: '',
@@ -56,6 +57,13 @@ export function BookingRequestModal({ isOpen, onClose, artist }: BookingRequestM
     hospitality_verpflegung: false,
     transport_type: '',
   })
+
+  // Update event_date when preSelectedDate changes
+  useEffect(() => {
+    if (preSelectedDate) {
+      setFormData(prev => ({ ...prev, event_date: preSelectedDate }))
+    }
+  }, [preSelectedDate])
 
   if (!isOpen) return null
 
