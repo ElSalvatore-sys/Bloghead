@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { HeartIcon, UserIcon, InstagramIcon, FacebookIcon, MenuIcon, CloseIcon } from '../icons'
 import { LoginModal, RegisterModal } from '../auth'
 import { useAuth } from '../../contexts/AuthContext'
@@ -384,6 +384,17 @@ export function Header() {
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Handle ?login=true URL parameter (from protected route redirect)
+  useEffect(() => {
+    if (searchParams.get('login') === 'true' && !isLoggedIn) {
+      setShowLoginModal(true)
+      // Clean up URL
+      searchParams.delete('login')
+      setSearchParams(searchParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams, isLoggedIn])
 
   // Handle scroll for sticky header effect
   useEffect(() => {

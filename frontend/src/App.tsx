@@ -7,6 +7,7 @@ import DatenschutzPage from './pages/DatenschutzPage'
 import AuthCallbackPage from './pages/AuthCallbackPage'
 import { MyProfilePage, MyRequestsPage, MyBookingsPage, MyCalendarPage, MyCommunityPage, MyChatPage, MyCoinsPage } from './pages/dashboard'
 import { CookieConsent } from './components/ui/CookieConsent'
+import { ProtectedRoute } from './components/auth'
 import { AuthProvider } from './contexts/AuthContext'
 
 function App() {
@@ -20,19 +21,19 @@ function App() {
             <Route path="/artists/:id" element={<ArtistProfilePage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/about" element={<AboutPage />} />
-            <Route path="/profile/edit" element={<ProfileEditPage />} />
+            <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
             <Route path="/impressum" element={<ImpressumPage />} />
             <Route path="/kontakt" element={<KontaktPage />} />
             <Route path="/datenschutz" element={<DatenschutzPage />} />
             <Route path="/auth/callback" element={<AuthCallbackPage />} />
-            {/* Dashboard Routes */}
-            <Route path="/dashboard/profile" element={<MyProfilePage />} />
-            <Route path="/dashboard/requests" element={<MyRequestsPage />} />
-            <Route path="/dashboard/bookings" element={<MyBookingsPage />} />
-            <Route path="/dashboard/calendar" element={<MyCalendarPage />} />
-            <Route path="/dashboard/community" element={<MyCommunityPage />} />
-            <Route path="/dashboard/chat" element={<MyChatPage />} />
-            <Route path="/dashboard/coins" element={<MyCoinsPage />} />
+            {/* Dashboard Routes - Protected */}
+            <Route path="/dashboard/profile" element={<ProtectedRoute><MyProfilePage /></ProtectedRoute>} />
+            <Route path="/dashboard/requests" element={<ProtectedRoute><MyRequestsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/bookings" element={<ProtectedRoute><MyBookingsPage /></ProtectedRoute>} />
+            <Route path="/dashboard/calendar" element={<ProtectedRoute><MyCalendarPage /></ProtectedRoute>} />
+            <Route path="/dashboard/community" element={<ProtectedRoute><MyCommunityPage /></ProtectedRoute>} />
+            <Route path="/dashboard/chat" element={<ProtectedRoute><MyChatPage /></ProtectedRoute>} />
+            <Route path="/dashboard/coins" element={<ProtectedRoute><MyCoinsPage /></ProtectedRoute>} />
           </Routes>
         </Layout>
         <CookieConsent />
