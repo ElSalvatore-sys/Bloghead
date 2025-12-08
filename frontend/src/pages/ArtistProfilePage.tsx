@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useMemo } from 'react'
 import { Button } from '../components/ui'
 import { ArtistCalendar, AudioPlayer } from '../components/artist'
+import { BookingRequestModal } from '../components/booking'
 import {
   InstagramIcon,
   PlayIcon,
@@ -10,6 +11,7 @@ import {
   HeartFilledIcon,
 } from '../components/icons'
 import { getArtistById, getArtistAvailability } from '../services/artistService'
+import { useAuth } from '../contexts/AuthContext'
 
 interface ArtistData {
   id: string
@@ -135,6 +137,7 @@ function ProfileSkeleton() {
 export function ArtistProfilePage() {
   const { id: artistId } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const [artist, setArtist] = useState<ArtistData | null>(null)
   const [availability, setAvailability] = useState<AvailabilityData[]>([])
@@ -142,6 +145,17 @@ export function ArtistProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isEditMode] = useState(false)
+  const [showBookingModal, setShowBookingModal] = useState(false)
+
+  // Handle booking button click
+  const handleBookingClick = () => {
+    if (!user) {
+      // Redirect to login
+      navigate('/?login=true', { state: { from: `/artists/${artistId}` } })
+      return
+    }
+    setShowBookingModal(true)
+  }
 
   // Fetch artist data
   useEffect(() => {
@@ -466,6 +480,7 @@ export function ArtistProfilePage() {
                     size="lg"
                     fullWidth
                     className="py-4 text-base font-bold uppercase tracking-wider"
+                    onClick={handleBookingClick}
                   >
                     Anfrage Senden
                   </Button>
@@ -493,11 +508,28 @@ export function ArtistProfilePage() {
               variant="primary"
               size="md"
               className="px-8 font-bold uppercase tracking-wider"
+              onClick={handleBookingClick}
             >
               Buchen
             </Button>
           </div>
         </div>
+      )}
+
+      {/* Booking Request Modal */}
+      {artist && (
+        <BookingRequestModal
+          isOpen={showBookingModal}
+          onClose={() => setShowBookingModal(false)}
+          artist={{
+            id: artist.id,
+            kuenstlername: artist.kuenstlername,
+            jobbezeichnung: artist.jobbezeichnung,
+            preis_pro_stunde: artist.preis_pro_stunde,
+            preis_pro_veranstaltung: artist.preis_pro_veranstaltung,
+            profile_image_url: artist.profile_image_url,
+          }}
+        />
       )}
     </div>
   )
