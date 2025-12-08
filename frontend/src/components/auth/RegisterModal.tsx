@@ -1231,13 +1231,13 @@ export function RegisterModal({
         onClick={() => !isLoading && onClose()}
       />
 
-      {/* Scrollable container - THIS IS THE KEY */}
-      <div className="fixed inset-0 z-50 overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-4">
+      {/* Scrollable container - using CSS-only approach */}
+      <div className="modal-scroll-container">
+        <div className="modal-center">
           {/* Modal box - no fixed height, grows naturally */}
           <div
             className={`
-              relative w-full my-8
+              modal-box relative
               ${step === 1 ? 'max-w-xl' : step === 2 ? 'max-w-2xl' : 'max-w-md'}
               bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950
               border border-white/10 rounded-2xl
