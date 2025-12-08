@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { HeartIcon, UserIcon, InstagramIcon, FacebookIcon, MenuIcon, CloseIcon } from '../icons'
 import { LoginModal, RegisterModal } from '../auth'
+import { NotificationBell } from '../notifications'
 import { useAuth } from '../../contexts/AuthContext'
 
 // Types
@@ -498,6 +499,9 @@ export function Header() {
               >
                 <HeartIcon size={22} />
               </Link>
+
+              {/* Notifications (only when logged in) */}
+              {isLoggedIn && <NotificationBell />}
 
               {/* User Icon / Dropdown */}
               <div className="relative">
