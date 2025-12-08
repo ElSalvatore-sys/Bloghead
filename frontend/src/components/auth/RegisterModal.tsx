@@ -1196,7 +1196,7 @@ export function RegisterModal({
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* CSS for animations */}
       <style>{`
         @keyframes fadeInUp {
@@ -1227,83 +1227,85 @@ export function RegisterModal({
 
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         onClick={() => !isLoading && onClose()}
       />
 
-      {/* Modal Content */}
-      <div
-        className={`
-          relative w-full
-          ${step === 1 ? 'max-w-xl' : step === 2 ? 'max-w-2xl' : 'max-w-md'}
-          bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950
-          border border-white/10 rounded-2xl
-          shadow-2xl shadow-purple-500/10
-          animate-in fade-in zoom-in-95 duration-300
-          max-h-[90vh] overflow-hidden flex flex-col
-        `}
-      >
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          disabled={isLoading}
-          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all z-10 disabled:opacity-50"
+      {/* Centered container */}
+      <div className="min-h-full flex items-center justify-center p-4">
+        {/* Modal Content */}
+        <div
+          className={`
+            relative w-full my-8
+            ${step === 1 ? 'max-w-xl' : step === 2 ? 'max-w-2xl' : 'max-w-md'}
+            bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950
+            border border-white/10 rounded-2xl
+            shadow-2xl shadow-purple-500/10
+            animate-in fade-in zoom-in-95 duration-300
+          `}
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            disabled={isLoading}
+            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all z-10 disabled:opacity-50"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
-        {/* Content with padding - scrollable */}
-        <div className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
-          {/* Step Content */}
-          <div className="min-h-0">
-            {step === 1 && (
-              <UserTypeStep
-                onSelect={handleUserTypeSelect}
-                onGoogleSignUp={handleGoogleSignUp}
-                onFacebookSignUp={handleFacebookSignUp}
-                isLoading={isLoading}
-              />
-            )}
-            {step === 2 && selectedType && (
-              <RegistrationFormStep
-                userType={selectedType}
-                formData={formData}
-                setFormData={setFormData}
-                errors={formErrors}
-                onSubmit={handleFormSubmit}
-                onBack={() => setStep(1)}
-                isLoading={isLoading}
-                submitError={submitError}
-              />
-            )}
-            {step === 3 && selectedType && (
-              <SuccessStep
-                userType={selectedType}
-                onClose={onClose}
-                onResendEmail={handleResendEmail}
-                isResending={isResending}
-              />
-            )}
+          {/* Content with padding */}
+          <div className="p-6 md:p-8">
+            {/* Step Content */}
+            <div>
+              {step === 1 && (
+                <UserTypeStep
+                  onSelect={handleUserTypeSelect}
+                  onGoogleSignUp={handleGoogleSignUp}
+                  onFacebookSignUp={handleFacebookSignUp}
+                  isLoading={isLoading}
+                />
+              )}
+              {step === 2 && selectedType && (
+                <RegistrationFormStep
+                  userType={selectedType}
+                  formData={formData}
+                  setFormData={setFormData}
+                  errors={formErrors}
+                  onSubmit={handleFormSubmit}
+                  onBack={() => setStep(1)}
+                  isLoading={isLoading}
+                  submitError={submitError}
+                />
+              )}
+              {step === 3 && selectedType && (
+                <SuccessStep
+                  userType={selectedType}
+                  onClose={onClose}
+                  onResendEmail={handleResendEmail}
+                  isResending={isResending}
+                />
+              )}
+            </div>
           </div>
+
+          {/* Login link - at bottom */}
+          {step !== 3 && (
+            <div className="px-6 md:px-8 pb-6 pt-4 border-t border-white/10">
+              <p className="text-sm text-gray-500 text-center">
+                Bereits registriert?{' '}
+                <button
+                  onClick={onLoginClick}
+                  disabled={isLoading}
+                  className="text-purple-400 hover:text-purple-300 hover:underline font-medium transition-colors disabled:opacity-50"
+                >
+                  Anmelden
+                </button>
+              </p>
+            </div>
+          )}
         </div>
-
-        {/* Login link - fixed at bottom */}
-        {step !== 3 && (
-          <div className="px-6 md:px-8 pb-6 pt-4 border-t border-white/10 bg-gray-900/80 backdrop-blur-lg">
-            <p className="text-sm text-gray-500 text-center">
-              Bereits registriert?{' '}
-              <button
-                onClick={onLoginClick}
-                disabled={isLoading}
-                className="text-purple-400 hover:text-purple-300 hover:underline font-medium transition-colors disabled:opacity-50"
-              >
-                Anmelden
-              </button>
-            </p>
-          </div>
-        )}
       </div>
     </div>,
     document.body

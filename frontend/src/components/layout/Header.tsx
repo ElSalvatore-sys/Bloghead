@@ -188,12 +188,14 @@ function MobileMenu({
   onClose,
   isLoggedIn,
   onSignInClick,
+  onRegisterClick,
   onLogout,
 }: {
   isOpen: boolean
   onClose: () => void
   isLoggedIn: boolean
   onSignInClick: () => void
+  onRegisterClick: () => void
   onLogout: () => void
 }) {
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
@@ -321,9 +323,18 @@ function MobileMenu({
           </div>
         )}
 
-        {/* Sign In Button (if not logged in) */}
+        {/* Auth Buttons (if not logged in) */}
         {!isLoggedIn && (
-          <div className="pt-6">
+          <div className="pt-6 space-y-3">
+            <button
+              onClick={() => {
+                onRegisterClick()
+                onClose()
+              }}
+              className="w-full py-3 px-6 border border-white/30 text-white font-bold text-sm tracking-wider uppercase rounded-full hover:bg-white/10 transition-all"
+            >
+              REGISTRIEREN
+            </button>
             <button
               onClick={() => {
                 onSignInClick()
@@ -497,16 +508,24 @@ export function Header() {
                 )}
               </div>
 
-              {/* Sign In Button */}
+              {/* Auth Buttons */}
               {!isLoggedIn && (
-                <button
-                  onClick={handleSignInClick}
-                  className="relative py-2 px-6 bg-gradient-to-r from-accent-red to-accent-salmon text-white font-bold text-xs tracking-wider uppercase rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200"
-                >
-                  SIGN IN
-                  {/* Decorative brush stroke */}
-                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-gradient-to-r from-accent-purple via-accent-red to-accent-salmon rounded-full opacity-60" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowRegisterModal(true)}
+                    className="py-2 px-5 border border-white/30 text-white font-bold text-xs tracking-wider uppercase rounded-full hover:bg-white/10 hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    REGISTRIEREN
+                  </button>
+                  <button
+                    onClick={handleSignInClick}
+                    className="relative py-2 px-5 bg-gradient-to-r from-accent-red to-accent-salmon text-white font-bold text-xs tracking-wider uppercase rounded-full hover:opacity-90 hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    SIGN IN
+                    {/* Decorative brush stroke */}
+                    <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-0.5 bg-gradient-to-r from-accent-purple via-accent-red to-accent-salmon rounded-full opacity-60" />
+                  </button>
+                </div>
               )}
 
               {/* Social Icons */}
@@ -550,6 +569,7 @@ export function Header() {
         onClose={() => setMobileMenuOpen(false)}
         isLoggedIn={isLoggedIn}
         onSignInClick={handleSignInClick}
+        onRegisterClick={() => setShowRegisterModal(true)}
         onLogout={handleLogout}
       />
 
