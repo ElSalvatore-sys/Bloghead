@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
+import { ReviewsSection } from '../components/reviews'
 import { getServiceProviderById } from '../services/serviceProviderService'
 import type { ServiceProviderListItem } from '../services/serviceProviderService'
 
@@ -289,6 +290,14 @@ export function ServiceProviderProfilePage() {
                 </div>
               </div>
             )}
+
+            {/* Reviews Section */}
+            <ReviewsSection
+              entityType="veranstalter"
+              entityId={provider.id}
+              entityName={provider.business_name}
+              entityImage={provider.profile_image_url || undefined}
+            />
           </div>
 
           {/* Sidebar */}

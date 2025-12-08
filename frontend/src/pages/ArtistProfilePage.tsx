@@ -9,6 +9,7 @@ import {
   CameraIcon,
 } from '../components/icons'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
+import { ReviewsSection } from '../components/reviews'
 import { getArtistById } from '../services/artistService'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -428,6 +429,14 @@ export function ArtistProfilePage() {
                 </a>
               </section>
             )}
+
+            {/* Reviews Section */}
+            <ReviewsSection
+              entityType="artist"
+              entityId={artist.id}
+              entityName={artist.kuenstlername || 'Künstler'}
+              entityImage={artist.profile_image_url}
+            />
           </div>
 
           {/* Right Column - Calendar */}
