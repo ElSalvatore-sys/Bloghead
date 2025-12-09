@@ -1,5 +1,5 @@
 # Bloghead Robots.txt
-# https://blog-head.com
+# https://blogyydev.xyz
 
 User-agent: *
 Allow: /
@@ -20,7 +20,7 @@ Allow: /datenschutz
 Allow: /kontakt
 
 # Sitemap location
-Sitemap: https://blog-head.com/sitemap.xml
+Sitemap: https://blogyydev.xyz/sitemap.xml
 
 # Crawl-delay for polite crawling
 Crawl-delay: 1

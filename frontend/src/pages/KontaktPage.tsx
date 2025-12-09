@@ -70,10 +70,10 @@ export default function KontaktPage() {
                 <div>
                   <h3 className="text-white font-bold uppercase tracking-wide mb-2">E-Mail</h3>
                   <a
-                    href="mailto:info@blog-head.com"
+                    href="mailto:l3lim3d@gmail.com"
                     className="text-accent-purple hover:underline"
                   >
-                    info@blog-head.com
+                    l3lim3d@gmail.com
                   </a>
                 </div>
 

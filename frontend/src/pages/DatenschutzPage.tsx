@@ -104,7 +104,7 @@ export default function DatenschutzPage() {
                 Deutschland
               </p>
               <p>
-                E-Mail: info@blog-head.com<br />
+                E-Mail: l3lim3d@gmail.com<br />
                 Telefon: +49 (0) 123 456789
               </p>
             </AccordionItem>

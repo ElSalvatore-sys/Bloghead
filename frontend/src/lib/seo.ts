@@ -11,7 +11,7 @@ interface SEOProps {
   noindex?: boolean
 }
 
-const BASE_URL = 'https://blog-head.com'
+const BASE_URL = 'https://blogyydev.xyz'
 const DEFAULT_IMAGE = `${BASE_URL}/og-image.jpg`
 const SITE_NAME = 'Bloghead'
 

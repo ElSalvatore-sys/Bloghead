@@ -38,7 +38,7 @@ export default function ImpressumPage() {
               </h2>
               <p className="leading-relaxed">
                 Telefon: +49 (0) 123 456789<br />
-                E-Mail: info@blog-head.com
+                E-Mail: l3lim3d@gmail.com
               </p>
             </section>
 
