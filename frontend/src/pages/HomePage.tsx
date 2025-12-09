@@ -13,6 +13,7 @@ import {
 import { RegisterModal } from '../components/auth'
 import { OnboardingModal } from '../components/auth/OnboardingModal'
 import { useAuth } from '../contexts/AuthContext'
+import { updatePageMeta, pageSEO, injectStructuredData, organizationSchema, websiteSchema } from '../lib/seo'
 
 export function HomePage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false)
@@ -37,6 +38,13 @@ export function HomePage() {
       setShowOnboarding(true)
     }
   }, [user, needsOnboarding, showOnboarding])
+
+  // SEO meta tags and structured data
+  useEffect(() => {
+    updatePageMeta(pageSEO.home)
+    injectStructuredData(organizationSchema)
+    injectStructuredData(websiteSchema)
+  }, [])
 
   const handleMemberClick = () => {
     setShowRegisterModal(true)

@@ -23,7 +23,7 @@ export function VRExperiencesSection() {
             {/* VR Image */}
             <div className="flex-1 relative">
               <img
-                src="/images/minh-pham-jSAb1ifwf8Y-unsplash.jpg"
+                src="/images/minh-pham-jSAb1ifwf8Y-unsplash.webp"
                 alt="Person wearing VR headset"
                 className="w-full h-full object-cover"
               />

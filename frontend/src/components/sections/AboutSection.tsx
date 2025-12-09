@@ -25,7 +25,7 @@ export function AboutSection() {
             <div className="lg:col-span-5 relative">
               <div className="aspect-[3/4] lg:aspect-auto lg:h-[500px] relative overflow-hidden">
                 <img
-                  src="/images/miguel-davis-V6K83zGHkUE-unsplash.jpg"
+                  src="/images/miguel-davis-V6K83zGHkUE-unsplash.webp"
                   alt="Artist performing"
                   className="w-full h-full object-cover"
                 />

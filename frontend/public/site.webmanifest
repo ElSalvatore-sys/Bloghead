@@ -1,0 +1,21 @@
+{
+  "name": "Bloghead - Kuenstler & Event-Services",
+  "short_name": "Bloghead",
+  "description": "Finde und buche DJs, Saenger, Bands und Event-Dienstleister fuer deine Veranstaltung.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#171717",
+  "theme_color": "#610AD1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["entertainment", "lifestyle", "business"],
+  "lang": "de",
+  "dir": "ltr"
+}

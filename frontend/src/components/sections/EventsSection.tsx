@@ -65,7 +65,7 @@ export function EventsSection() {
               {/* Small Image Bottom Left */}
               <div className="aspect-[4/3] overflow-hidden">
                 <img
-                  src="/images/pexels-luis-quintero-2091383.jpg"
+                  src="/images/pexels-luis-quintero-2091383.webp"
                   alt="Event"
                   className="w-full h-full object-cover"
                 />
@@ -76,14 +76,14 @@ export function EventsSection() {
             <div className="col-span-3 flex flex-col gap-2 md:gap-3">
               <div className="flex-1 overflow-hidden">
                 <img
-                  src="/images/alexander-popov-f3e6YNo3Y98-unsplash.jpg"
+                  src="/images/alexander-popov-f3e6YNo3Y98-unsplash.webp"
                   alt="Concert crowd"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex-1 overflow-hidden">
                 <img
-                  src="/images/flavio-gasperini-QO0hJHVUVso-unsplash.jpg"
+                  src="/images/flavio-gasperini-QO0hJHVUVso-unsplash.webp"
                   alt="Concert lights"
                   className="w-full h-full object-cover"
                 />
@@ -98,7 +98,7 @@ export function EventsSection() {
                 style={{ backgroundColor: '#610AD1' }}
               />
               <img
-                src="/images/luis-reynoso-J5a0MRXVnUI-unsplash.jpg"
+                src="/images/luis-reynoso-J5a0MRXVnUI-unsplash.webp"
                 alt="Main event"
                 className="w-full h-full object-cover"
               />
@@ -108,7 +108,7 @@ export function EventsSection() {
             <div className="col-span-3 flex flex-col gap-2 md:gap-3">
               <div className="flex-1 overflow-hidden">
                 <img
-                  src="/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg"
+                  src="/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.webp"
                   alt="Artist performing"
                   className="w-full h-full object-cover"
                 />
@@ -120,7 +120,7 @@ export function EventsSection() {
                   style={{ backgroundColor: '#610AD1' }}
                 />
                 <img
-                  src="/images/german-lopez-sP45Es070zI-unsplash.jpg"
+                  src="/images/german-lopez-sP45Es070zI-unsplash.webp"
                   alt="DJ set"
                   className="w-full h-full object-cover"
                 />

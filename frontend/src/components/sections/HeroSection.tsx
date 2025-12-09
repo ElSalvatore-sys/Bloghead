@@ -16,10 +16,21 @@ export function HeroSection({}: HeroSectionProps) {
       {/* Background Image - Grayscale */}
       <div className="absolute inset-0">
         <img
-          src="/images/alexandre-st-louis-IlfpKwRMln0-unsplash.jpg"
+          src="/images/alexandre-st-louis-IlfpKwRMln0-unsplash.webp"
+          srcSet="
+            /images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-400w.webp 400w,
+            /images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-800w.webp 800w,
+            /images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-1200w.webp 1200w,
+            /images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-1600w.webp 1600w,
+            /images/alexandre-st-louis-IlfpKwRMln0-unsplash.webp 1920w
+          "
+          sizes="100vw"
           alt="Artist performing"
           className="w-full h-full object-cover"
           style={{ filter: 'grayscale(100%)' }}
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
         />
         {/* Dark overlay */}
         <div

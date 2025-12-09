@@ -1,0 +1,26 @@
+# Bloghead Robots.txt
+# https://blog-head.com
+
+User-agent: *
+Allow: /
+
+# Block dashboard/private areas from crawlers
+Disallow: /dashboard/
+Disallow: /profile/
+Disallow: /auth/
+Disallow: /api/
+
+# Allow important pages
+Allow: /artists
+Allow: /events
+Allow: /services
+Allow: /about
+Allow: /impressum
+Allow: /datenschutz
+Allow: /kontakt
+
+# Sitemap location
+Sitemap: https://blog-head.com/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1

@@ -152,7 +152,7 @@ export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarou
       {/* Full-width Grayscale Background Image */}
       <div className="absolute inset-0 top-3">
         <img
-          src="/images/latrach-med-jamil-VD0LgaqFf4U-unsplash.jpg"
+          src="/images/latrach-med-jamil-VD0LgaqFf4U-unsplash.webp"
           alt="Artist background"
           className="w-full h-full object-cover"
           style={{ filter: 'grayscale(100%)' }}
