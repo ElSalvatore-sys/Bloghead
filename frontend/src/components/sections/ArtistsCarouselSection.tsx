@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/Button'
+import { OptimizedImage } from '../ui/OptimizedImage'
 
 interface Artist {
   id: string
@@ -15,31 +16,31 @@ const sampleArtists: Artist[] = [
     id: '1',
     name: 'DJ MARCUS',
     description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
-    imageUrl: '/images/alexander-popov-f3e6YNo3Y98-unsplash.jpg',
+    imageUrl: '/images/alexander-popov-f3e6YNo3Y98-unsplash.webp',
   },
   {
     id: '2',
     name: 'LISA VOICE',
     description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
-    imageUrl: '/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.jpg',
+    imageUrl: '/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.webp',
   },
   {
     id: '3',
     name: 'MIKE BEATS',
     description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
-    imageUrl: '/images/thiago-borrere-alvim-bf8APnBxoCk-unsplash.jpg',
+    imageUrl: '/images/thiago-borrere-alvim-bf8APnBxoCk-unsplash.webp',
   },
   {
     id: '4',
     name: 'ANNA STRINGS',
     description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
-    imageUrl: '/images/0df1b407-55a7-4251-99e9-b54723369de6.jpeg',
+    imageUrl: '/images/0df1b407-55a7-4251-99e9-b54723369de6.webp',
   },
   {
     id: '5',
     name: 'TOM WAVE',
     description: 'dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt.',
-    imageUrl: '/images/curtis-potvin-XBqp-UxhCVs-unsplash.jpg',
+    imageUrl: '/images/curtis-potvin-XBqp-UxhCVs-unsplash.webp',
   },
 ]
 
@@ -72,10 +73,11 @@ function ArtistCard({ artist }: { artist: Artist }) {
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Base Image */}
-      <img
+      <OptimizedImage
         src={artist.imageUrl}
         alt={artist.name}
-        className="w-full h-full object-cover"
+        className="w-full h-full"
+        sizes="(max-width: 768px) 180px, 200px"
       />
 
       {/* Purple Hover Overlay */}
@@ -151,11 +153,11 @@ export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarou
 
       {/* Full-width Grayscale Background Image */}
       <div className="absolute inset-0 top-3">
-        <img
+        <OptimizedImage
           src="/images/latrach-med-jamil-VD0LgaqFf4U-unsplash.webp"
           alt="Artist background"
-          className="w-full h-full object-cover"
-          style={{ filter: 'grayscale(100%)' }}
+          className="w-full h-full [&_img]:grayscale"
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-black/60" />
       </div>

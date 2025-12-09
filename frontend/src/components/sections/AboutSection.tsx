@@ -1,4 +1,5 @@
 import { Button } from '../ui/Button'
+import { OptimizedImage } from '../ui/OptimizedImage'
 
 export function AboutSection() {
   return (
@@ -24,10 +25,11 @@ export function AboutSection() {
             {/* Left: Image (takes about 45% width) */}
             <div className="lg:col-span-5 relative">
               <div className="aspect-[3/4] lg:aspect-auto lg:h-[500px] relative overflow-hidden">
-                <img
+                <OptimizedImage
                   src="/images/miguel-davis-V6K83zGHkUE-unsplash.webp"
                   alt="Artist performing"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 1024px) 100vw, 45vw"
                 />
               </div>
             </div>

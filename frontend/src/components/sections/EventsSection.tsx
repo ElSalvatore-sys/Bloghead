@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/Button'
+import { OptimizedImage } from '../ui/OptimizedImage'
 
 // Arrow icons
 function ChevronLeftIcon({ className = '' }: { className?: string }) {
@@ -64,10 +65,11 @@ export function EventsSection() {
 
               {/* Small Image Bottom Left */}
               <div className="aspect-[4/3] overflow-hidden">
-                <img
+                <OptimizedImage
                   src="/images/pexels-luis-quintero-2091383.webp"
                   alt="Event"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 768px) 25vw, 200px"
                 />
               </div>
             </div>
@@ -75,17 +77,19 @@ export function EventsSection() {
             {/* Second Column - 2 stacked images */}
             <div className="col-span-3 flex flex-col gap-2 md:gap-3">
               <div className="flex-1 overflow-hidden">
-                <img
+                <OptimizedImage
                   src="/images/alexander-popov-f3e6YNo3Y98-unsplash.webp"
                   alt="Concert crowd"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 768px) 25vw, 300px"
                 />
               </div>
               <div className="flex-1 overflow-hidden">
-                <img
+                <OptimizedImage
                   src="/images/flavio-gasperini-QO0hJHVUVso-unsplash.webp"
                   alt="Concert lights"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 768px) 25vw, 300px"
                 />
               </div>
             </div>
@@ -97,20 +101,22 @@ export function EventsSection() {
                 className="absolute top-0 left-0 right-0 h-2 md:h-3 z-10"
                 style={{ backgroundColor: '#610AD1' }}
               />
-              <img
+              <OptimizedImage
                 src="/images/luis-reynoso-J5a0MRXVnUI-unsplash.webp"
                 alt="Main event"
-                className="w-full h-full object-cover"
+                className="w-full h-full"
+                sizes="(max-width: 768px) 25vw, 400px"
               />
             </div>
 
             {/* Right Column - 2 stacked images with purple bar on last */}
             <div className="col-span-3 flex flex-col gap-2 md:gap-3">
               <div className="flex-1 overflow-hidden">
-                <img
+                <OptimizedImage
                   src="/images/jazmin-quaynor-8ALMAJP0Ago-unsplash.webp"
                   alt="Artist performing"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 768px) 25vw, 300px"
                 />
               </div>
               <div className="flex-1 relative overflow-hidden">
@@ -119,10 +125,11 @@ export function EventsSection() {
                   className="absolute top-0 bottom-0 right-0 w-2 md:w-3 z-10"
                   style={{ backgroundColor: '#610AD1' }}
                 />
-                <img
+                <OptimizedImage
                   src="/images/german-lopez-sP45Es070zI-unsplash.webp"
                   alt="DJ set"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
+                  sizes="(max-width: 768px) 25vw, 300px"
                 />
               </div>
             </div>

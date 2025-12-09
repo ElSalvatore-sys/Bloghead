@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Button } from '../ui/Button'
+import { OptimizedImage } from '../ui/OptimizedImage'
 
 export function VRExperiencesSection() {
   return (
@@ -22,10 +23,11 @@ export function VRExperiencesSection() {
 
             {/* VR Image */}
             <div className="flex-1 relative">
-              <img
+              <OptimizedImage
                 src="/images/minh-pham-jSAb1ifwf8Y-unsplash.webp"
                 alt="Person wearing VR headset"
-                className="w-full h-full object-cover"
+                className="w-full h-full"
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
           </div>

@@ -105,6 +105,18 @@ export function OptimizedImage({
   const generateSrcSet = (): string | undefined => {
     if (!src || src.startsWith('data:')) return undefined
 
+    // For local /images/ files, use pre-generated responsive versions
+    if (src.startsWith('/images/') && src.endsWith('.webp') && !src.includes('/responsive/')) {
+      const filename = src.replace('/images/', '').replace('.webp', '')
+      const widths = [400, 800, 1200, 1600]
+      const srcSet = widths
+        .map((w) => `/images/responsive/${filename}-${w}w.webp ${w}w`)
+        .join(', ')
+      // Add original as largest size
+      return `${srcSet}, ${src} 1920w`
+    }
+
+    // For external URLs (Supabase, Unsplash)
     const widths = [320, 640, 768, 1024, 1280, 1920]
     const srcSet = widths
       .filter((w) => !width || w <= width * 2)
