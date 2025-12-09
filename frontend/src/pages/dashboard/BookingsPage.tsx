@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom'
-
 // Placeholder data for artists/service providers
 const mockBookings = [
   {

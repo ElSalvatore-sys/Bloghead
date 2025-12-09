@@ -4,7 +4,7 @@ import { HeartIcon, UserIcon, InstagramIcon, FacebookIcon, MenuIcon, CloseIcon }
 import { LoginModal, RegisterModal } from '../auth'
 import { NotificationBell } from '../notifications'
 import { useAuth } from '../../contexts/AuthContext'
-import { getFullNavigationForRole, type UserRole, type NavItem as RoleNavItem } from '../../config/navigationConfig'
+import { getFullNavigationForRole, type UserRole } from '../../config/navigationConfig'
 
 // Types
 interface NavDropdownItem {

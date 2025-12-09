@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom'
-
 // My Events page for event organizers
 const mockEvents = [
   {

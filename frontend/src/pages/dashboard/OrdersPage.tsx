@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom'
-
 // Orders page for service providers (similar to bookings but for services)
 const mockOrders = [
   {

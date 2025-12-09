@@ -38,10 +38,7 @@ const BookingRequestsPage = lazy(() => import('./pages/dashboard/BookingRequests
 const BookedArtistsPage = lazy(() => import('./pages/dashboard/BookedArtistsPage').then(m => ({ default: m.BookedArtistsPage })))
 
 // Legacy Dashboard pages (default exports - keeping for backward compatibility)
-const LegacyMyProfilePage = lazy(() => import('./pages/dashboard/MyProfilePage'))
 const LegacyMyRequestsPage = lazy(() => import('./pages/dashboard/MyRequestsPage'))
-const LegacyMyBookingsPage = lazy(() => import('./pages/dashboard/MyBookingsPage'))
-const LegacyMyCalendarPage = lazy(() => import('./pages/dashboard/MyCalendarPage'))
 const LegacyMyCommunityPage = lazy(() => import('./pages/dashboard/MyCommunityPage'))
 const LegacyMyChatPage = lazy(() => import('./pages/dashboard/MyChatPage'))
 const LegacyMyCoinsPage = lazy(() => import('./pages/dashboard/MyCoinsPage'))
