@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { MultiSelect } from '../ui/MultiSelect'
+import { sanitizeInput, isValidEmail, isValidPhone, validatePassword } from '../../lib/security/sanitize'
 
 // Types
 export type UserType = 'fan' | 'artist' | 'service_provider' | 'event_organizer'
@@ -1067,23 +1068,32 @@ export function RegisterModal({
   const validateForm = (): Record<string, string> => {
     const errors: Record<string, string> = {}
 
-    if (!formData.username.trim()) errors.username = 'Erforderlich'
-    if (!formData.firstName.trim()) errors.firstName = 'Erforderlich'
-    if (!formData.lastName.trim()) errors.lastName = 'Erforderlich'
-    if (!formData.email.trim()) {
+    // Sanitize all text inputs
+    const sanitizedUsername = sanitizeInput(formData.username)
+    const sanitizedFirstName = sanitizeInput(formData.firstName)
+    const sanitizedLastName = sanitizeInput(formData.lastName)
+    const sanitizedEmail = sanitizeInput(formData.email).toLowerCase()
+    const sanitizedConfirmEmail = sanitizeInput(formData.confirmEmail).toLowerCase()
+    const sanitizedPhone = sanitizeInput(formData.phone)
+
+    if (!sanitizedUsername) errors.username = 'Erforderlich'
+    if (!sanitizedFirstName) errors.firstName = 'Erforderlich'
+    if (!sanitizedLastName) errors.lastName = 'Erforderlich'
+    if (!sanitizedEmail) {
       errors.email = 'Erforderlich'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!isValidEmail(sanitizedEmail)) {
       errors.email = 'Ungültige E-Mail-Adresse'
     }
-    if (!formData.confirmEmail.trim()) {
+    if (!sanitizedConfirmEmail) {
       errors.confirmEmail = 'Erforderlich'
-    } else if (formData.email !== formData.confirmEmail) {
+    } else if (sanitizedEmail !== sanitizedConfirmEmail) {
       errors.confirmEmail = 'E-Mail-Adressen stimmen nicht überein'
     }
-    if (!formData.password) {
-      errors.password = 'Erforderlich'
-    } else if (formData.password.length < 8) {
-      errors.password = 'Mind. 8 Zeichen'
+
+    // Use validatePassword from sanitize.ts
+    const passwordValidation = validatePassword(formData.password)
+    if (!passwordValidation.valid) {
+      errors.password = passwordValidation.errors[0] || 'Ungültiges Passwort'
     }
     if (formData.password !== formData.confirmPassword) {
       errors.confirmPassword = 'Stimmt nicht überein'
@@ -1099,13 +1109,21 @@ export function RegisterModal({
 
     if (selectedType === 'service_provider') {
       if (!formData.industry) errors.industry = 'Erforderlich'
-      if (!formData.address.trim()) errors.address = 'Erforderlich'
-      if (!formData.vatId.trim()) errors.vatId = 'Erforderlich'
-      if (!formData.phone.trim()) errors.phone = 'Pflichtfeld'
+      if (!sanitizeInput(formData.address)) errors.address = 'Erforderlich'
+      if (!sanitizeInput(formData.vatId)) errors.vatId = 'Erforderlich'
+      if (!sanitizedPhone) {
+        errors.phone = 'Pflichtfeld'
+      } else if (!isValidPhone(sanitizedPhone)) {
+        errors.phone = 'Ungültige Telefonnummer'
+      }
     }
 
     if (selectedType === 'event_organizer') {
-      if (!formData.phone.trim()) errors.phone = 'Pflichtfeld'
+      if (!sanitizedPhone) {
+        errors.phone = 'Pflichtfeld'
+      } else if (sanitizedPhone && !isValidPhone(sanitizedPhone)) {
+        errors.phone = 'Ungültige Telefonnummer'
+      }
     }
 
     return errors
@@ -1125,37 +1143,45 @@ export function RegisterModal({
     setIsLoading(true)
 
     try {
+      // Sanitize all inputs before sending to backend
+      const sanitizedEmail = sanitizeInput(formData.email).toLowerCase()
+      const sanitizedUsername = sanitizeInput(formData.username)
+      const sanitizedFirstName = sanitizeInput(formData.firstName)
+      const sanitizedLastName = sanitizeInput(formData.lastName)
+      const sanitizedPhone = sanitizeInput(formData.phone)
+      const sanitizedAddress = sanitizeInput(formData.address)
+
       const metadata: Record<string, unknown> = {
         user_type: selectedType,
-        username: formData.username,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        full_name: `${formData.firstName} ${formData.lastName}`,
+        username: sanitizedUsername,
+        first_name: sanitizedFirstName,
+        last_name: sanitizedLastName,
+        full_name: `${sanitizedFirstName} ${sanitizedLastName}`,
         newsletter_subscribed: formData.newsletterSubscribed,
       }
 
       if (selectedType === 'artist') {
         metadata.genres = formData.genres
-        metadata.profession = formData.profession
-        metadata.address = formData.address
-        metadata.tax_number = formData.taxNumber
-        metadata.business_type = formData.businessType
-        metadata.phone = formData.phone
+        metadata.profession = sanitizeInput(formData.profession)
+        metadata.address = sanitizedAddress
+        metadata.tax_number = sanitizeInput(formData.taxNumber)
+        metadata.business_type = sanitizeInput(formData.businessType)
+        metadata.phone = sanitizedPhone
       }
 
       if (selectedType === 'service_provider') {
-        metadata.industry = formData.industry
-        metadata.address = formData.address
-        metadata.vat_id = formData.vatId
-        metadata.business_type = formData.businessType
-        metadata.phone = formData.phone
+        metadata.industry = sanitizeInput(formData.industry)
+        metadata.address = sanitizedAddress
+        metadata.vat_id = sanitizeInput(formData.vatId)
+        metadata.business_type = sanitizeInput(formData.businessType)
+        metadata.phone = sanitizedPhone
       }
 
       if (selectedType === 'event_organizer') {
-        metadata.address = formData.address
-        metadata.vat_id = formData.vatId
-        metadata.business_type = formData.businessType
-        metadata.phone = formData.phone
+        metadata.address = sanitizedAddress
+        metadata.vat_id = sanitizeInput(formData.vatId)
+        metadata.business_type = sanitizeInput(formData.businessType)
+        metadata.phone = sanitizedPhone
         metadata.preferences = {
           crowd_size: formData.crowdSize,
           event_vibes: formData.eventVibes,
@@ -1164,7 +1190,7 @@ export function RegisterModal({
         }
       }
 
-      const { error } = await signUp(formData.email, formData.password, metadata)
+      const { error } = await signUp(sanitizedEmail, formData.password, metadata)
 
       if (error) {
         if (error.message.includes('already registered')) {

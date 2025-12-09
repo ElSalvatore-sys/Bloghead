@@ -839,26 +839,8 @@ export default function MyCommunityPage() {
             </a>
             <button
               onClick={() => {
-                // Export followers list functionality
-                const data = activeTab === 'followers'
-                  ? followers.map(f => ({
-                      name: f.follower?.membername || `${f.follower?.vorname} ${f.follower?.nachname}`,
-                      type: f.follower_type,
-                      since: formatJoinDate(f.created_at)
-                    }))
-                  : activeTab === 'following'
-                  ? following.map(f => ({
-                      artist: f.artist?.künstlername,
-                      location: f.artist?.ort,
-                      since: formatJoinDate(f.created_at)
-                    }))
-                  : favorites.map(f => ({
-                      artist: f.artist?.künstlername,
-                      notes: f.notes,
-                      since: formatJoinDate(f.created_at)
-                    }))
-
-                console.log('Export data:', data)
+                // TODO: Implement export functionality
+                // Would export: followers, following, or favorites list based on activeTab
                 alert('Export-Funktion kommt bald!')
               }}
               className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors flex items-center gap-2"

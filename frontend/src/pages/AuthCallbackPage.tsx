@@ -10,27 +10,15 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        console.log('[AuthCallback] Starting auth callback handling...')
-        console.log('[AuthCallback] Current URL:', window.location.href)
-
         // Get the auth code/tokens from URL
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const queryParams = new URLSearchParams(window.location.search)
 
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
-        const type = hashParams.get('type') || queryParams.get('type')
         const errorParam = hashParams.get('error') || queryParams.get('error')
         const errorDescription = hashParams.get('error_description') || queryParams.get('error_description')
         const code = queryParams.get('code')
-
-        console.log('[AuthCallback] Params:', {
-          hasAccessToken: !!accessToken,
-          hasRefreshToken: !!refreshToken,
-          type,
-          hasCode: !!code,
-          error: errorParam
-        })
 
         // Check for errors in URL
         if (errorParam) {
@@ -41,7 +29,6 @@ export default function AuthCallbackPage() {
 
         // If tokens in URL hash (email confirmation flow), set session
         if (accessToken && refreshToken) {
-          console.log('[AuthCallback] Setting session from URL tokens...')
           setStatus('Melde dich an...')
 
           const { error: sessionError } = await supabase.auth.setSession({
@@ -54,13 +41,10 @@ export default function AuthCallbackPage() {
             setError(sessionError.message)
             return
           }
-
-          console.log('[AuthCallback] Session set successfully')
         }
 
         // Try to exchange code for session (PKCE flow)
         if (code) {
-          console.log('[AuthCallback] Exchanging code for session...')
           setStatus('Verifiziere...')
 
           const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
@@ -69,13 +53,10 @@ export default function AuthCallbackPage() {
             setError(exchangeError.message)
             return
           }
-
-          console.log('[AuthCallback] Code exchanged successfully')
         }
 
         // Check if we now have a session
         const { data: { session } } = await supabase.auth.getSession()
-        console.log('[AuthCallback] Current session:', session ? `User: ${session.user.id}` : 'No session')
 
         if (session?.user) {
           setStatus('Erfolgreich bestätigt! Leite weiter...')
@@ -87,15 +68,11 @@ export default function AuthCallbackPage() {
             .eq('id', session.user.id)
             .single()
 
-          console.log('[AuthCallback] User profile:', profile)
-
           if (!profile?.user_type) {
             // New user needs onboarding
-            console.log('[AuthCallback] Redirecting to onboarding...')
             navigate('/?onboarding=true', { replace: true })
           } else {
             // Existing user - go to dashboard
-            console.log('[AuthCallback] Redirecting to dashboard...')
             navigate('/dashboard/profile', { replace: true })
           }
         } else {

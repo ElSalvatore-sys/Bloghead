@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { sanitizeInput, isValidEmail } from '../../lib/security/sanitize'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -72,10 +73,19 @@ export function LoginModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+
+    // Sanitize and validate inputs
+    const sanitizedEmail = sanitizeInput(email).toLowerCase()
+
+    if (!isValidEmail(sanitizedEmail)) {
+      setError('Bitte gib eine gültige E-Mail-Adresse ein.')
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      const { error } = await signIn(email, password)
+      const { error } = await signIn(sanitizedEmail, password)
       if (error) {
         // Map Supabase error messages to German
         if (error.message.includes('Invalid login credentials')) {

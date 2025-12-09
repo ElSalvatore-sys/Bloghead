@@ -157,11 +157,6 @@ export function DashboardLayout() {
   const userRole = userProfile?.user_type as UserRole | undefined
   const navItems = getFullNavigationForRole(userRole)
 
-  // Debug logging
-  console.log('[DashboardLayout] User:', user?.id)
-  console.log('[DashboardLayout] UserProfile:', userProfile)
-  console.log('[DashboardLayout] UserRole:', userRole)
-
   const handleLogout = async () => {
     await signOut()
     navigate('/')

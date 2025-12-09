@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { sanitizeInput, sanitizeHTML, isValidEmail } from '../lib/security/sanitize'
 
 export default function KontaktPage() {
   const [formData, setFormData] = useState({
@@ -14,9 +15,27 @@ export default function KontaktPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Sanitize and validate inputs
+    const sanitizedName = sanitizeInput(formData.name)
+    const sanitizedEmail = sanitizeInput(formData.email).toLowerCase()
+    const sanitizedSubject = sanitizeInput(formData.subject)
+    const sanitizedMessage = sanitizeHTML(formData.message) // Allow basic formatting in message
+
+    if (!sanitizedName || !sanitizedEmail || !sanitizedSubject || !sanitizedMessage) {
+      setSubmitStatus('error')
+      return
+    }
+
+    if (!isValidEmail(sanitizedEmail)) {
+      setSubmitStatus('error')
+      return
+    }
+
     setIsSubmitting(true)
 
-    // Simulate form submission
+    // TODO: Replace with actual form submission to backend
+    // For now, simulate form submission
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     setSubmitStatus('success')

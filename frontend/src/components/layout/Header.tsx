@@ -390,10 +390,6 @@ export function Header() {
   const isLoggedIn = !!user
   const userRole = userProfile?.user_type as UserRole | undefined
 
-  // Debug logging
-  console.log('[Header] User:', user?.id)
-  console.log('[Header] UserProfile:', userProfile)
-  console.log('[Header] UserRole:', userRole)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)

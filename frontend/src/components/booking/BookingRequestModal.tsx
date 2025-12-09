@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from '../ui'
 import { createBookingRequest } from '../../services/bookingService'
 import { useAuth } from '../../contexts/AuthContext'
+import { sanitizeInput, sanitizeHTML, sanitizeURL } from '../../lib/security/sanitize'
 
 interface BookingRequestModalProps {
   isOpen: boolean
@@ -95,6 +96,14 @@ export function BookingRequestModal({ isOpen, onClose, artist, preSelectedDate }
     setError(null)
 
     try {
+      // Sanitize all text inputs before sending to backend
+      const sanitizedLocationName = sanitizeInput(formData.event_location_name)
+      const sanitizedLocationAddress = sanitizeInput(formData.event_location_address)
+      const sanitizedMapsLink = sanitizeURL(formData.event_location_maps_link)
+      const sanitizedMessage = sanitizeHTML(formData.message)
+      const sanitizedEquipmentAvailable = sanitizeInput(formData.equipment_available)
+      const sanitizedEquipmentNeeded = sanitizeInput(formData.equipment_needed)
+
       const { error: submitError } = await createBookingRequest({
         artist_id: artist.id,
         requester_id: user.id,
@@ -103,13 +112,13 @@ export function BookingRequestModal({ isOpen, onClose, artist, preSelectedDate }
         event_time_start: formData.event_time_start || null,
         event_time_end: formData.event_time_end || null,
         event_size: formData.event_size ? parseInt(formData.event_size) : null,
-        event_location_name: formData.event_location_name || null,
-        event_location_address: formData.event_location_address || null,
-        event_location_maps_link: formData.event_location_maps_link || null,
+        event_location_name: sanitizedLocationName || null,
+        event_location_address: sanitizedLocationAddress || null,
+        event_location_maps_link: sanitizedMapsLink || null,
         proposed_budget: formData.proposed_budget ? parseFloat(formData.proposed_budget) : null,
-        message: formData.message || null,
-        equipment_available: formData.equipment_available || null,
-        equipment_needed: formData.equipment_needed || null,
+        message: sanitizedMessage || null,
+        equipment_available: sanitizedEquipmentAvailable || null,
+        equipment_needed: sanitizedEquipmentNeeded || null,
         hospitality_unterbringung: formData.hospitality_unterbringung,
         hospitality_verpflegung: formData.hospitality_verpflegung,
         transport_type: formData.transport_type || null,

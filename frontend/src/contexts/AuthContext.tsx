@@ -56,7 +56,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null
       }
 
-      console.log('[AuthContext] User profile fetched:', data)
       setUserProfile(data as UserProfile)
       return data as UserProfile
     } catch (err) {
@@ -90,9 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Get initial session
-    console.log('[AuthContext] Getting initial session...')
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('[AuthContext] Initial session:', session ? `User: ${session.user.id}` : 'No session')
       setSession(session)
       setUser(session?.user ?? null)
 
@@ -109,8 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event: AuthChangeEvent, session: Session | null) => {
-        console.log('[AuthContext] Auth event:', event, session ? `User: ${session.user.id}` : 'No session')
+      async (_event: AuthChangeEvent, session: Session | null) => {
         setSession(session)
         setUser(session?.user ?? null)
 
