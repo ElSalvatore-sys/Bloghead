@@ -4,6 +4,7 @@ import { HeartIcon, UserIcon, InstagramIcon, FacebookIcon, MenuIcon, CloseIcon }
 import { LoginModal, RegisterModal } from '../auth'
 import { NotificationBell } from '../notifications'
 import { useAuth } from '../../contexts/AuthContext'
+import { getFullNavigationForRole, type UserRole, type NavItem as RoleNavItem } from '../../config/navigationConfig'
 
 // Types
 interface NavDropdownItem {
@@ -52,16 +53,15 @@ const navItems: NavItem[] = [
   },
 ]
 
-const userMenuItems: UserMenuItem[] = [
-  { label: 'Mein Profil', href: '/profile' },
-  { label: 'Meine Anfragen', href: '/requests' },
-  { label: 'Meine Buchungen', href: '/bookings' },
-  { label: 'Mein Kalender', href: '/calendar' },
-  { label: 'Meine Community', href: '/community' },
-  { label: 'Meine Chat', href: '/chat' },
-  { label: 'Meine Coins', href: '/coins' },
-  { label: 'Support', href: '/support' },
-]
+// User menu items are now role-based - see navigationConfig.ts
+// This function converts role nav items to user menu items format
+function getRoleBasedUserMenuItems(userRole: UserRole | undefined): UserMenuItem[] {
+  const navItems = getFullNavigationForRole(userRole)
+  return navItems.map(item => ({
+    label: item.label,
+    href: item.path,
+  }))
+}
 
 // Chevron Down Icon
 function ChevronDownIcon({ className = '' }: { className?: string }) {
@@ -132,12 +132,15 @@ function UserDropdown({
   isOpen,
   onClose,
   onLogout,
+  userRole,
 }: {
   isOpen: boolean
   onClose: () => void
   onLogout: () => void
+  userRole: UserRole | undefined
 }) {
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const menuItems = getRoleBasedUserMenuItems(userRole)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -162,7 +165,7 @@ function UserDropdown({
       ref={dropdownRef}
       className="absolute top-full right-0 mt-2 min-w-[200px] bg-bg-card border border-white/10 rounded-lg shadow-lg py-2 z-50"
     >
-      {userMenuItems.map((item) => (
+      {menuItems.map((item) => (
         <Link
           key={item.href}
           to={item.href}
@@ -195,6 +198,7 @@ function MobileMenu({
   onSignInClick,
   onRegisterClick,
   onLogout,
+  userRole,
 }: {
   isOpen: boolean
   onClose: () => void
@@ -202,8 +206,10 @@ function MobileMenu({
   onSignInClick: () => void
   onRegisterClick: () => void
   onLogout: () => void
+  userRole: UserRole | undefined
 }) {
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
+  const userMenuItems = getRoleBasedUserMenuItems(userRole)
 
   useEffect(() => {
     if (isOpen) {
@@ -380,8 +386,14 @@ function MobileMenu({
 
 // Main Header Component
 export function Header() {
-  const { user, signOut } = useAuth()
+  const { user, userProfile, signOut } = useAuth()
   const isLoggedIn = !!user
+  const userRole = userProfile?.user_type as UserRole | undefined
+
+  // Debug logging
+  console.log('[Header] User:', user?.id)
+  console.log('[Header] UserProfile:', userProfile)
+  console.log('[Header] UserRole:', userRole)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -523,6 +535,7 @@ export function Header() {
                     isOpen={userDropdownOpen}
                     onClose={() => setUserDropdownOpen(false)}
                     onLogout={handleLogout}
+                    userRole={userRole}
                   />
                 )}
               </div>
@@ -590,6 +603,7 @@ export function Header() {
         onSignInClick={handleSignInClick}
         onRegisterClick={() => setShowRegisterModal(true)}
         onLogout={handleLogout}
+        userRole={userRole}
       />
 
       {/* Login Modal */}

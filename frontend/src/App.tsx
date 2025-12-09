@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Layout } from './components/layout'
+import { Layout, DashboardLayout } from './components/layout'
 import { HomePage } from './pages'
 import { CookieConsent } from './components/ui/CookieConsent'
 import { ProtectedRoute } from './components/auth'
@@ -22,14 +22,29 @@ const KontaktPage = lazy(() => import('./pages/KontaktPage'))
 const DatenschutzPage = lazy(() => import('./pages/DatenschutzPage'))
 const AuthCallbackPage = lazy(() => import('./pages/AuthCallbackPage'))
 
-// Dashboard pages (have default exports)
-const MyProfilePage = lazy(() => import('./pages/dashboard/MyProfilePage'))
-const MyRequestsPage = lazy(() => import('./pages/dashboard/MyRequestsPage'))
-const MyBookingsPage = lazy(() => import('./pages/dashboard/MyBookingsPage'))
-const MyCalendarPage = lazy(() => import('./pages/dashboard/MyCalendarPage'))
-const MyCommunityPage = lazy(() => import('./pages/dashboard/MyCommunityPage'))
-const MyChatPage = lazy(() => import('./pages/dashboard/MyChatPage'))
-const MyCoinsPage = lazy(() => import('./pages/dashboard/MyCoinsPage'))
+// Role-based Dashboard pages (named exports)
+const ProfilePage = lazy(() => import('./pages/dashboard/ProfilePage').then(m => ({ default: m.ProfilePage })))
+const SettingsPage = lazy(() => import('./pages/dashboard/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const FavoritesPage = lazy(() => import('./pages/dashboard/FavoritesPage').then(m => ({ default: m.FavoritesPage })))
+const EventsAttendedPage = lazy(() => import('./pages/dashboard/EventsAttendedPage').then(m => ({ default: m.EventsAttendedPage })))
+const MyReviewsPage = lazy(() => import('./pages/dashboard/MyReviewsPage').then(m => ({ default: m.MyReviewsPage })))
+const BookingsPage = lazy(() => import('./pages/dashboard/BookingsPage').then(m => ({ default: m.BookingsPage })))
+const CalendarPage = lazy(() => import('./pages/dashboard/CalendarPage').then(m => ({ default: m.CalendarPage })))
+const ReviewsPage = lazy(() => import('./pages/dashboard/ReviewsPage').then(m => ({ default: m.ReviewsPage })))
+const StatsPage = lazy(() => import('./pages/dashboard/StatsPage').then(m => ({ default: m.StatsPage })))
+const OrdersPage = lazy(() => import('./pages/dashboard/OrdersPage').then(m => ({ default: m.OrdersPage })))
+const MyEventsPage = lazy(() => import('./pages/dashboard/MyEventsPage').then(m => ({ default: m.MyEventsPage })))
+const BookingRequestsPage = lazy(() => import('./pages/dashboard/BookingRequestsPage').then(m => ({ default: m.BookingRequestsPage })))
+const BookedArtistsPage = lazy(() => import('./pages/dashboard/BookedArtistsPage').then(m => ({ default: m.BookedArtistsPage })))
+
+// Legacy Dashboard pages (default exports - keeping for backward compatibility)
+const LegacyMyProfilePage = lazy(() => import('./pages/dashboard/MyProfilePage'))
+const LegacyMyRequestsPage = lazy(() => import('./pages/dashboard/MyRequestsPage'))
+const LegacyMyBookingsPage = lazy(() => import('./pages/dashboard/MyBookingsPage'))
+const LegacyMyCalendarPage = lazy(() => import('./pages/dashboard/MyCalendarPage'))
+const LegacyMyCommunityPage = lazy(() => import('./pages/dashboard/MyCommunityPage'))
+const LegacyMyChatPage = lazy(() => import('./pages/dashboard/MyChatPage'))
+const LegacyMyCoinsPage = lazy(() => import('./pages/dashboard/MyCoinsPage'))
 
 // Loading spinner component
 function LoadingSpinner() {
@@ -48,10 +63,10 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <Layout>
-            <Suspense fallback={<LoadingSpinner />}>
-              <Routes>
-                {/* Public Routes */}
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              {/* Public Routes - with Layout (Header/Footer) */}
+              <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/artists" element={<ArtistsPage />} />
                 <Route path="/artists/:id" element={<ArtistProfilePage />} />
@@ -65,20 +80,50 @@ function App() {
                 <Route path="/datenschutz" element={<DatenschutzPage />} />
                 <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
-                {/* Protected Routes */}
+                {/* Protected Routes with Layout */}
                 <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
+              </Route>
 
-                {/* Dashboard Routes - Protected */}
-                <Route path="/dashboard/profile" element={<ProtectedRoute><MyProfilePage /></ProtectedRoute>} />
-                <Route path="/dashboard/requests" element={<ProtectedRoute><MyRequestsPage /></ProtectedRoute>} />
-                <Route path="/dashboard/bookings" element={<ProtectedRoute><MyBookingsPage /></ProtectedRoute>} />
-                <Route path="/dashboard/calendar" element={<ProtectedRoute><MyCalendarPage /></ProtectedRoute>} />
-                <Route path="/dashboard/community" element={<ProtectedRoute><MyCommunityPage /></ProtectedRoute>} />
-                <Route path="/dashboard/chat" element={<ProtectedRoute><MyChatPage /></ProtectedRoute>} />
-                <Route path="/dashboard/coins" element={<ProtectedRoute><MyCoinsPage /></ProtectedRoute>} />
-              </Routes>
-            </Suspense>
-          </Layout>
+              {/* Dashboard Routes - Protected with DashboardLayout (no Header/Footer) */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }
+              >
+                {/* Common pages (all roles) */}
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="settings" element={<SettingsPage />} />
+
+                {/* Fan pages */}
+                <Route path="favorites" element={<FavoritesPage />} />
+                <Route path="events-attended" element={<EventsAttendedPage />} />
+                <Route path="my-reviews" element={<MyReviewsPage />} />
+
+                {/* Artist pages */}
+                <Route path="bookings" element={<BookingsPage />} />
+                <Route path="calendar" element={<CalendarPage />} />
+                <Route path="reviews" element={<ReviewsPage />} />
+                <Route path="stats" element={<StatsPage />} />
+
+                {/* Service Provider pages */}
+                <Route path="orders" element={<OrdersPage />} />
+
+                {/* Event Organizer pages */}
+                <Route path="my-events" element={<MyEventsPage />} />
+                <Route path="booking-requests" element={<BookingRequestsPage />} />
+                <Route path="booked-artists" element={<BookedArtistsPage />} />
+
+                {/* Legacy routes - redirect to new routes or keep for compatibility */}
+                <Route path="requests" element={<LegacyMyRequestsPage />} />
+                <Route path="community" element={<LegacyMyCommunityPage />} />
+                <Route path="chat" element={<LegacyMyChatPage />} />
+                <Route path="coins" element={<LegacyMyCoinsPage />} />
+              </Route>
+            </Routes>
+          </Suspense>
           <CookieConsent />
         </AuthProvider>
       </BrowserRouter>
