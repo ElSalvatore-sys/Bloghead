@@ -1,4 +1,11 @@
 import { supabase } from '../lib/supabase'
+import type {
+  ArtistAvailability,
+  AvailabilityStatus,
+  AvailabilityUpdate,
+  TimeSlot,
+  CalendarDay
+} from '../types/booking'
 
 export interface BookingRequest {
   id: string
@@ -693,4 +700,396 @@ export function getCalendarSyncStatus(booking: Booking): CalendarSyncStatus {
     hasIcalSync: !!booking.ical_uid,
     anySync: !!(booking.google_calendar_event_id || booking.apple_calendar_event_id || booking.ical_uid)
   }
+}
+
+// ============================================
+// ARTIST AVAILABILITY FUNCTIONS
+// ============================================
+
+// Get artist availability for a month
+export async function getArtistAvailability(
+  artistId: string,
+  year: number,
+  month: number
+): Promise<{ data: ArtistAvailability[] | null; error: Error | null }> {
+  const startDate = new Date(year, month, 1)
+  const endDate = new Date(year, month + 1, 0)
+
+  const { data, error } = await supabase
+    .from('artist_availability')
+    .select('*')
+    .eq('artist_id', artistId)
+    .gte('date', startDate.toISOString().split('T')[0])
+    .lte('date', endDate.toISOString().split('T')[0])
+    .order('date', { ascending: true })
+
+  return { data: data as ArtistAvailability[] | null, error }
+}
+
+// Get availability for a date range (useful for multi-month views)
+export async function getArtistAvailabilityRange(
+  artistId: string,
+  startDate: string,
+  endDate: string
+): Promise<{ data: ArtistAvailability[] | null; error: Error | null }> {
+  const { data, error } = await supabase
+    .from('artist_availability')
+    .select('*')
+    .eq('artist_id', artistId)
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .order('date', { ascending: true })
+
+  return { data: data as ArtistAvailability[] | null, error }
+}
+
+// Set availability for a single date
+export async function setArtistAvailability(
+  artistId: string,
+  date: string,
+  status: AvailabilityStatus,
+  timeSlots?: TimeSlot[],
+  notes?: string
+): Promise<{ data: ArtistAvailability | null; error: Error | null }> {
+  // Check if availability already exists for this date
+  const { data: existing } = await supabase
+    .from('artist_availability')
+    .select('id')
+    .eq('artist_id', artistId)
+    .eq('date', date)
+    .single()
+
+  if (existing) {
+    // Update existing
+    const { data, error } = await supabase
+      .from('artist_availability')
+      .update({
+        status,
+        time_slots: timeSlots || null,
+        notes: notes || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', existing.id)
+      .select()
+      .single()
+
+    return { data: data as ArtistAvailability | null, error }
+  } else {
+    // Create new
+    const { data, error } = await supabase
+      .from('artist_availability')
+      .insert({
+        artist_id: artistId,
+        date,
+        status,
+        time_slots: timeSlots || null,
+        notes: notes || null,
+        visibility: 'visible',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    return { data: data as ArtistAvailability | null, error }
+  }
+}
+
+// Bulk update availability for multiple dates
+export async function setArtistAvailabilityBulk(
+  artistId: string,
+  updates: AvailabilityUpdate[]
+): Promise<{ success: boolean; error: Error | null }> {
+  try {
+    for (const update of updates) {
+      const { error } = await setArtistAvailability(
+        artistId,
+        update.date,
+        update.status,
+        update.time_slots,
+        update.notes
+      )
+      if (error) {
+        return { success: false, error }
+      }
+    }
+    return { success: true, error: null }
+  } catch (err) {
+    return { success: false, error: err as Error }
+  }
+}
+
+// Delete availability entry (revert to default available)
+export async function deleteArtistAvailability(
+  artistId: string,
+  date: string
+): Promise<{ success: boolean; error: Error | null }> {
+  const { error } = await supabase
+    .from('artist_availability')
+    .delete()
+    .eq('artist_id', artistId)
+    .eq('date', date)
+
+  return { success: !error, error }
+}
+
+// Block a date range (useful for vacations, etc.)
+export async function blockDateRange(
+  artistId: string,
+  startDate: string,
+  endDate: string,
+  notes?: string
+): Promise<{ success: boolean; error: Error | null }> {
+  const updates: AvailabilityUpdate[] = []
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    updates.push({
+      date: d.toISOString().split('T')[0],
+      status: 'blocked',
+      notes
+    })
+  }
+
+  return setArtistAvailabilityBulk(artistId, updates)
+}
+
+// Get calendar days with availability status for display
+export function getCalendarDaysWithAvailability(
+  year: number,
+  month: number,
+  availability: ArtistAvailability[]
+): CalendarDay[] {
+  const days: CalendarDay[] = []
+  const lastDay = new Date(year, month + 1, 0)
+
+  // Create a map for quick lookup
+  const availabilityMap = new Map<string, ArtistAvailability>()
+  availability.forEach(a => availabilityMap.set(a.date, a))
+
+  // Add days of current month
+  for (let i = 1; i <= lastDay.getDate(); i++) {
+    const date = new Date(year, month, i)
+    const dateStr = date.toISOString().split('T')[0]
+    const avail = availabilityMap.get(dateStr)
+
+    days.push({
+      date: dateStr,
+      status: avail?.status || 'available',
+      hasTimeSlots: !!(avail?.time_slots && avail.time_slots.length > 0),
+      notes: avail?.notes || undefined,
+      bookingId: avail?.booking_id || undefined
+    })
+  }
+
+  return days
+}
+
+// ============================================
+// BOOKING MANAGEMENT (Extended)
+// ============================================
+
+// Get bookings for artist (by artist_profile.id)
+export async function getBookingsForArtist(
+  artistProfileId: string,
+  status?: BookingRequest['status']
+): Promise<{ data: Booking[] | null; error: Error | null }> {
+  let query = supabase
+    .from('bookings')
+    .select(`
+      *,
+      client:users!client_id(
+        id,
+        membername,
+        vorname,
+        nachname,
+        profile_image_url
+      )
+    `)
+    .eq('artist_id', artistProfileId)
+    .order('event_date', { ascending: true })
+
+  if (status) {
+    query = query.eq('status', status)
+  }
+
+  const { data, error } = await query
+  return { data: data as Booking[] | null, error }
+}
+
+// Get bookings for customer
+export async function getBookingsForCustomer(
+  customerId: string,
+  status?: BookingRequest['status']
+): Promise<{ data: Booking[] | null; error: Error | null }> {
+  let query = supabase
+    .from('bookings')
+    .select(`
+      *,
+      artist_profile:artist_profiles!artist_id(
+        id,
+        kuenstlername,
+        jobbezeichnung,
+        star_rating,
+        user_id
+      )
+    `)
+    .eq('client_id', customerId)
+    .order('event_date', { ascending: true })
+
+  if (status) {
+    query = query.eq('status', status)
+  }
+
+  const { data, error } = await query
+  return { data: data as Booking[] | null, error }
+}
+
+// Update booking status
+export async function updateBookingStatus(
+  bookingId: string,
+  status: Booking['status'],
+  cancellationReason?: string,
+  cancelledBy?: string
+): Promise<{ data: Booking | null; error: Error | null }> {
+  const updateData: Record<string, unknown> = {
+    status,
+    updated_at: new Date().toISOString()
+  }
+
+  if (status === 'cancelled') {
+    updateData.cancelled_at = new Date().toISOString()
+    if (cancellationReason) updateData.cancellation_reason = cancellationReason
+    if (cancelledBy) updateData.cancelled_by = cancelledBy
+  }
+
+  const { data, error } = await supabase
+    .from('bookings')
+    .update(updateData)
+    .eq('id', bookingId)
+    .select()
+    .single()
+
+  return { data: data as Booking | null, error }
+}
+
+// Cancel booking with availability update
+export async function cancelBooking(
+  bookingId: string,
+  userId: string,
+  reason?: string
+): Promise<{ success: boolean; error: Error | null }> {
+  // First, get the booking to find the artist and date
+  const { data: booking, error: fetchError } = await supabase
+    .from('bookings')
+    .select('artist_id, event_date')
+    .eq('id', bookingId)
+    .single()
+
+  if (fetchError || !booking) {
+    return { success: false, error: fetchError }
+  }
+
+  // Update booking status
+  const { error: updateError } = await updateBookingStatus(
+    bookingId,
+    'cancelled',
+    reason,
+    userId
+  )
+
+  if (updateError) {
+    return { success: false, error: updateError }
+  }
+
+  // Update availability back to available
+  if (booking.artist_id && booking.event_date) {
+    await setArtistAvailability(
+      booking.artist_id,
+      booking.event_date,
+      'available',
+      undefined,
+      'Buchung storniert'
+    )
+  }
+
+  return { success: true, error: null }
+}
+
+// Create a confirmed booking from an accepted request
+export async function createBookingFromRequest(
+  requestId: string,
+  totalPrice: number,
+  depositAmount?: number
+): Promise<{ data: Booking | null; error: Error | null }> {
+  // Get the request details
+  const { data: request, error: requestError } = await supabase
+    .from('booking_requests')
+    .select('*')
+    .eq('id', requestId)
+    .single()
+
+  if (requestError || !request) {
+    return { data: null, error: requestError }
+  }
+
+  // Generate booking number
+  const bookingNumber = generateBookingNumber()
+
+  // Create booking
+  const { data, error } = await supabase
+    .from('bookings')
+    .insert({
+      booking_number: bookingNumber,
+      request_id: requestId,
+      artist_id: request.artist_id,
+      client_id: request.requester_id,
+      veranstalter_id: request.veranstalter_id,
+      event_date: request.event_date,
+      event_time_start: request.event_time_start,
+      event_time_end: request.event_time_end,
+      event_type: request.event_type,
+      event_location_name: request.event_location_name,
+      event_location_address: request.event_location_address,
+      event_size: request.event_size,
+      total_price: totalPrice,
+      deposit_amount: depositAmount,
+      status: 'confirmed',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .select()
+    .single()
+
+  if (!error && data && request.artist_id && request.event_date) {
+    // Update artist availability to booked
+    await setArtistAvailability(
+      request.artist_id,
+      request.event_date,
+      'booked',
+      undefined,
+      `Buchung ${bookingNumber}`
+    )
+
+    // Update request status to confirmed
+    await supabase
+      .from('booking_requests')
+      .update({ status: 'confirmed', updated_at: new Date().toISOString() })
+      .eq('id', requestId)
+  }
+
+  return { data: data as Booking | null, error }
+}
+
+// Get artist profile ID from user ID
+export async function getArtistProfileId(userId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('artist_profiles')
+    .select('id')
+    .eq('user_id', userId)
+    .single()
+
+  if (error || !data) return null
+  return data.id
 }

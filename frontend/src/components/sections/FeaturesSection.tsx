@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../ui/Button'
 
 interface FeaturesSectionProps {
@@ -5,6 +7,21 @@ interface FeaturesSectionProps {
 }
 
 export function FeaturesSection({ onRegisterClick }: FeaturesSectionProps) {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  const handleClick = () => {
+    if (user) {
+      // User is logged in - go to events or dashboard
+      navigate('/events')
+    } else if (onRegisterClick) {
+      // User not logged in - show register modal
+      onRegisterClick()
+    } else {
+      // Fallback - go to registration page
+      navigate('/registrieren')
+    }
+  }
   return (
     <section className="bg-bg-primary py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -114,10 +131,10 @@ export function FeaturesSection({ onRegisterClick }: FeaturesSectionProps) {
         <div className="flex justify-center">
           <Button
             variant="outline"
-            onClick={onRegisterClick}
+            onClick={handleClick}
             className="border-accent-purple text-accent-purple hover:bg-accent-purple/10 px-10 py-3 tracking-wider uppercase rounded-full text-sm font-bold"
           >
-            Jetzt Registrieren
+            {user ? 'Events Entdecken' : 'Jetzt Registrieren'}
           </Button>
         </div>
       </div>

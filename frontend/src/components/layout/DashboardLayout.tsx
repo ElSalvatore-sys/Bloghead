@@ -1,4 +1,5 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { getFullNavigationForRole, type UserRole } from '../../config/navigationConfig'
 
@@ -129,6 +130,25 @@ function LogoutIcon({ className = '' }: { className?: string }) {
   )
 }
 
+function MenuIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="6" x2="21" y2="6" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  )
+}
+
+function XIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  )
+}
+
 // Map icon names to components
 const iconMap: Record<string, React.FC<{ className?: string }>> = {
   user: UserIcon,
@@ -152,10 +172,28 @@ function getIcon(iconName: string | undefined) {
 }
 
 export function DashboardLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const { user, userProfile, signOut } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const userRole = userProfile?.user_type as UserRole | undefined
   const navItems = getFullNavigationForRole(userRole)
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    setSidebarOpen(false)
+  }, [location.pathname])
+
+  // Close sidebar on window resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setSidebarOpen(false)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const handleLogout = async () => {
     await signOut()
@@ -181,10 +219,34 @@ export function DashboardLayout() {
 
   return (
     <div className="min-h-screen bg-bg-primary flex">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-bg-card border-r border-white/10 flex flex-col">
+      <aside
+        className={`
+          fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-bg-card border-r border-white/10 flex flex-col
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0
+        `}
+      >
+        {/* Close button - mobile only */}
+        <button
+          className="absolute top-4 right-4 p-2 text-white/70 hover:text-white md:hidden"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Menü schließen"
+        >
+          <XIcon className="w-6 h-6" />
+        </button>
+
         {/* User Info */}
-        <div className="p-6 border-b border-white/10">
+        <div className="p-6 pt-14 md:pt-6 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-purple to-accent-red flex items-center justify-center text-white font-bold text-lg">
               {avatarInitial}
@@ -202,6 +264,7 @@ export function DashboardLayout() {
             <NavLink
               key={item.path}
               to={item.path}
+              onClick={() => setSidebarOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                   isActive
@@ -229,8 +292,20 @@ export function DashboardLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto p-6 md:p-8">
+      <main className="flex-1 overflow-y-auto min-h-screen">
+        {/* Mobile header with hamburger */}
+        <div className="sticky top-0 z-30 bg-bg-card border-b border-white/10 p-4 md:hidden flex items-center gap-4">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 text-white/70 hover:text-white"
+            aria-label="Menü öffnen"
+          >
+            <MenuIcon className="w-6 h-6" />
+          </button>
+          <span className="text-white font-medium">Dashboard</span>
+        </div>
+
+        <div className="max-w-5xl mx-auto p-4 md:p-6 lg:p-8">
           <Outlet />
         </div>
       </main>

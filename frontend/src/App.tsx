@@ -1,9 +1,10 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Layout, DashboardLayout } from './components/layout'
+import { Layout, DashboardLayout, AdminLayout } from './components/layout'
 import { HomePage } from './pages'
 import { CookieConsent } from './components/ui/CookieConsent'
 import { ProtectedRoute } from './components/auth'
+import { AdminGuard } from './components/admin'
 import { AuthProvider } from './contexts/AuthContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
@@ -42,6 +43,14 @@ const LegacyMyRequestsPage = lazy(() => import('./pages/dashboard/MyRequestsPage
 const LegacyMyCommunityPage = lazy(() => import('./pages/dashboard/MyCommunityPage'))
 const LegacyMyChatPage = lazy(() => import('./pages/dashboard/MyChatPage'))
 const LegacyMyCoinsPage = lazy(() => import('./pages/dashboard/MyCoinsPage'))
+
+// Admin pages
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })))
+const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage').then(m => ({ default: m.AdminUsersPage })))
+const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPage').then(m => ({ default: m.AdminReportsPage })))
+const AdminAnnouncementsPage = lazy(() => import('./pages/admin/AdminAnnouncementsPage').then(m => ({ default: m.AdminAnnouncementsPage })))
+const AdminTicketsPage = lazy(() => import('./pages/admin/AdminTicketsPage').then(m => ({ default: m.AdminTicketsPage })))
+const AdminAnalyticsPage = lazy(() => import('./pages/admin/AdminAnalyticsPage').then(m => ({ default: m.AdminAnalyticsPage })))
 
 // Loading spinner component
 function LoadingSpinner() {
@@ -118,6 +127,23 @@ function App() {
                 <Route path="community" element={<LegacyMyCommunityPage />} />
                 <Route path="chat" element={<LegacyMyChatPage />} />
                 <Route path="coins" element={<LegacyMyCoinsPage />} />
+              </Route>
+
+              {/* Admin Routes - Protected with AdminGuard and AdminLayout */}
+              <Route
+                path="/admin"
+                element={
+                  <AdminGuard>
+                    <AdminLayout />
+                  </AdminGuard>
+                }
+              >
+                <Route index element={<AdminDashboardPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
+                <Route path="reports" element={<AdminReportsPage />} />
+                <Route path="announcements" element={<AdminAnnouncementsPage />} />
+                <Route path="tickets" element={<AdminTicketsPage />} />
+                <Route path="analytics" element={<AdminAnalyticsPage />} />
               </Route>
             </Routes>
           </Suspense>

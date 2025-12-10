@@ -1,0 +1,173 @@
+BLOGHEAD - PRESENTATION.AI PROMPTS
+====================================
+
+Use these prompts with presentation.ai to generate professional slides.
+
+---
+
+PROMPT 1: EXECUTIVE OVERVIEW (5-7 slides)
+-----------------------------------------
+
+Create a modern, dark-themed presentation for "Bloghead" - an artist booking platform.
+
+Theme: Dark background (#171717), Purple accent (#610AD1), Orange highlights (#FB7A43)
+
+Slides needed:
+1. Title slide: "Bloghead - Die Artist-Booking-Plattform" with tagline "Kuenstler. Events. Verbunden."
+2. Problem slide: Show 4 pain points - Artists struggle to find gigs, Organizers can't find talent easily, Service providers are hard to discover, Fans miss events
+3. Solution slide: One platform connecting all stakeholders - Artists, Event Organizers, Service Providers, and Fans
+4. Key Features: Smart Search, Secure Booking, Coin System, Real-time Chat, Ratings
+5. Market Opportunity: German music/event industry statistics
+6. Technology: React, TypeScript, Supabase, 93/100 Performance Score
+7. Call to Action: "Jetzt starten" with contact information
+
+Style: Professional, modern, minimal text, impactful visuals
+
+---
+
+PROMPT 2: FEATURE DEEP-DIVE (10-12 slides)
+------------------------------------------
+
+Create a detailed feature presentation for "Bloghead" artist booking platform.
+
+Theme: Dark mode, purple (#610AD1) and orange (#FB7A43) accents on dark (#171717) background
+
+Slides:
+1. Title: "Bloghead Features im Detail"
+2. For Artists: Profile with portfolio, calendar management, booking requests, statistics, secure payments
+3. For Event Organizers: Event creation with AI assistance, artist search with filters, booking management, contracts
+4. For Service Providers: Service profiles (photography, sound, lighting), order management, customer reviews
+5. For Fans/Community: Follow artists, event notifications, write reviews, tip artists
+6. Smart Search Feature: Genre, location, price, availability filters with "Waffle View" grid
+7. Booking Flow: Request → Accept → Deposit → Event → Payment → Review (show as process diagram)
+8. Coin System: Earn coins for activity, redeem for premium features
+9. Rating System: Mutual ratings after events, categories for quality, professionalism, communication
+10. Real-time Chat: Direct messages, file sharing, booking discussions
+11. Security: GDPR compliant, secure payments, escrow system
+12. Summary: All features in one ecosystem
+
+Include icons and visual representations for each feature.
+
+---
+
+PROMPT 3: TECHNICAL ARCHITECTURE (8-10 slides)
+----------------------------------------------
+
+Create a technical presentation for developers about "Bloghead" architecture.
+
+Theme: Clean, dark (#171717), with code-style elements, purple accents
+
+Slides:
+1. Title: "Bloghead - Technische Architektur"
+2. Tech Stack: React 18 + TypeScript + Vite + TailwindCSS 4 + Supabase
+3. Frontend Architecture: Component hierarchy diagram (Pages → Sections → UI Components)
+4. Database Schema: 38 tables overview with key relationships (users, artists, bookings, events, messages)
+5. Authentication: Email/Password + OAuth (Google, Facebook, Instagram) + Supabase Auth
+6. API Layer: Service functions connecting to Supabase (show code snippet style)
+7. Real-time Features: Supabase Realtime for chat and notifications
+8. Security: Row Level Security (RLS), GDPR compliance, data protection
+9. Performance: 93/100 Lighthouse, >90% test coverage, 304 automated tests
+10. Deployment: Vercel auto-deploy, CI/CD pipeline
+
+Use architecture diagrams and code snippets where appropriate.
+
+---
+
+PROMPT 4: USER JOURNEY (6-8 slides)
+-----------------------------------
+
+Create a user journey presentation showing how different users interact with Bloghead.
+
+Theme: Storytelling format, dark background, warm accents
+
+Slides:
+1. Title: "User Journeys - Bloghead"
+2. Fan Journey: Discover → Follow → Attend → Review → Tip
+3. Artist Journey: Register → Create Profile → Set Availability → Receive Booking → Perform → Get Paid
+4. Organizer Journey: Plan Event → Search Artists → Book → Manage → Pay → Rate
+5. Service Provider Journey: List Services → Receive Orders → Deliver → Get Reviewed
+6. Cross-Journey: Show how all users interact on the platform
+7. Success Metrics: Bookings completed, reviews written, satisfaction rates
+8. Future Vision: AI event planning, VR experiences, mobile app
+
+Use journey map style visualizations with icons for each step.
+
+---
+
+PROMPT 5: BUSINESS CASE (6 slides)
+----------------------------------
+
+Create a business case presentation for Bloghead platform.
+
+Theme: Professional, data-driven, dark with accent colors
+
+Slides:
+1. Title: "Bloghead - Business Case"
+2. Market Size: German event/music industry worth €XXX billion
+3. Revenue Model: Commission on bookings (15-20%), Premium subscriptions, Coin purchases
+4. Development Investment: 13 days of AI-assisted development, equivalent to €XX,XXX in traditional development
+5. Competitive Advantage: All-in-one platform, modern tech stack, German market focus, GDPR compliant
+6. Next Steps: Phase 3 backend completion, Beta launch, User acquisition
+
+Include charts and statistics where applicable.
+
+---
+
+PROMPT 6: DEMO PREPARATION (4 slides)
+-------------------------------------
+
+Create introductory slides for a live demo of Bloghead.
+
+Theme: Minimal, clean, dark
+
+Slides:
+1. Title: "Bloghead Live Demo"
+2. What We'll See: Homepage, Artist Search, Artist Profile, Booking Flow (list format)
+3. Key Points to Notice: Responsive design, smooth animations, German localization, professional UI
+4. Let's Begin: Simple slide to transition to live demo
+
+Keep text minimal - these are just intro slides before live demonstration.
+
+---
+
+GENERAL STYLING NOTES FOR ALL PROMPTS:
+======================================
+
+Colors:
+- Primary: #610AD1 (Purple)
+- Secondary: #FB7A43 (Orange)
+- Error/Alert: #F92B02 (Red)
+- Background: #171717 (Dark)
+- Text: #FFFFFF (White), #9CA3AF (Gray for secondary text)
+
+Typography:
+- Headlines: Bold, clean sans-serif
+- Body: Regular weight, high readability
+
+Visual Style:
+- Glassmorphism effects where appropriate
+- Subtle gradients from purple to orange
+- Rounded corners on elements
+- Plenty of whitespace
+- Professional iconography
+
+Logo: Include "Bloghead" text logo on each slide
+
+---
+
+SINGLE-SLIDE PROMPTS:
+=====================
+
+For quick single slides, use these focused prompts:
+
+"Create a dark-themed slide showing Bloghead's 4 user types: Fan, Artist, Service Provider, Event Organizer - each with an icon and 2-3 bullet points of features"
+
+"Create a process flow slide showing Bloghead's booking process: Request → Accept → Deposit → Event → Payment → Review - with icons and arrows on dark background"
+
+"Create a statistics slide for Bloghead: 38 database tables, 26+ components, 7 pages, 304 tests, 93/100 performance score - use icons and modern data visualization"
+
+"Create a tech stack slide showing: React, TypeScript, Vite, TailwindCSS, Supabase - with logos arranged in a modern layout on dark background"
+
+---
+
+END OF PROMPTS FILE

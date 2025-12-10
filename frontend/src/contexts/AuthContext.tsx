@@ -15,6 +15,7 @@ export interface UserProfile {
   cover_image_url: string | null
   is_verified: boolean
   membership_tier: 'basic' | 'premium' | null
+  role?: 'user' | 'admin' | 'moderator'
 }
 
 interface AuthContextType {
@@ -46,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('id, email, membername, vorname, nachname, user_type, profile_image_url, cover_image_url, is_verified, membership_tier')
+        .select('id, email, membername, vorname, nachname, user_type, profile_image_url, cover_image_url, is_verified, membership_tier, role')
         .eq('id', userId)
         .single()
 

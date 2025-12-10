@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../ui/Button'
 import { OptimizedImage } from '../ui/OptimizedImage'
 
@@ -20,6 +21,17 @@ function ChevronRightIcon({ className = '' }: { className?: string }) {
 }
 
 export function EventsSection() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+
+  const handleRegisterClick = () => {
+    if (!user) {
+      navigate('/registrieren')
+    } else {
+      navigate('/events')
+    }
+  }
+
   return (
     <section className="bg-bg-primary py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
@@ -149,14 +161,13 @@ export function EventsSection() {
             Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur
             ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu.
           </p>
-          <Link to="/events">
-            <Button
-              variant="outline"
-              className="border-accent-purple text-accent-purple hover:bg-accent-purple/10 px-10 py-3 tracking-wider uppercase rounded-full text-sm font-bold"
-            >
-              Jetzt Registrieren
-            </Button>
-          </Link>
+          <Button
+            variant="outline"
+            onClick={handleRegisterClick}
+            className="border-accent-purple text-accent-purple hover:bg-accent-purple/10 px-10 py-3 tracking-wider uppercase rounded-full text-sm font-bold"
+          >
+            {user ? 'Events Entdecken' : 'Jetzt Registrieren'}
+          </Button>
         </div>
       </div>
     </section>

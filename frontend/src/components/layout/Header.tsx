@@ -133,11 +133,13 @@ function UserDropdown({
   onClose,
   onLogout,
   userRole,
+  isAdmin,
 }: {
   isOpen: boolean
   onClose: () => void
   onLogout: () => void
   userRole: UserRole | undefined
+  isAdmin: boolean
 }) {
   const dropdownRef = useRef<HTMLDivElement>(null)
   const menuItems = getRoleBasedUserMenuItems(userRole)
@@ -165,6 +167,22 @@ function UserDropdown({
       ref={dropdownRef}
       className="absolute top-full right-0 mt-2 min-w-[200px] bg-bg-card border border-white/10 rounded-lg shadow-lg py-2 z-50"
     >
+      {/* Admin Panel Link */}
+      {isAdmin && (
+        <>
+          <Link
+            to="/admin"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors"
+            onClick={onClose}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            Admin Panel
+          </Link>
+          <div className="border-t border-white/10 my-1"></div>
+        </>
+      )}
       {menuItems.map((item) => (
         <Link
           key={item.href}
@@ -199,6 +217,7 @@ function MobileMenu({
   onRegisterClick,
   onLogout,
   userRole,
+  isAdmin,
 }: {
   isOpen: boolean
   onClose: () => void
@@ -207,6 +226,7 @@ function MobileMenu({
   onRegisterClick: () => void
   onLogout: () => void
   userRole: UserRole | undefined
+  isAdmin: boolean
 }) {
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
   const userMenuItems = getRoleBasedUserMenuItems(userRole)
@@ -292,6 +312,20 @@ function MobileMenu({
           <HeartIcon size={20} />
           Favoriten
         </Link>
+
+        {/* Admin Link (if admin) */}
+        {isLoggedIn && isAdmin && (
+          <Link
+            to="/admin"
+            className="flex items-center gap-3 py-4 text-lg font-medium text-purple-400 border-b border-white/5"
+            onClick={onClose}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            Admin Panel
+          </Link>
+        )}
 
         {/* User Menu Items (if logged in) */}
         {isLoggedIn && (
@@ -389,6 +423,7 @@ export function Header() {
   const { user, userProfile, signOut } = useAuth()
   const isLoggedIn = !!user
   const userRole = userProfile?.user_type as UserRole | undefined
+  const isAdmin = userProfile?.role === 'admin'
 
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showRegisterModal, setShowRegisterModal] = useState(false)
@@ -532,6 +567,7 @@ export function Header() {
                     onClose={() => setUserDropdownOpen(false)}
                     onLogout={handleLogout}
                     userRole={userRole}
+                    isAdmin={isAdmin}
                   />
                 )}
               </div>
@@ -600,6 +636,7 @@ export function Header() {
         onRegisterClick={() => setShowRegisterModal(true)}
         onLogout={handleLogout}
         userRole={userRole}
+        isAdmin={isAdmin}
       />
 
       {/* Login Modal */}
