@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { getFullNavigationForRole, type UserRole } from '../../config/navigationConfig'
+import { CreateEventButton } from '../event'
 
 // Icons for sidebar navigation
 function UserIcon({ className = '' }: { className?: string }) {
@@ -308,6 +309,9 @@ export function DashboardLayout() {
         <div className="max-w-5xl mx-auto p-4 md:p-6 lg:p-8">
           <Outlet />
         </div>
+
+        {/* Floating Create Event Button - Only for Event Organizers */}
+        <CreateEventButton />
       </main>
     </div>
   )

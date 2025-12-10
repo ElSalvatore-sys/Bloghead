@@ -7,7 +7,7 @@ Ihr habt mir **3 PDF-Designs** gegeben:
 - Flowchart (Benutzerablauf)
 - Website-Mockups (wie es aussehen soll)
 
-**Ergebnis:** Eine funktionierende Website in **13 Tagen**.
+**Ergebnis:** Eine funktionierende Website in **13 Tagen**. that needs polishing. 
 
 ---
 
@@ -102,8 +102,11 @@ Jeder Benutzertyp hat seinen eigenen Bereich:
 | Wiederverwendbare Bausteine | 63 |
 | Datenbank-Tabellen | 36 |
 | Backend-Services | 14 |
-| Automatische Tests | 59 |
-| Aufgaben erledigt | 66 |
+| Unit Tests | 304 |
+| E2E Tests | 206 |
+| **Gesamt Tests** | **510** |
+| Browser getestet | 4 |
+| Testabdeckung | 90%+ |
 | **Entwicklungszeit** | **13 Tage** |
 
 ---
@@ -115,7 +118,6 @@ Jeder Benutzertyp hat seinen eigenen Bereich:
 | Performance (Geschwindigkeit) | 93 von 100 |
 | SEO (Google-Findbarkeit) | 100 von 100 |
 | Mobile-freundlich | Ja |
-| Deutsche Sprache | Komplett |
 
 **Verbesserungen:**
 - Ladezeit: 68s → 2.7s (25x schneller)
@@ -129,9 +131,9 @@ Jeder Benutzertyp hat seinen eigenen Bereich:
 |-----------|--------|------|
 | Agentur wuerde verlangen | 50.000 - 100.000 EUR | 3-6 Monate |
 | Freelancer wuerde verlangen | 25.000 - 50.000 EUR | 2-4 Monate |
-| **Wir haben bezahlt** | **~300 EUR** | **13 Tage** |
+| **Wir haben bezahlt** | **~>300 EUR** | **13 Tage** |
 
-**Ersparnis: ~99%**
+**Ersparnis: ~80%**
 
 ---
 

@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom'
+
 // My Events page for event organizers
 const mockEvents = [
   {
@@ -88,6 +90,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 }
 
 export function MyEventsPage() {
+  const navigate = useNavigate()
   const upcomingEvents = mockEvents.filter(e => e.status === 'upcoming')
   const pastEvents = mockEvents.filter(e => e.status === 'completed')
 
@@ -95,7 +98,10 @@ export function MyEventsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-white">Meine Events</h1>
-        <button className="flex items-center gap-2 px-4 py-2 bg-accent-purple text-white font-medium rounded-lg hover:bg-accent-purple/90 transition-colors">
+        <button
+          onClick={() => navigate('/events/create')}
+          className="flex items-center gap-2 px-4 py-2 bg-accent-purple text-white font-medium rounded-lg hover:bg-accent-purple/90 transition-colors"
+        >
           <CalendarPlusIcon className="w-5 h-5" />
           Neues Event
         </button>

@@ -16,8 +16,8 @@ const EventsPage = lazy(() => import('./pages/EventsPage').then(m => ({ default:
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage').then(m => ({ default: m.EventDetailPage })))
 const ServiceProvidersPage = lazy(() => import('./pages/ServiceProvidersPage').then(m => ({ default: m.ServiceProvidersPage })))
 const ServiceProviderProfilePage = lazy(() => import('./pages/ServiceProviderProfilePage').then(m => ({ default: m.ServiceProviderProfilePage })))
-const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })))
 const ProfileEditPage = lazy(() => import('./pages/ProfileEditPage').then(m => ({ default: m.ProfileEditPage })))
+const CreateEventPage = lazy(() => import('./pages/CreateEventPage').then(m => ({ default: m.CreateEventPage })))
 const ImpressumPage = lazy(() => import('./pages/ImpressumPage'))
 const KontaktPage = lazy(() => import('./pages/KontaktPage'))
 const DatenschutzPage = lazy(() => import('./pages/DatenschutzPage'))
@@ -80,7 +80,6 @@ function App() {
                 <Route path="/events/:id" element={<EventDetailPage />} />
                 <Route path="/services" element={<ServiceProvidersPage />} />
                 <Route path="/services/:id" element={<ServiceProviderProfilePage />} />
-                <Route path="/about" element={<AboutPage />} />
                 <Route path="/impressum" element={<ImpressumPage />} />
                 <Route path="/kontakt" element={<KontaktPage />} />
                 <Route path="/datenschutz" element={<DatenschutzPage />} />
@@ -88,6 +87,7 @@ function App() {
 
                 {/* Protected Routes with Layout */}
                 <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
+                <Route path="/events/create" element={<ProtectedRoute><CreateEventPage /></ProtectedRoute>} />
               </Route>
 
               {/* Dashboard Routes - Protected with DashboardLayout (no Header/Footer) */}

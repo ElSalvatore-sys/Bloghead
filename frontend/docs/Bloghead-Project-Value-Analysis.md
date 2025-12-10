@@ -67,9 +67,9 @@ Dieses Dokument analysiert den Wert des Bloghead-Projekts basierend auf den **ta
 | API-Konzeption | 40h | 5.200 EUR |
 | Auth-System | 24h | 3.120 EUR |
 | **Testing & QA** | | |
-| Unit Tests (10 Dateien) | 40h | 3.600 EUR |
+| Unit Tests (304 Tests) | 60h | 5.400 EUR |
 | Integration Tests | 32h | 2.880 EUR |
-| E2E Tests | 24h | 2.160 EUR |
+| E2E Tests (206 Tests, 4 Browser) | 40h | 3.600 EUR |
 | **Projektmanagement** | 60h | 6.840 EUR |
 | **Dokumentation** | 24h | 2.160 EUR |
 | | | |
@@ -168,7 +168,9 @@ Dieses Dokument analysiert den Wert des Bloghead-Projekts basierend auf den **ta
 | Clean Code Principles | ✅ | Gleichwertig |
 | 63 Komponenten | ✅ | Ueberdurchschnittlich |
 | **Testing** | | |
-| 10 Test-Dateien | ✅ | Standard |
+| 304 Unit Tests | ✅ | Ueberdurchschnittlich |
+| 206 E2E Tests | ✅ | Ueberdurchschnittlich |
+| 4 Browser getestet | ✅ | Ueberdurchschnittlich |
 | >90% Coverage | ✅ | Ueberdurchschnittlich |
 | **Performance** | | |
 | 93/100 Lighthouse | ✅ | Ueberdurchschnittlich |
@@ -285,7 +287,7 @@ Wenn die Plattform Einnahmen generiert:
 | 40 Seiten | ~48.000 EUR |
 | 63 Komponenten | ~15.000 EUR |
 | 14 Services | ~7.000 EUR |
-| Testing Suite | ~8.000 EUR |
+| Testing Suite (510 Tests) | ~12.000 EUR |
 | Design-System | ~10.000 EUR |
 | Dokumentation | ~5.000 EUR |
 | | |

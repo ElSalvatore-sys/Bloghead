@@ -24,24 +24,11 @@ interface UserMenuItem {
   icon?: React.ReactNode
 }
 
-// Navigation configuration
-const navItems: NavItem[] = [
-  {
-    label: 'ABOUT',
-    href: '/about',
-    dropdown: [
-      { label: 'Wer wir sind', href: '/about/who-we-are' },
-      { label: 'Unsere Vorteile', href: '/about/benefits' },
-      { label: 'Bloghead Coins', href: '/about/coins' },
-    ],
-  },
+// Base navigation items (always visible)
+const baseNavItems: NavItem[] = [
   {
     label: 'ARTISTS',
     href: '/artists',
-  },
-  {
-    label: 'SERVICES',
-    href: '/services',
   },
   {
     label: 'EVENTS',
@@ -52,6 +39,25 @@ const navItems: NavItem[] = [
     ],
   },
 ]
+
+// Services nav item (only for event_organizer)
+const servicesNavItem: NavItem = {
+  label: 'SERVICES',
+  href: '/services',
+}
+
+// Function to get navigation items based on user role
+function getNavItems(userRole: UserRole | undefined): NavItem[] {
+  const items = [...baseNavItems]
+
+  // Only show Services to event_organizer (Veranstalter)
+  if (userRole === 'event_organizer') {
+    // Insert Services after Artists (at index 1)
+    items.splice(1, 0, servicesNavItem)
+  }
+
+  return items
+}
 
 // User menu items are now role-based - see navigationConfig.ts
 // This function converts role nav items to user menu items format
@@ -263,7 +269,7 @@ function MobileMenu({
 
       {/* Navigation */}
       <nav className="flex flex-col p-4 overflow-y-auto h-[calc(100vh-80px)]">
-        {navItems.map((item) => (
+        {getNavItems(userRole).map((item) => (
           <div key={item.href} className="border-b border-white/5">
             {item.dropdown ? (
               <>
@@ -489,7 +495,7 @@ export function Header() {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-8">
-              {navItems.map((item) => (
+              {getNavItems(userRole).map((item) => (
                 <div key={item.href} className="relative">
                   {item.dropdown ? (
                     <>

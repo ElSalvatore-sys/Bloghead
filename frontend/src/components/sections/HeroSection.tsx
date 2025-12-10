@@ -42,33 +42,42 @@ export function HeroSection({}: HeroSectionProps) {
       {/* Hero Content - Centered */}
       <div
         className={`
-          relative z-10 flex flex-col items-center text-center px-4
+          relative z-10 flex flex-col items-center text-center px-4 max-w-5xl mx-auto
           transition-all duration-1000 ease-out
           ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
         `}
       >
-        {/* "BE A MEMBER OF" - small caps */}
-        <p
-          className="text-white text-xs md:text-sm uppercase mb-2 md:mb-4"
-          style={{
-            letterSpacing: '0.3em',
-            fontFamily: 'Roboto, sans-serif',
-            fontWeight: 400
-          }}
-        >
-          Be a member of
-        </p>
-
         {/* "BlogHead" - Large display font */}
         <h1
-          className="font-display text-white leading-none"
+          className="font-display text-white leading-none mb-4 md:mb-6"
           style={{
-            fontSize: 'clamp(80px, 15vw, 200px)',
+            fontSize: 'clamp(60px, 12vw, 160px)',
             textShadow: '0 0 40px rgba(255, 255, 255, 0.3)',
           }}
         >
           BlogHead
         </h1>
+
+        {/* Tagline */}
+        <p
+          className="text-white text-lg md:text-2xl lg:text-3xl font-bold uppercase mb-4 md:mb-6"
+          style={{
+            letterSpacing: '0.1em',
+            fontFamily: 'Roboto, sans-serif',
+          }}
+        >
+          Backstage Control, Frontstage Connection
+        </p>
+
+        {/* Subtitle */}
+        <p
+          className="text-white/80 text-sm md:text-base lg:text-lg leading-relaxed max-w-3xl"
+          style={{
+            fontFamily: 'Roboto, sans-serif',
+          }}
+        >
+          Von der ersten Anfrage bis zum letzten Applaus: Bloghead bringt Eventbuero, Dienstleisternetzwerk, Artists und Community auf eine gemeinsame Plattform.
+        </p>
       </div>
 
       {/* Scroll Indicator */}

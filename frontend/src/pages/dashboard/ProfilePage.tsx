@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { type UserRole } from '../../config/navigationConfig'
 
 export function ProfilePage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const userRole = user?.user_metadata?.user_type as UserRole | undefined
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
@@ -38,7 +40,10 @@ export function ProfilePage() {
           </div>
 
           {/* Edit Button */}
-          <button className="px-4 py-2 border border-white/20 text-white text-sm font-medium rounded-lg hover:bg-white/5 transition-colors">
+          <button
+            onClick={() => navigate('/profile/edit')}
+            className="px-4 py-2 border border-white/20 text-white text-sm font-medium rounded-lg hover:bg-white/5 transition-colors"
+          >
             Profil bearbeiten
           </button>
         </div>

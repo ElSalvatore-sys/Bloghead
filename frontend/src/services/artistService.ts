@@ -34,9 +34,30 @@ export interface ArtistListItem {
   cover_image_url?: string
 }
 
-// Generate placeholder image URL based on artist name
-function getPlaceholderImage(name: string, size = 400): string {
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Artist')}&background=610AD1&color=fff&size=${size}&bold=true`
+// Unsplash placeholder images for artists (music/performance themed)
+const artistPlaceholders = [
+  'https://images.unsplash.com/photo-1571266028243-e4733b0f0bb0?w=400&h=400&fit=crop', // DJ at decks
+  'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&h=400&fit=crop', // Singer with mic
+  'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop', // Band performing
+  'https://images.unsplash.com/photo-1547355253-ff0740f6e8c1?w=400&h=400&fit=crop', // Rapper on stage
+  'https://images.unsplash.com/photo-1465847899084-d164df4dedc6?w=400&h=400&fit=crop', // Violinist
+  'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=400&fit=crop', // Jazz musician
+  'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=400&h=400&fit=crop', // DJ mixing
+  'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=400&fit=crop', // Guitar player
+  'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&h=400&fit=crop', // Singer live
+  'https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=400&h=400&fit=crop', // Concert performer
+  'https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=400&h=400&fit=crop', // Band silhouette
+  'https://images.unsplash.com/photo-1501612780327-45045538702b?w=400&h=400&fit=crop', // Festival DJ
+]
+
+// Generate placeholder image URL based on artist id for consistency
+function getPlaceholderImage(artistId: string): string {
+  // Use artist id to get a consistent placeholder (same artist always gets same image)
+  const hash = artistId.split('').reduce((acc, char) => {
+    return acc + char.charCodeAt(0)
+  }, 0)
+  const index = hash % artistPlaceholders.length
+  return artistPlaceholders[index]
 }
 
 // Get list of artists with filters
@@ -117,7 +138,7 @@ export async function getArtists(filters: ArtistFilters = {}) {
     const userData = artist.users as { profile_image_url?: string; cover_image_url?: string } | null
     return {
       ...artist,
-      profile_image_url: userData?.profile_image_url || getPlaceholderImage(artist.kuenstlername),
+      profile_image_url: userData?.profile_image_url || getPlaceholderImage(artist.id),
       cover_image_url: userData?.cover_image_url,
       // Map preis_minimum to preis_pro_stunde for backward compatibility with UI
       preis_pro_stunde: artist.preis_minimum,
@@ -165,7 +186,7 @@ export async function getArtistById(artistId: string) {
 
   const flattenedData = {
     ...data,
-    profile_image_url: userData?.profile_image_url || getPlaceholderImage(data.kuenstlername),
+    profile_image_url: userData?.profile_image_url || getPlaceholderImage(data.id),
     cover_image_url: userData?.cover_image_url,
     vorname: userData?.vorname,
     nachname: userData?.nachname,

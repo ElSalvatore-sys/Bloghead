@@ -102,7 +102,10 @@ Each user type has their own area:
 | Reusable components | 63 |
 | Database tables | 36 |
 | Backend services | 14 |
-| Automated tests | 304 |
+| Unit Tests | 304 |
+| E2E Tests | 206 |
+| **Total Tests** | **510** |
+| Browsers Tested | 4 |
 | Test coverage | 90%+ |
 | **Development time** | **13 days** |
 
