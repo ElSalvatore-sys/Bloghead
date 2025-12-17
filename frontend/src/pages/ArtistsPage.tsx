@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
@@ -40,13 +41,20 @@ function ArtistCard({ artist }: ArtistCardProps) {
     'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop'
 
   return (
-    <div className="group flex flex-col">
+    <motion.div
+      className="group flex flex-col"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
+    >
       {/* Image Container */}
       <div className="relative aspect-square mb-4 overflow-hidden rounded-lg">
         <img
           src={imageUrl}
           alt={artist.kuenstlername || 'Künstler'}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
         {/* Favorite Button */}
         <FavoriteButton
@@ -99,17 +107,19 @@ function ArtistCard({ artist }: ArtistCardProps) {
 
         {/* CTA Button */}
         <Link to={`/artists/${artist.id}`}>
-          <Button
-            variant="secondary"
-            size="sm"
-            fullWidth
-            className="mt-3 rounded-full border-white/30 hover:border-white/50 uppercase tracking-wider"
-          >
-            Profil Ansehen
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              fullWidth
+              className="mt-3 rounded-full border-white/30 hover:border-white/50 uppercase tracking-wider"
+            >
+              Profil Ansehen
+            </Button>
+          </motion.div>
         </Link>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

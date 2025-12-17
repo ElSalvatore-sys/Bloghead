@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../ui/Button'
 
@@ -31,18 +32,31 @@ export function MemberCTASection({ className = '', onMemberClick }: MemberCTASec
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
         {/* Main Title - Hyperwave Font italic */}
-        <h2 className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight italic">
+        <motion.h2
+          className="font-display text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight italic"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6 }}
+        >
           Starte jetzt mit deinem Profil auf Bloghead.
-        </h2>
+        </motion.h2>
 
         {/* CTA Button */}
-        <Button
-          variant="outline"
-          onClick={handleClick}
-          className="border-white text-white hover:bg-white/10 px-10 py-4 tracking-wider uppercase rounded-full text-sm md:text-base font-bold"
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
         >
-          {user ? 'Zum Dashboard' : 'Kostenlos Registrieren'}
-        </Button>
+          <Button
+            variant="outline"
+            onClick={handleClick}
+            className="border-white text-white hover:bg-white/10 px-10 py-4 tracking-wider uppercase rounded-full text-sm md:text-base font-bold"
+          >
+            {user ? 'Zum Dashboard' : 'Kostenlos Registrieren'}
+          </Button>
+        </motion.div>
       </div>
     </section>
   )

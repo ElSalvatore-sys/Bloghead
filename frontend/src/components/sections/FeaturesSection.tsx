@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../ui/Button'
+import { staggerContainer, staggerItem } from '@/lib/animations'
 
 interface FeaturesSectionProps {
   onRegisterClick?: () => void
@@ -56,28 +58,52 @@ export function FeaturesSection({ onRegisterClick }: FeaturesSectionProps) {
     <section className="bg-bg-primary py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Section Title */}
-        <div className="mb-12 md:mb-16 text-center">
+        <motion.div
+          className="mb-12 md:mb-16 text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="font-display text-4xl md:text-6xl lg:text-7xl text-white italic mb-4">
             Fuer wen ist Bloghead?
           </h2>
           {/* Gradient underline bar */}
-          <div
+          <motion.div
             className="h-1 w-32 md:w-40 mt-4 mx-auto"
             style={{
               background: 'linear-gradient(90deg, #610AD1 0%, #F92B02 100%)'
             }}
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
           />
-        </div>
+        </motion.div>
 
         {/* 4 User Type Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12"
+          variants={staggerContainer}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: '-50px' }}
+        >
           {userTypes.map((userType) => (
-            <UserTypeCard key={userType.id} userType={userType} />
+            <motion.div key={userType.id} variants={staggerItem}>
+              <UserTypeCard userType={userType} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* CTA Button - Centered */}
-        <div className="flex justify-center">
+        <motion.div
+          className="flex justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           <Button
             variant="outline"
             onClick={handleClick}
@@ -85,7 +111,7 @@ export function FeaturesSection({ onRegisterClick }: FeaturesSectionProps) {
           >
             {user ? 'Events Entdecken' : 'Jetzt Registrieren'}
           </Button>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

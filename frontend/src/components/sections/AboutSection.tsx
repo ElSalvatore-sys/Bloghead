@@ -1,9 +1,17 @@
+import { motion } from 'framer-motion'
+
 export function AboutSection() {
   return (
     <section className="relative bg-bg-primary py-16 md:py-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Section Title */}
-        <div className="mb-12 md:mb-16 text-center">
+        <motion.div
+          className="mb-12 md:mb-16 text-center"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6 }}
+        >
           <h2 className="font-display text-4xl md:text-6xl lg:text-7xl text-white italic mb-4">
             Eine Plattform
           </h2>
@@ -14,22 +22,31 @@ export function AboutSection() {
             Zwei Welten
           </p>
           {/* Gradient underline bar */}
-          <div
+          <motion.div
             className="h-1 w-32 md:w-40 mt-4 mx-auto"
             style={{
               background: 'linear-gradient(90deg, #610AD1 0%, #F92B02 100%)'
             }}
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
           />
-        </div>
+        </motion.div>
 
         {/* Two Cards Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           {/* Frontstage Card */}
-          <div
+          <motion.div
             className="rounded-2xl p-8 md:p-10 lg:p-12 flex flex-col"
             style={{
               background: 'linear-gradient(135deg, #F92B02 0%, #FB7A43 100%)',
             }}
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(249, 43, 2, 0.2)' }}
           >
             {/* Icon */}
             <div className="w-16 h-16 mb-6 text-white">
@@ -58,14 +75,19 @@ export function AboutSection() {
             >
               Frontstage bringt Bloghead Artists und Community zusammen: Kuenstlerprofile treffen auf ihre Community, die Events, Tickets und Aktionen an einem Ort finden - fuer mehr Naehe, gemeinsamen Vibe und eine wachsende Crowd.
             </p>
-          </div>
+          </motion.div>
 
           {/* Backstage Card */}
-          <div
+          <motion.div
             className="rounded-2xl p-8 md:p-10 lg:p-12 flex flex-col"
             style={{
               backgroundColor: '#610AD1',
             }}
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            whileHover={{ y: -5, boxShadow: '0 20px 40px rgba(97, 10, 209, 0.3)' }}
           >
             {/* Icon */}
             <div className="w-16 h-16 mb-6 text-white">
@@ -95,7 +117,7 @@ export function AboutSection() {
             >
               Backstage bietet Bloghead alles fuer die Event-Orga: Angebote, Vertraege, Rechnungen und Frageboegen laufen mit Kontakten, E-Mails und Workflows in einem System zusammen - statt in verstreuten Postfaechern und Excel-Listen.
             </p>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

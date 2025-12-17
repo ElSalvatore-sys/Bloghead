@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Button } from '../ui/Button'
 import { OptimizedImage } from '../ui/OptimizedImage'
 
@@ -164,12 +165,24 @@ export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarou
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-16 md:py-24">
         {/* Section Title - Hyperwave italic */}
-        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8 italic">
+        <motion.h2
+          className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8 italic"
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6 }}
+        >
           Artists
-        </h2>
+        </motion.h2>
 
         {/* Content: Left text, artist cards on bottom */}
-        <div className="max-w-lg mb-12">
+        <motion.div
+          className="max-w-lg mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           <h3
             className="text-white text-xl md:text-2xl font-bold uppercase tracking-wide mb-4"
             style={{ fontFamily: 'Roboto, sans-serif' }}
@@ -192,10 +205,16 @@ export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarou
               Find Out More
             </Button>
           </Link>
-        </div>
+        </motion.div>
 
         {/* Artist Cards Carousel */}
-        <div className="relative">
+        <motion.div
+          className="relative"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           {/* Navigation Arrows */}
           <button
             onClick={() => scroll('left')}
@@ -229,7 +248,7 @@ export function ArtistsCarouselSection({ artists = sampleArtists }: ArtistsCarou
               <ArtistCard key={artist.id} artist={artist} />
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Hide scrollbar */}

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator 2 - Minimal Modern</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f5f5f7;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .calculator {
+      background: #ffffff;
+      border-radius: 40px;
+      padding: 32px 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 340px;
+    }
+    .display {
+      padding: 20px 8px;
+      margin-bottom: 24px;
+    }
+    .display-expression {
+      font-size: 16px;
+      font-weight: 400;
+      color: #86868b;
+      text-align: right;
+      min-height: 24px;
+      margin-bottom: 8px;
+    }
+    .display-result {
+      font-size: 56px;
+      font-weight: 300;
+      color: #1d1d1f;
+      text-align: right;
+      letter-spacing: -2px;
+      line-height: 1;
+    }
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+    .btn {
+      border: none;
+      border-radius: 50%;
+      font-family: inherit;
+      font-size: 28px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      margin: 0 auto;
+    }
+    .btn:hover { transform: scale(1.05); }
+    .btn:active { transform: scale(0.95); opacity: 0.8; }
+
+    .btn-function {
+      background: #e5e5ea;
+      color: #1d1d1f;
+      font-size: 24px;
+    }
+    .btn-function:hover { background: #d1d1d6; }
+
+    .btn-number {
+      background: #ffffff;
+      color: #1d1d1f;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .btn-number:hover { background: #f5f5f7; }
+
+    .btn-operator {
+      background: #ff9500;
+      color: #ffffff;
+      font-size: 32px;
+    }
+    .btn-operator:hover { background: #ffaa33; }
+    .btn-operator.active {
+      background: #ffffff;
+      color: #ff9500;
+    }
+
+    .btn-zero {
+      width: 158px;
+      border-radius: 36px;
+      justify-content: flex-start;
+      padding-left: 28px;
+      grid-column: span 2;
+    }
+
+    /* Subtle gradient overlay */
+    .calculator::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, transparent 100%);
+      border-radius: 40px 40px 0 0;
+      pointer-events: none;
+    }
+    .calculator { position: relative; }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <!-- Display -->
+    <div class="display">
+      <div class="display-expression">125 × 8</div>
+      <div class="display-result">1,000</div>
+    </div>
+
+    <!-- Button Grid -->
+    <div class="btn-grid">
+      <!-- Row 1 -->
+      <button class="btn btn-function">AC</button>
+      <button class="btn btn-function">±</button>
+      <button class="btn btn-function">%</button>
+      <button class="btn btn-operator">÷</button>
+
+      <!-- Row 2 -->
+      <button class="btn btn-number">7</button>
+      <button class="btn btn-number">8</button>
+      <button class="btn btn-number">9</button>
+      <button class="btn btn-operator">×</button>
+
+      <!-- Row 3 -->
+      <button class="btn btn-number">4</button>
+      <button class="btn btn-number">5</button>
+      <button class="btn btn-number">6</button>
+      <button class="btn btn-operator">−</button>
+
+      <!-- Row 4 -->
+      <button class="btn btn-number">1</button>
+      <button class="btn btn-number">2</button>
+      <button class="btn btn-number">3</button>
+      <button class="btn btn-operator">+</button>
+
+      <!-- Row 5 -->
+      <button class="btn btn-number btn-zero">0</button>
+      <button class="btn btn-number">.</button>
+      <button class="btn btn-operator">=</button>
+    </div>
+  </div>
+</body>
+</html>

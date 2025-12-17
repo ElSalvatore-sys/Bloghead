@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import type { Event } from '../../services/eventService'
 
 interface EventCardProps {
@@ -38,10 +39,17 @@ export function EventCard({ event }: EventCardProps) {
   const defaultImage = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800'
 
   return (
-    <Link
-      to={`/events/${event.id}`}
-      className="group block bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/10"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
     >
+      <Link
+        to={`/events/${event.id}`}
+        className="group block bg-white/5 rounded-xl overflow-hidden hover:bg-white/10 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/20"
+      >
       {/* Image Container */}
       <div className="relative aspect-[16/10] overflow-hidden">
         <img
@@ -108,10 +116,15 @@ export function EventCard({ event }: EventCardProps) {
         )}
 
         {/* CTA Button */}
-        <button className="w-full mt-2 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded-lg transition-colors">
+        <motion.button
+          className="w-full mt-2 py-2.5 bg-purple-600 hover:bg-purple-500 text-white text-sm font-medium rounded-lg transition-colors"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
           Details ansehen
-        </button>
+        </motion.button>
       </div>
-    </Link>
+      </Link>
+    </motion.div>
   )
 }

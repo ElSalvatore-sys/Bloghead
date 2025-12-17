@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator 1 - Classic Scientific</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .calculator {
+      background: linear-gradient(145deg, #1e1e32, #252542);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      width: 100%;
+      max-width: 380px;
+    }
+    .display {
+      background: #0a0a14;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .display-expression {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 14px;
+      color: #6b7280;
+      text-align: right;
+      min-height: 20px;
+      margin-bottom: 8px;
+    }
+    .display-result {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 42px;
+      font-weight: 700;
+      color: #ffffff;
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-row {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .btn-row.memory { grid-template-columns: repeat(5, 1fr); }
+    .btn-row.scientific { grid-template-columns: repeat(5, 1fr); }
+    .btn-row.main { grid-template-columns: repeat(5, 1fr); }
+    .btn-row.bottom { grid-template-columns: 2fr 1fr 1fr 1fr; }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 52px;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0) scale(0.98); }
+
+    .btn-memory {
+      background: linear-gradient(145deg, #1b3a4b, #163040);
+      color: #00d9ff;
+      font-size: 14px;
+    }
+    .btn-memory:hover { background: linear-gradient(145deg, #234d63, #1b3a4b); }
+
+    .btn-scientific {
+      background: linear-gradient(145deg, #1f4068, #19345a);
+      color: #00d9ff;
+      font-size: 15px;
+    }
+    .btn-scientific:hover { background: linear-gradient(145deg, #2a5080, #1f4068); }
+
+    .btn-number {
+      background: linear-gradient(145deg, #3d3d5c, #2d2d44);
+      color: #ffffff;
+    }
+    .btn-number:hover { background: linear-gradient(145deg, #4a4a6a, #3d3d5c); }
+
+    .btn-operator {
+      background: linear-gradient(145deg, #e94560, #d63d56);
+      color: #ffffff;
+    }
+    .btn-operator:hover { background: linear-gradient(145deg, #ff5070, #e94560); }
+
+    .btn-clear {
+      background: linear-gradient(145deg, #ff6b6b, #ee5a5a);
+      color: #ffffff;
+    }
+    .btn-clear:hover { background: linear-gradient(145deg, #ff7b7b, #ff6b6b); }
+
+    .btn-equal {
+      background: linear-gradient(145deg, #00d9ff, #00c4e6);
+      color: #0a0a14;
+      font-weight: 700;
+    }
+    .btn-equal:hover { background: linear-gradient(145deg, #20e9ff, #00d9ff); }
+
+    @keyframes press {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(0.95); }
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <!-- Display -->
+    <div class="display">
+      <div class="display-expression">sin(45) × 2 =</div>
+      <div class="display-result">1.414213</div>
+    </div>
+
+    <!-- Memory Row -->
+    <div class="btn-row memory">
+      <button class="btn btn-memory">MC</button>
+      <button class="btn btn-memory">MR</button>
+      <button class="btn btn-memory">M+</button>
+      <button class="btn btn-memory">M-</button>
+      <button class="btn btn-memory">MS</button>
+    </div>
+
+    <!-- Scientific Row 1 -->
+    <div class="btn-row scientific">
+      <button class="btn btn-scientific">sin</button>
+      <button class="btn btn-scientific">cos</button>
+      <button class="btn btn-scientific">tan</button>
+      <button class="btn btn-scientific">log</button>
+      <button class="btn btn-scientific">ln</button>
+    </div>
+
+    <!-- Scientific Row 2 -->
+    <div class="btn-row scientific">
+      <button class="btn btn-scientific">x²</button>
+      <button class="btn btn-scientific">√</button>
+      <button class="btn btn-scientific">xʸ</button>
+      <button class="btn btn-scientific">π</button>
+      <button class="btn btn-scientific">e</button>
+    </div>
+
+    <!-- Main Buttons -->
+    <div class="btn-row main">
+      <button class="btn btn-number">7</button>
+      <button class="btn btn-number">8</button>
+      <button class="btn btn-number">9</button>
+      <button class="btn btn-operator">÷</button>
+      <button class="btn btn-clear">C</button>
+    </div>
+    <div class="btn-row main">
+      <button class="btn btn-number">4</button>
+      <button class="btn btn-number">5</button>
+      <button class="btn btn-number">6</button>
+      <button class="btn btn-operator">×</button>
+      <button class="btn btn-operator">⌫</button>
+    </div>
+    <div class="btn-row main">
+      <button class="btn btn-number">1</button>
+      <button class="btn btn-number">2</button>
+      <button class="btn btn-number">3</button>
+      <button class="btn btn-operator">−</button>
+      <button class="btn btn-scientific">(</button>
+    </div>
+    <div class="btn-row main">
+      <button class="btn btn-number">0</button>
+      <button class="btn btn-number">.</button>
+      <button class="btn btn-number">±</button>
+      <button class="btn btn-operator">+</button>
+      <button class="btn btn-scientific">)</button>
+    </div>
+
+    <!-- Equal Row -->
+    <div class="btn-row bottom">
+      <button class="btn btn-equal">=</button>
+      <button class="btn btn-scientific">Ans</button>
+      <button class="btn btn-scientific">Rad</button>
+      <button class="btn btn-scientific">%</button>
+    </div>
+  </div>
+</body>
+</html>

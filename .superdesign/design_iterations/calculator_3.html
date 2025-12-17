@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator 3 - Neumorphic</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #e0e5ec;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .calculator {
+      background: #e0e5ec;
+      border-radius: 40px;
+      padding: 32px;
+      box-shadow:
+        20px 20px 60px #bec3c9,
+        -20px -20px 60px #ffffff;
+      width: 100%;
+      max-width: 360px;
+    }
+    .display {
+      background: #e0e5ec;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 28px;
+      box-shadow:
+        inset 8px 8px 16px #bec3c9,
+        inset -8px -8px 16px #ffffff;
+    }
+    .display-expression {
+      font-size: 14px;
+      font-weight: 400;
+      color: #636e72;
+      text-align: right;
+      min-height: 20px;
+      margin-bottom: 8px;
+    }
+    .display-result {
+      font-size: 44px;
+      font-weight: 600;
+      color: #2d3436;
+      text-align: right;
+      letter-spacing: -1px;
+    }
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .btn {
+      border: none;
+      border-radius: 16px;
+      background: #e0e5ec;
+      font-family: 'Poppins', sans-serif;
+      font-size: 22px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+      box-shadow:
+        6px 6px 12px #bec3c9,
+        -6px -6px 12px #ffffff;
+    }
+    .btn:hover {
+      box-shadow:
+        4px 4px 8px #bec3c9,
+        -4px -4px 8px #ffffff;
+    }
+    .btn:active {
+      box-shadow:
+        inset 4px 4px 8px #bec3c9,
+        inset -4px -4px 8px #ffffff;
+    }
+
+    .btn-function {
+      color: #636e72;
+    }
+
+    .btn-number {
+      color: #2d3436;
+    }
+
+    .btn-operator {
+      color: #6c5ce7;
+      font-size: 26px;
+    }
+
+    .btn-equal {
+      background: linear-gradient(145deg, #6c5ce7, #5f4dd0);
+      color: #ffffff;
+      box-shadow:
+        6px 6px 12px #bec3c9,
+        -6px -6px 12px #ffffff;
+    }
+    .btn-equal:hover {
+      background: linear-gradient(145deg, #7d6ef0, #6c5ce7);
+    }
+    .btn-equal:active {
+      box-shadow:
+        inset 4px 4px 8px rgba(0,0,0,0.2),
+        inset -4px -4px 8px rgba(255,255,255,0.1);
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+    }
+
+    /* Subtle inner glow effect */
+    .calculator::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60%;
+      height: 60%;
+      background: radial-gradient(circle, rgba(108, 92, 231, 0.03) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .calculator { position: relative; }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <!-- Display -->
+    <div class="display">
+      <div class="display-expression">24 × 15 + 40</div>
+      <div class="display-result">400</div>
+    </div>
+
+    <!-- Button Grid -->
+    <div class="btn-grid">
+      <!-- Row 1 -->
+      <button class="btn btn-function">C</button>
+      <button class="btn btn-function">±</button>
+      <button class="btn btn-function">%</button>
+      <button class="btn btn-operator">÷</button>
+
+      <!-- Row 2 -->
+      <button class="btn btn-number">7</button>
+      <button class="btn btn-number">8</button>
+      <button class="btn btn-number">9</button>
+      <button class="btn btn-operator">×</button>
+
+      <!-- Row 3 -->
+      <button class="btn btn-number">4</button>
+      <button class="btn btn-number">5</button>
+      <button class="btn btn-number">6</button>
+      <button class="btn btn-operator">−</button>
+
+      <!-- Row 4 -->
+      <button class="btn btn-number">1</button>
+      <button class="btn btn-number">2</button>
+      <button class="btn btn-number">3</button>
+      <button class="btn btn-operator">+</button>
+
+      <!-- Row 5 -->
+      <button class="btn btn-number btn-zero">0</button>
+      <button class="btn btn-number">.</button>
+      <button class="btn btn-equal">=</button>
+    </div>
+  </div>
+</body>
+</html>

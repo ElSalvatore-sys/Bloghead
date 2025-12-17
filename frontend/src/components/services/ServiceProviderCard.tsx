@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Button } from '../ui/Button'
 import { StarRating } from '../ui/StarRating'
 import { FavoriteButton } from '../ui/FavoriteButton'
@@ -72,13 +73,20 @@ export function ServiceProviderCard({ provider }: ServiceProviderCardProps) {
     : '📦'
 
   return (
-    <div className="group flex flex-col">
+    <motion.div
+      className="group flex flex-col"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.4 }}
+      whileHover={{ y: -8, transition: { duration: 0.3 } }}
+    >
       {/* Image Container */}
       <div className="relative aspect-square mb-4 overflow-hidden rounded-lg">
         <img
           src={imageUrl}
           alt={provider.business_name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
 
         {/* Badges */}
@@ -147,17 +155,19 @@ export function ServiceProviderCard({ provider }: ServiceProviderCardProps) {
 
         {/* CTA Button */}
         <Link to={`/services/${provider.id}`}>
-          <Button
-            variant="secondary"
-            size="sm"
-            fullWidth
-            className="mt-3 rounded-full border-white/30 hover:border-white/50 uppercase tracking-wider"
-          >
-            Profil Ansehen
-          </Button>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              fullWidth
+              className="mt-3 rounded-full border-white/30 hover:border-white/50 uppercase tracking-wider"
+            >
+              Profil Ansehen
+            </Button>
+          </motion.div>
         </Link>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

@@ -42,16 +42,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
 
-  // Fetch user profile from database
-  const fetchUserProfile = useCallback(async (userId: string) => {
+  // Fetch user profile from database with retry logic for RLS timing issues
+  const fetchUserProfile = useCallback(async (userId: string, retryCount = 0): Promise<UserProfile | null> => {
+    const MAX_RETRIES = 3
+    const RETRY_DELAY = 500 // ms
+
     try {
+      console.log('[AuthContext] fetchUserProfile: Starting query for', userId, retryCount > 0 ? `(retry ${retryCount})` : '')
+
       const { data, error } = await supabase
         .from('users')
         .select('id, email, membername, vorname, nachname, user_type, profile_image_url, cover_image_url, is_verified, membership_tier, role')
         .eq('id', userId)
         .single()
 
+      console.log('[AuthContext] fetchUserProfile: Query returned', { data: data ? 'exists' : 'null', error: error?.message || 'none', code: error?.code })
+
       if (error) {
+        // PGRST116 = "JSON object requested, multiple (or no) rows returned" - RLS might be blocking
+        // 406 = Not Acceptable - same issue
+        if ((error.code === 'PGRST116' || error.code === '406') && retryCount < MAX_RETRIES) {
+          console.log(`[AuthContext] RLS timing issue detected, retrying in ${RETRY_DELAY}ms...`)
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
+          return fetchUserProfile(userId, retryCount + 1)
+        }
+
         console.error('Error fetching user profile:', error)
         setUserProfile(null)
         return null
@@ -89,36 +104,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
+    // Helper to fetch profile with timeout
+    const fetchProfileWithTimeout = async (userId: string, timeoutMs = 10000): Promise<UserProfile | null> => {
+      const timeoutPromise = new Promise<null>((resolve) => {
+        setTimeout(() => {
+          console.warn('[AuthContext] Profile fetch timed out after', timeoutMs, 'ms')
+          resolve(null)
+        }, timeoutMs)
+      })
+
+      return Promise.race([fetchUserProfile(userId), timeoutPromise])
+    }
+
     // Get initial session
+    console.log('[AuthContext] Getting initial session...')
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('[AuthContext] Session retrieved:', session ? 'exists' : 'null')
       setSession(session)
       setUser(session?.user ?? null)
 
       // Fetch user profile from database if logged in
       if (session?.user?.id) {
-        const profile = await fetchUserProfile(session.user.id)
+        console.log('[AuthContext] Fetching user profile for:', session.user.id)
+        const profile = await fetchProfileWithTimeout(session.user.id)
+        console.log('[AuthContext] Profile fetched:', profile ? 'exists' : 'null')
         checkOnboardingNeeded(profile)
       } else {
         setUserProfile(null)
         checkOnboardingNeeded(null)
       }
+      console.log('[AuthContext] Setting loading to false')
+      setLoading(false)
+    }).catch(err => {
+      console.error('[AuthContext] getSession error:', err)
       setLoading(false)
     })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event: AuthChangeEvent, session: Session | null) => {
+        console.log('[AuthContext] onAuthStateChange:', _event, session ? 'session exists' : 'no session')
         setSession(session)
         setUser(session?.user ?? null)
 
         // Fetch user profile from database if logged in
         if (session?.user?.id) {
-          const profile = await fetchUserProfile(session.user.id)
+          console.log('[AuthContext] onAuthStateChange: Fetching profile for', session.user.id)
+          const profile = await fetchProfileWithTimeout(session.user.id)
+          console.log('[AuthContext] onAuthStateChange: Profile result', profile ? 'exists' : 'null')
           checkOnboardingNeeded(profile)
         } else {
           setUserProfile(null)
           checkOnboardingNeeded(null)
         }
+        console.log('[AuthContext] onAuthStateChange: Setting loading to false')
         setLoading(false)
       }
     )
@@ -167,7 +206,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      // Clear local state first
+      setUser(null)
+      setUserProfile(null)
+      setSession(null)
+      setNeedsOnboarding(false)
+
+      // Then sign out from Supabase (this should clear localStorage)
+      const { error } = await supabase.auth.signOut()
+
+      if (error) {
+        console.error('Sign out error:', error)
+        // Force clear localStorage if Supabase signOut fails
+        const keys = Object.keys(localStorage).filter(k => k.includes('sb-') || k.includes('supabase'))
+        keys.forEach(k => localStorage.removeItem(k))
+      }
+    } catch (err) {
+      console.error('Sign out exception:', err)
+      // Force clear on any error
+      const keys = Object.keys(localStorage).filter(k => k.includes('sb-') || k.includes('supabase'))
+      keys.forEach(k => localStorage.removeItem(k))
+    }
   }
 
   return (

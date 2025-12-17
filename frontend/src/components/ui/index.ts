@@ -6,3 +6,8 @@ export { Modal, AuthModal } from './Modal'
 export { StarRating } from './StarRating'
 export { GradientBrush, BrushStrokeSVG, SectionDivider } from './GradientBrush'
 export { OptimizedImage } from './OptimizedImage'
+
+// Animation components (Framer Motion)
+export { AnimatedModal } from './AnimatedModal'
+export { AnimatedCard } from './AnimatedCard'
+export { ScrollReveal, StaggerContainer, StaggerItem } from './ScrollReveal'

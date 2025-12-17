@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator 6 - Neo-Brutalist</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #fffef0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-image:
+        radial-gradient(circle at 20% 80%, #feca57 0%, transparent 25%),
+        radial-gradient(circle at 80% 20%, #ff6b6b 0%, transparent 25%),
+        radial-gradient(circle at 50% 50%, #54a0ff 0%, transparent 30%);
+      background-size: 100% 100%;
+    }
+    .calculator {
+      background: #fffef0;
+      border: 4px solid #000000;
+      border-radius: 0;
+      padding: 24px;
+      box-shadow: 12px 12px 0px #000000;
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+    }
+    .calculator::before {
+      content: 'CALC-O-MATIC';
+      position: absolute;
+      top: -16px;
+      left: 20px;
+      background: #ff6b6b;
+      color: #000;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border: 3px solid #000;
+    }
+
+    .display {
+      background: #c8e6c9;
+      border: 4px solid #000000;
+      padding: 20px;
+      margin-bottom: 20px;
+      margin-top: 8px;
+      position: relative;
+    }
+    .display::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      right: 4px;
+      bottom: 4px;
+      border: 2px dashed rgba(0,0,0,0.2);
+      pointer-events: none;
+    }
+    .display-expression {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: #2e7d32;
+      text-align: right;
+      min-height: 20px;
+      margin-bottom: 8px;
+    }
+    .display-result {
+      font-family: 'Space Mono', monospace;
+      font-size: 42px;
+      font-weight: 700;
+      color: #1b5e20;
+      text-align: right;
+      letter-spacing: 2px;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .btn {
+      border: 3px solid #000000;
+      font-family: 'Space Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.1s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 64px;
+      box-shadow: 4px 4px 0px #000000;
+      position: relative;
+    }
+    .btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px #000000;
+    }
+    .btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px #000000;
+    }
+
+    .btn-function {
+      background: #feca57;
+      color: #000000;
+    }
+
+    .btn-number {
+      background: #fffef0;
+      color: #000000;
+    }
+
+    .btn-operator {
+      background: #ff6b6b;
+      color: #000000;
+      font-size: 26px;
+    }
+
+    .btn-equal {
+      background: #5f27cd;
+      color: #ffffff;
+    }
+
+    .btn-clear {
+      background: #54a0ff;
+      color: #000000;
+    }
+
+    .btn-zero {
+      grid-column: span 2;
+    }
+
+    /* Decorative elements */
+    .sticker {
+      position: absolute;
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border: 2px solid #000;
+      transform: rotate(-5deg);
+    }
+    .sticker-1 {
+      top: 60px;
+      right: -12px;
+      background: #ff9ff3;
+    }
+    .sticker-2 {
+      bottom: 20px;
+      left: -8px;
+      background: #54a0ff;
+      transform: rotate(8deg);
+    }
+
+    /* Scan lines effect */
+    .calculator::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.02) 2px,
+        rgba(0,0,0,0.02) 4px
+      );
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <!-- Stickers -->
+    <div class="sticker sticker-1">MATH!</div>
+    <div class="sticker sticker-2">2024</div>
+
+    <!-- Display -->
+    <div class="display">
+      <div class="display-expression">99 + 1 =</div>
+      <div class="display-result">100</div>
+    </div>
+
+    <!-- Button Grid -->
+    <div class="btn-grid">
+      <!-- Row 1 -->
+      <button class="btn btn-clear">C</button>
+      <button class="btn btn-function">±</button>
+      <button class="btn btn-function">%</button>
+      <button class="btn btn-operator">÷</button>
+
+      <!-- Row 2 -->
+      <button class="btn btn-number">7</button>
+      <button class="btn btn-number">8</button>
+      <button class="btn btn-number">9</button>
+      <button class="btn btn-operator">×</button>
+
+      <!-- Row 3 -->
+      <button class="btn btn-number">4</button>
+      <button class="btn btn-number">5</button>
+      <button class="btn btn-number">6</button>
+      <button class="btn btn-operator">−</button>
+
+      <!-- Row 4 -->
+      <button class="btn btn-number">1</button>
+      <button class="btn btn-number">2</button>
+      <button class="btn btn-number">3</button>
+      <button class="btn btn-operator">+</button>
+
+      <!-- Row 5 -->
+      <button class="btn btn-number btn-zero">0</button>
+      <button class="btn btn-number">.</button>
+      <button class="btn btn-equal">=</button>
+    </div>
+  </div>
+</body>
+</html>

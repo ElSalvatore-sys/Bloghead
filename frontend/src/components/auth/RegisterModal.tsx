@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import type { FormEvent } from 'react'
 import { createPortal } from 'react-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import { MultiSelect } from '../ui/MultiSelect'
 import { sanitizeInput, isValidEmail, isValidPhone, validatePassword } from '../../lib/security/sanitize'
+import { modalAnimation, buttonTap, staggerContainer, staggerItem } from '@/lib/animations'
 
 // Types
 export type UserType = 'fan' | 'artist' | 'service_provider' | 'event_organizer'
@@ -207,19 +209,34 @@ function UserTypeStep({
   isLoading: boolean
 }) {
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Header */}
-      <div className="text-center mb-8">
+      <motion.div
+        className="text-center mb-8"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
         <h2 className="text-2xl md:text-3xl font-display text-white mb-2">
           WILLKOMMEN BEI BLOGHEAD
         </h2>
         <p className="text-gray-400 text-sm">Wähle deinen Account-Typ</p>
-      </div>
+      </motion.div>
 
-      {/* User Type Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        {userTypes.map((type, index) => (
-          <button
+      {/* User Type Cards - Staggered Animation */}
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+      >
+        {userTypes.map((type) => (
+          <motion.button
             key={type.id}
             onClick={() => onSelect(type.id)}
             disabled={isLoading}
@@ -227,21 +244,22 @@ function UserTypeStep({
               relative p-5 md:p-6 rounded-2xl border-2 text-left
               bg-gradient-to-br ${type.gradient} ${type.hoverGradient}
               ${type.borderColor} ${type.hoverBorder}
-              hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/10
-              transition-all duration-300 ease-out
-              disabled:opacity-50 disabled:hover:scale-100
+              transition-colors duration-300 ease-out
+              disabled:opacity-50
               group
             `}
-            style={{
-              animation: `fadeInUp 0.5s ease-out forwards`,
-              animationDelay: `${index * 100}ms`,
-              opacity: 0
-            }}
+            variants={staggerItem}
+            whileHover={!isLoading ? { scale: 1.02, boxShadow: '0 20px 40px rgba(97, 10, 209, 0.15)' } : undefined}
+            whileTap={!isLoading ? { scale: 0.98 } : undefined}
           >
             {/* Icon with hover animation */}
-            <div className="text-4xl mb-4 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+            <motion.div
+              className="text-4xl mb-4"
+              whileHover={{ scale: 1.1, rotate: -3 }}
+              transition={{ duration: 0.3 }}
+            >
               {type.icon}
-            </div>
+            </motion.div>
 
             {/* Title & Tagline */}
             <h3 className="text-lg font-bold text-white mb-1 group-hover:text-white transition-colors">
@@ -252,29 +270,44 @@ function UserTypeStep({
             </p>
 
             {/* Arrow indicator */}
-            <div className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-white/20 group-hover:translate-x-1 transition-all">
+            <motion.div
+              className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400 group-hover:text-white group-hover:bg-white/20 transition-all"
+              whileHover={{ x: 4 }}
+            >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-            </div>
-          </button>
+            </motion.div>
+          </motion.button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Divider */}
-      <div className="flex items-center gap-4 mb-6">
+      <motion.div
+        className="flex items-center gap-4 mb-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         <span className="text-gray-500 text-xs uppercase tracking-wider">oder schnell mit</span>
         <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-      </div>
+      </motion.div>
 
       {/* Social Sign Up - Side by side */}
-      <div className="flex gap-3">
-        <button
+      <motion.div
+        className="flex gap-3"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <motion.button
           type="button"
           onClick={onGoogleSignUp}
           disabled={isLoading}
-          className="flex-1 rounded-xl border border-white/20 bg-white py-3 text-sm font-medium text-gray-800 transition-all hover:bg-gray-100 hover:scale-[1.02] disabled:opacity-50 flex items-center justify-center gap-2"
+          className="flex-1 rounded-xl border border-white/20 bg-white py-3 text-sm font-medium text-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          whileHover={!isLoading ? { scale: 1.02, backgroundColor: '#f3f4f6' } : undefined}
+          whileTap={!isLoading ? buttonTap : undefined}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -283,21 +316,23 @@ function UserTypeStep({
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
           <span className="hidden sm:inline">Google</span>
-        </button>
+        </motion.button>
 
-        <button
+        <motion.button
           type="button"
           onClick={onFacebookSignUp}
           disabled={isLoading}
-          className="flex-1 rounded-xl bg-[#1877F2] py-3 text-sm font-medium text-white transition-all hover:bg-[#166FE5] hover:scale-[1.02] disabled:opacity-50 flex items-center justify-center gap-2"
+          className="flex-1 rounded-xl bg-[#1877F2] py-3 text-sm font-medium text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          whileHover={!isLoading ? { scale: 1.02, backgroundColor: '#166FE5' } : undefined}
+          whileTap={!isLoading ? buttonTap : undefined}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
           </svg>
           <span className="hidden sm:inline">Facebook</span>
-        </button>
-      </div>
-    </div>
+        </motion.button>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -397,41 +432,73 @@ function RegistrationFormStep({
   `
 
   return (
-    <div className="flex flex-col">
+    <motion.div
+      className="flex flex-col"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+    >
       {/* Header with back button */}
-      <div className="flex items-center justify-between mb-6">
-        <button
+      <motion.div
+        className="flex items-center justify-between mb-6"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <motion.button
           onClick={onBack}
           disabled={isLoading}
           className="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors disabled:opacity-50 group"
+          whileHover={{ x: -4 }}
+          whileTap={{ scale: 0.95 }}
         >
-          <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Zurück
-        </button>
+        </motion.button>
         <ProgressBar step={2} />
-      </div>
+      </motion.div>
 
       {/* User type indicator */}
-      <div className="flex items-center gap-4 mb-6 p-4 bg-white/5 rounded-xl border border-white/10">
+      <motion.div
+        className="flex items-center gap-4 mb-6 p-4 bg-white/5 rounded-xl border border-white/10"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.15 }}
+      >
         <span className="text-3xl">{currentType.icon}</span>
         <div>
           <p className="text-white font-medium">{currentType.title}</p>
           <p className="text-gray-500 text-sm">Account erstellen</p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Error Message */}
-      {submitError && (
-        <div className="mb-6 rounded-xl bg-red-500/20 border border-red-500/50 p-4 text-sm text-white flex items-center gap-3">
-          <span className="text-xl">⚠️</span>
-          {submitError}
-        </div>
-      )}
+      <AnimatePresence>
+        {submitError && (
+          <motion.div
+            className="mb-6 rounded-xl bg-red-500/20 border border-red-500/50 p-4 text-sm text-white flex items-center gap-3"
+            initial={{ opacity: 0, y: -10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <span className="text-xl">⚠️</span>
+            {submitError}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Form content */}
-      <form onSubmit={onSubmit} className="space-y-8">
+      <motion.form
+        onSubmit={onSubmit}
+        className="space-y-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
 
         {/* SECTION 1: Account */}
         <div>
@@ -851,13 +918,14 @@ function RegistrationFormStep({
         </div>
 
         {/* Submit Button */}
-        <button
+        <motion.button
           type="submit"
           disabled={isLoading || !formData.termsAccepted}
           className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-600 to-orange-500 text-white font-bold text-lg
-                     hover:shadow-xl hover:shadow-purple-500/30 hover:scale-[1.01]
-                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none
-                     transition-all duration-300 flex items-center justify-center gap-2"
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-colors duration-300 flex items-center justify-center gap-2"
+          whileHover={!isLoading && formData.termsAccepted ? { scale: 1.01, boxShadow: '0 20px 40px rgba(147, 51, 234, 0.3)' } : undefined}
+          whileTap={!isLoading && formData.termsAccepted ? { scale: 0.98 } : undefined}
         >
           {isLoading ? (
             <>
@@ -873,9 +941,9 @@ function RegistrationFormStep({
               <span className="text-xl">🚀</span>
             </>
           )}
-        </button>
-      </form>
-    </div>
+        </motion.button>
+      </motion.form>
+    </motion.div>
   )
 }
 
@@ -902,29 +970,74 @@ function SuccessStep({
   }
 
   return (
-    <div
+    <motion.div
       className="text-center py-6"
-      style={{
-        animation: 'fadeInUp 0.5s ease-out forwards'
-      }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
     >
       {/* Success checkmark */}
-      <div className="relative inline-block mb-4">
+      <motion.div
+        className="relative inline-block mb-4"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
+      >
         <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto shadow-lg shadow-green-500/30">
-          <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
+          <motion.svg
+            className="w-10 h-10 text-white"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={3}
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            <motion.path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M5 13l4 4L19 7"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            />
+          </motion.svg>
         </div>
-        <div className="absolute -top-1 -right-1 text-2xl animate-bounce">✨</div>
-      </div>
+        <motion.div
+          className="absolute -top-1 -right-1 text-2xl"
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 1, repeat: Infinity, repeatDelay: 1 }}
+        >
+          ✨
+        </motion.div>
+      </motion.div>
 
-      <h2 className="text-2xl font-display text-white mb-2">Registrierung erfolgreich!</h2>
-      <p className="text-gray-400 text-sm mb-6">
+      <motion.h2
+        className="text-2xl font-display text-white mb-2"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        Registrierung erfolgreich!
+      </motion.h2>
+      <motion.p
+        className="text-gray-400 text-sm mb-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
         Du bist fast bereit, {getSuccessMessage()}
-      </p>
+      </motion.p>
 
       {/* Email confirmation box */}
-      <div className="bg-white/5 border border-white/10 rounded-xl p-5 mb-6 text-left">
+      <motion.div
+        className="bg-white/5 border border-white/10 rounded-xl p-5 mb-6 text-left"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
         <div className="flex items-start gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
             <span className="text-xl">📧</span>
@@ -955,14 +1068,21 @@ function SuccessStep({
             </li>
           </ul>
         </div>
-      </div>
+      </motion.div>
 
       {/* Action buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <button
+      <motion.div
+        className="flex flex-col sm:flex-row gap-3 justify-center"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+      >
+        <motion.button
           onClick={onResendEmail}
           disabled={isResending}
-          className="px-5 py-2.5 border border-white/30 rounded-xl text-white text-sm hover:bg-white/10 hover:scale-[1.02] transition-all disabled:opacity-50"
+          className="px-5 py-2.5 border border-white/30 rounded-xl text-white text-sm transition-colors disabled:opacity-50"
+          whileHover={!isResending ? { scale: 1.02, backgroundColor: 'rgba(255,255,255,0.1)' } : undefined}
+          whileTap={!isResending ? { scale: 0.98 } : undefined}
         >
           {isResending ? (
             <span className="flex items-center justify-center gap-2">
@@ -975,15 +1095,17 @@ function SuccessStep({
           ) : (
             'E-Mail erneut senden'
           )}
-        </button>
-        <button
+        </motion.button>
+        <motion.button
           onClick={onClose}
-          className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-orange-500 rounded-xl text-white text-sm font-medium hover:opacity-90 hover:scale-[1.02] transition-all"
+          className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-orange-500 rounded-xl text-white text-sm font-medium transition-colors"
+          whileHover={{ scale: 1.02, opacity: 0.9 }}
+          whileTap={{ scale: 0.98 }}
         >
           Zur Startseite
-        </button>
-      </div>
-    </div>
+        </motion.button>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -1219,124 +1341,144 @@ export function RegisterModal({
     }
   }
 
-  if (!isOpen) return null
-
   return createPortal(
-    <>
-      {/* CSS for animations */}
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.3);
-        }
-      `}</style>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* CSS for scrollbar */}
+          <style>{`
+            .custom-scrollbar::-webkit-scrollbar {
+              width: 6px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: rgba(255, 255, 255, 0.05);
+              border-radius: 3px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 3px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: rgba(255, 255, 255, 0.3);
+            }
+          `}</style>
 
-      {/* Backdrop - SEPARATE from scroll container */}
-      <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
-        onClick={() => !isLoading && onClose()}
-      />
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+            initial={modalAnimation.overlay.initial}
+            animate={modalAnimation.overlay.animate}
+            exit={modalAnimation.overlay.exit}
+            transition={modalAnimation.overlay.transition}
+            onClick={() => !isLoading && onClose()}
+          />
 
-      {/* Scrollable container - using CSS-only approach */}
-      <div className="modal-scroll-container">
-        <div className="modal-center">
-          {/* Modal box - no fixed height, grows naturally */}
-          <div
-            className={`
-              modal-box relative
-              ${step === 1 ? 'max-w-xl' : step === 2 ? 'max-w-2xl' : 'max-w-md'}
-              bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950
-              border border-white/10 rounded-2xl
-              shadow-2xl shadow-purple-500/10
-              animate-in fade-in zoom-in-95 duration-300
-            `}
-            onClick={(e) => e.stopPropagation()}
+          {/* Scrollable container */}
+          <motion.div
+            className="modal-scroll-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all z-10 disabled:opacity-50"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Content with padding */}
-          <div className="p-6 md:p-8">
-            {/* Step Content */}
-            <div>
-              {step === 1 && (
-                <UserTypeStep
-                  onSelect={handleUserTypeSelect}
-                  onGoogleSignUp={handleGoogleSignUp}
-                  onFacebookSignUp={handleFacebookSignUp}
-                  isLoading={isLoading}
-                />
-              )}
-              {step === 2 && selectedType && (
-                <RegistrationFormStep
-                  userType={selectedType}
-                  formData={formData}
-                  setFormData={setFormData}
-                  errors={formErrors}
-                  onSubmit={handleFormSubmit}
-                  onBack={() => setStep(1)}
-                  isLoading={isLoading}
-                  submitError={submitError}
-                />
-              )}
-              {step === 3 && selectedType && (
-                <SuccessStep
-                  userType={selectedType}
-                  onClose={onClose}
-                  onResendEmail={handleResendEmail}
-                  isResending={isResending}
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Login link - at bottom */}
-          {step !== 3 && (
-            <div className="px-6 md:px-8 pb-6 pt-4 border-t border-white/10">
-              <p className="text-sm text-gray-500 text-center">
-                Bereits registriert?{' '}
-                <button
-                  onClick={onLoginClick}
+            <div className="modal-center">
+              {/* Modal box */}
+              <motion.div
+                className={`
+                  modal-box relative
+                  ${step === 1 ? 'max-w-xl' : step === 2 ? 'max-w-2xl' : 'max-w-md'}
+                  bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950
+                  border border-white/10 rounded-2xl
+                  shadow-2xl shadow-purple-500/10
+                `}
+                initial={modalAnimation.content.initial}
+                animate={modalAnimation.content.animate}
+                exit={modalAnimation.content.exit}
+                transition={modalAnimation.content.transition}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Close Button */}
+                <motion.button
+                  onClick={onClose}
                   disabled={isLoading}
-                  className="text-purple-400 hover:text-purple-300 hover:underline font-medium transition-colors disabled:opacity-50"
+                  className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors z-10 disabled:opacity-50"
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
                 >
-                  Anmelden
-                </button>
-              </p>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </motion.button>
+
+                {/* Content with padding */}
+                <div className="p-6 md:p-8">
+                  {/* Step Content with AnimatePresence for transitions */}
+                  <AnimatePresence mode="wait">
+                    {step === 1 && (
+                      <motion.div key="step1">
+                        <UserTypeStep
+                          onSelect={handleUserTypeSelect}
+                          onGoogleSignUp={handleGoogleSignUp}
+                          onFacebookSignUp={handleFacebookSignUp}
+                          isLoading={isLoading}
+                        />
+                      </motion.div>
+                    )}
+                    {step === 2 && selectedType && (
+                      <motion.div key="step2">
+                        <RegistrationFormStep
+                          userType={selectedType}
+                          formData={formData}
+                          setFormData={setFormData}
+                          errors={formErrors}
+                          onSubmit={handleFormSubmit}
+                          onBack={() => setStep(1)}
+                          isLoading={isLoading}
+                          submitError={submitError}
+                        />
+                      </motion.div>
+                    )}
+                    {step === 3 && selectedType && (
+                      <motion.div key="step3">
+                        <SuccessStep
+                          userType={selectedType}
+                          onClose={onClose}
+                          onResendEmail={handleResendEmail}
+                          isResending={isResending}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Login link - at bottom */}
+                <AnimatePresence>
+                  {step !== 3 && (
+                    <motion.div
+                      className="px-6 md:px-8 pb-6 pt-4 border-t border-white/10"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <p className="text-sm text-gray-500 text-center">
+                        Bereits registriert?{' '}
+                        <motion.button
+                          onClick={onLoginClick}
+                          disabled={isLoading}
+                          className="text-purple-400 hover:text-purple-300 font-medium transition-colors disabled:opacity-50"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          Anmelden
+                        </motion.button>
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             </div>
-          )}
-        </div>
-        </div>
-      </div>
-    </>,
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>,
     document.body
   )
 }

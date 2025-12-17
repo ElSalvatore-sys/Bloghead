@@ -1,20 +1,19 @@
-import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 
 interface HeroSectionProps {
   onMemberClick?: () => void
 }
 
 export function HeroSection({}: HeroSectionProps) {
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    setIsVisible(true)
-  }, [])
-
   return (
     <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-bg-primary">
       {/* Background Image - Grayscale */}
-      <div className="absolute inset-0">
+      <motion.div
+        className="absolute inset-0"
+        initial={{ scale: 1.1 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1.5, ease: 'easeOut' }}
+      >
         <img
           src="/images/alexandre-st-louis-IlfpKwRMln0-unsplash.webp"
           srcSet="
@@ -37,60 +36,65 @@ export function HeroSection({}: HeroSectionProps) {
           className="absolute inset-0"
           style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
         />
-      </div>
+      </motion.div>
 
       {/* Hero Content - Centered */}
-      <div
-        className={`
-          relative z-10 flex flex-col items-center text-center px-4 max-w-5xl mx-auto
-          transition-all duration-1000 ease-out
-          ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
-        `}
-      >
+      <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-5xl mx-auto">
         {/* "BlogHead" - Large display font */}
-        <h1
+        <motion.h1
           className="font-display text-white leading-none mb-4 md:mb-6"
           style={{
             fontSize: 'clamp(60px, 12vw, 160px)',
             textShadow: '0 0 40px rgba(255, 255, 255, 0.3)',
           }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
         >
           BlogHead
-        </h1>
+        </motion.h1>
 
         {/* Tagline */}
-        <p
+        <motion.p
           className="text-white text-lg md:text-2xl lg:text-3xl font-bold uppercase mb-4 md:mb-6"
           style={{
             letterSpacing: '0.1em',
             fontFamily: 'Roboto, sans-serif',
           }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
         >
           Backstage Control, Frontstage Connection
-        </p>
+        </motion.p>
 
         {/* Subtitle */}
-        <p
+        <motion.p
           className="text-white/80 text-sm md:text-base lg:text-lg leading-relaxed max-w-3xl"
           style={{
             fontFamily: 'Roboto, sans-serif',
           }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
         >
           Von der ersten Anfrage bis zum letzten Applaus: Bloghead bringt Eventbuero, Dienstleisternetzwerk, Artists und Community auf eine gemeinsame Plattform.
-        </p>
+        </motion.p>
       </div>
 
       {/* Scroll Indicator */}
-      <div
-        className={`
-          absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer
-          transition-all duration-1000 delay-500
-          ${isVisible ? 'opacity-100' : 'opacity-0'}
-        `}
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 1 }}
         onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
       >
         <div className="flex flex-col items-center gap-2 text-white/50 hover:text-white transition-colors">
-          <div className="animate-bounce">
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
             <svg
               width="24"
               height="24"
@@ -103,9 +107,9 @@ export function HeroSection({}: HeroSectionProps) {
             >
               <path d="M12 5v14M5 12l7 7 7-7" />
             </svg>
-          </div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   )
 }

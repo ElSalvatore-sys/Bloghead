@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Button } from '../ui/Button'
 import { OptimizedImage } from '../ui/OptimizedImage'
 
@@ -7,14 +8,26 @@ export function VRExperiencesSection() {
     <section className="bg-bg-primary py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Section Title - Hyperwave italic */}
-        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8 italic">
+        <motion.h2
+          className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8 italic"
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6 }}
+        >
           VR Experiences
-        </h2>
+        </motion.h2>
 
         {/* Two-column layout with orange bar - matching d8 */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 items-stretch">
           {/* Left: Orange bar + VR Image */}
-          <div className="relative flex min-h-[350px] md:min-h-[450px]">
+          <motion.div
+            className="relative flex min-h-[350px] md:min-h-[450px]"
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+          >
             {/* Orange Accent Bar - wider to match designer */}
             <div
               className="w-6 md:w-8 flex-shrink-0"
@@ -30,14 +43,18 @@ export function VRExperiencesSection() {
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
-          </div>
+          </motion.div>
 
           {/* Right: Gradient Card - matching d8 gradient */}
-          <div
+          <motion.div
             className="p-8 md:p-10 lg:p-12 flex flex-col justify-center min-h-[350px] md:min-h-[450px]"
             style={{
               background: 'linear-gradient(135deg, #610AD1 0%, #F92B02 60%, #FB7A43 100%)',
             }}
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: '-50px' }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
             {/* Title - Roboto Bold uppercase */}
             <h3
@@ -69,7 +86,7 @@ export function VRExperiencesSection() {
                 </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

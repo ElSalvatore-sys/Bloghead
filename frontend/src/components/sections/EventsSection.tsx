@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import { Button } from '../ui/Button'
 import { OptimizedImage } from '../ui/OptimizedImage'
@@ -36,12 +37,24 @@ export function EventsSection() {
     <section className="bg-bg-primary py-16 md:py-24">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Section Title - Left aligned */}
-        <h2 className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8 italic">
+        <motion.h2
+          className="font-display text-5xl md:text-7xl lg:text-8xl text-white mb-8 italic"
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 0.6 }}
+        >
           Events
-        </h2>
+        </motion.h2>
 
         {/* Image Grid Layout - matching designer d6/d7 */}
-        <div className="relative mb-12">
+        <motion.div
+          className="relative mb-12"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
           {/* Navigation Arrows */}
           <button
             className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/80 -translate-x-1/2"
@@ -146,28 +159,45 @@ export function EventsSection() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Bottom Section - Centered text and button */}
         <div className="text-center">
-          <h3 className="font-display text-xl md:text-2xl lg:text-3xl text-white mb-4 italic">
+          <motion.h3
+            className="font-display text-xl md:text-2xl lg:text-3xl text-white mb-4 italic"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
             Hier Steht Etwas Zum Thema Events.
-          </h3>
-          <p
+          </motion.h3>
+          <motion.p
             className="text-white/50 text-sm leading-relaxed max-w-3xl mx-auto mb-8"
             style={{ fontFamily: 'Roboto, sans-serif' }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
             Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.
             Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur
             ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu.
-          </p>
-          <Button
-            variant="outline"
-            onClick={handleRegisterClick}
-            className="border-accent-purple text-accent-purple hover:bg-accent-purple/10 px-10 py-3 tracking-wider uppercase rounded-full text-sm font-bold"
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
           >
-            {user ? 'Events Entdecken' : 'Jetzt Registrieren'}
-          </Button>
+            <Button
+              variant="outline"
+              onClick={handleRegisterClick}
+              className="border-accent-purple text-accent-purple hover:bg-accent-purple/10 px-10 py-3 tracking-wider uppercase rounded-full text-sm font-bold"
+            >
+              {user ? 'Events Entdecken' : 'Jetzt Registrieren'}
+            </Button>
+          </motion.div>
         </div>
       </div>
     </section>

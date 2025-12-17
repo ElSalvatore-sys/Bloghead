@@ -16,7 +16,7 @@ const EventsPage = lazy(() => import('./pages/EventsPage').then(m => ({ default:
 const EventDetailPage = lazy(() => import('./pages/EventDetailPage').then(m => ({ default: m.EventDetailPage })))
 const ServiceProvidersPage = lazy(() => import('./pages/ServiceProvidersPage').then(m => ({ default: m.ServiceProvidersPage })))
 const ServiceProviderProfilePage = lazy(() => import('./pages/ServiceProviderProfilePage').then(m => ({ default: m.ServiceProviderProfilePage })))
-const ProfileEditPage = lazy(() => import('./pages/ProfileEditPage').then(m => ({ default: m.ProfileEditPage })))
+const ProfileEditPage = lazy(() => import('./pages/dashboard/ProfileEditPage'))
 const CreateEventPage = lazy(() => import('./pages/CreateEventPage').then(m => ({ default: m.CreateEventPage })))
 const ImpressumPage = lazy(() => import('./pages/ImpressumPage'))
 const KontaktPage = lazy(() => import('./pages/KontaktPage'))
