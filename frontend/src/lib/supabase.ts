@@ -21,6 +21,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,  // IMPORTANT for email confirmation redirect
+      flowType: 'pkce',  // More secure OAuth flow
     },
   })
   console.log('[Supabase] Client initialized successfully')

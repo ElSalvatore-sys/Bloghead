@@ -1,24 +1,40 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState('Bestätige dein Konto...')
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the auth code/tokens from URL
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const queryParams = new URLSearchParams(window.location.search)
+        // Debug: Log full URL info
+        console.log('[AuthCallback] Starting callback processing...')
+        console.log('[AuthCallback] Full URL:', window.location.href)
+        console.log('[AuthCallback] Hash:', window.location.hash)
+        console.log('[AuthCallback] Search:', window.location.search)
 
+        // Parse hash fragment (email confirmation, magic link, OAuth implicit)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1))
+
+        // Extract all relevant params
         const accessToken = hashParams.get('access_token')
         const refreshToken = hashParams.get('refresh_token')
-        const errorParam = hashParams.get('error') || queryParams.get('error')
-        const errorDescription = hashParams.get('error_description') || queryParams.get('error_description')
-        const code = queryParams.get('code')
+        const tokenType = hashParams.get('type') // 'signup', 'recovery', 'magiclink'
+        const errorParam = hashParams.get('error') || searchParams.get('error')
+        const errorDescription = hashParams.get('error_description') || searchParams.get('error_description')
+        const code = searchParams.get('code') // PKCE code
+
+        console.log('[AuthCallback] Parsed params:', {
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken,
+          tokenType,
+          hasCode: !!code,
+          error: errorParam
+        })
 
         // Check for errors in URL
         if (errorParam) {
@@ -27,69 +43,118 @@ export default function AuthCallbackPage() {
           return
         }
 
-        // If tokens in URL hash (email confirmation flow), set session
+        // PRIORITY 1: Handle hash-based tokens (email confirmation, magic link)
         if (accessToken && refreshToken) {
+          console.log('[AuthCallback] Found hash tokens, setting session...')
           setStatus('Melde dich an...')
 
-          const { error: sessionError } = await supabase.auth.setSession({
+          const { data, error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           })
 
           if (sessionError) {
-            console.error('[AuthCallback] Session error:', sessionError)
+            console.error('[AuthCallback] setSession error:', sessionError)
             setError(sessionError.message)
             return
           }
+
+          console.log('[AuthCallback] Session set successfully:', data.user?.email)
+
+          // Clear hash from URL to prevent re-processing
+          window.history.replaceState(null, '', window.location.pathname)
+
+          // Redirect based on token type
+          setStatus('Erfolgreich bestätigt! Leite weiter...')
+
+          await handleSuccessfulAuth(data.session?.user?.id, tokenType === 'signup')
+          return
         }
 
-        // Try to exchange code for session (PKCE flow)
+        // PRIORITY 2: Handle PKCE code exchange (OAuth)
         if (code) {
-          setStatus('Verifiziere...')
+          console.log('[AuthCallback] Found PKCE code, exchanging...')
+          setStatus('Verifiziere OAuth...')
 
-          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+
           if (exchangeError) {
             console.error('[AuthCallback] Code exchange error:', exchangeError)
             setError(exchangeError.message)
             return
           }
+
+          console.log('[AuthCallback] Code exchanged successfully:', data.user?.email)
+          setStatus('Erfolgreich angemeldet! Leite weiter...')
+
+          await handleSuccessfulAuth(data.session?.user?.id, false)
+          return
         }
 
-        // Check if we now have a session
+        // PRIORITY 3: Check if Supabase already processed the URL (detectSessionInUrl)
+        console.log('[AuthCallback] No explicit tokens, checking for existing session...')
         const { data: { session } } = await supabase.auth.getSession()
 
         if (session?.user) {
-          setStatus('Erfolgreich bestätigt! Leite weiter...')
+          console.log('[AuthCallback] Found existing session:', session.user.email)
+          setStatus('Session gefunden! Leite weiter...')
 
-          // Check if user needs onboarding
-          const { data: profile } = await supabase
-            .from('users')
-            .select('user_type')
-            .eq('id', session.user.id)
-            .single()
-
-          if (!profile?.user_type) {
-            // New user needs onboarding
-            navigate('/?onboarding=true', { replace: true })
-          } else {
-            // Existing user - go to dashboard
-            navigate('/dashboard/profile', { replace: true })
-          }
-        } else {
-          console.error('[AuthCallback] No session after callback')
-          setError('Keine gültige Session gefunden. Bitte versuche es erneut.')
+          await handleSuccessfulAuth(session.user.id, false)
+          return
         }
+
+        // No valid auth data found
+        console.error('[AuthCallback] No tokens, code, or session found')
+        setError('Keine gültigen Anmeldedaten gefunden. Bitte versuche es erneut.')
+
       } catch (err) {
         console.error('[AuthCallback] Unexpected error:', err)
         setError('Ein unerwarteter Fehler ist aufgetreten')
       }
     }
 
-    // Small delay to let Supabase process URL params
-    const timeoutId = setTimeout(handleAuthCallback, 100)
+    // Helper function to handle successful authentication
+    const handleSuccessfulAuth = async (userId: string | undefined, _isNewSignup: boolean) => {
+      if (!userId) {
+        console.error('[AuthCallback] No user ID after auth')
+        setError('Benutzer-ID nicht gefunden')
+        return
+      }
+
+      try {
+        // Check if user has completed profile (has user_type)
+        const { data: profile, error: profileError } = await supabase
+          .from('users')
+          .select('user_type, membername')
+          .eq('id', userId)
+          .single()
+
+        console.log('[AuthCallback] Profile check:', { profile, error: profileError })
+
+        // Small delay to ensure session is fully persisted
+        await new Promise(resolve => setTimeout(resolve, 300))
+
+        if (profileError || !profile?.user_type) {
+          // New user or incomplete profile - show onboarding
+          console.log('[AuthCallback] Redirecting to onboarding (no user_type)')
+          navigate('/?onboarding=true', { replace: true })
+        } else {
+          // Existing user with complete profile - go to dashboard
+          console.log('[AuthCallback] Redirecting to dashboard')
+          navigate('/dashboard/profile', { replace: true })
+        }
+      } catch (err) {
+        console.error('[AuthCallback] Profile check error:', err)
+        // Default to home with onboarding on error
+        navigate('/?onboarding=true', { replace: true })
+      }
+    }
+
+    // Small delay to ensure Supabase client is ready and URL is processed
+    const timeoutId = setTimeout(handleAuthCallback, 150)
 
     return () => clearTimeout(timeoutId)
-  }, [navigate])
+  }, [navigate, searchParams])
 
   if (error) {
     return (
@@ -100,14 +165,22 @@ export default function AuthCallbackPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-4">Fehler</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">Fehler bei der Anmeldung</h1>
           <p className="text-red-400 mb-6">{error}</p>
-          <button
-            onClick={() => navigate('/')}
-            className="px-6 py-3 bg-accent-purple text-white rounded-lg hover:bg-accent-purple/80 transition-colors"
-          >
-            Zurück zur Startseite
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/')}
+              className="w-full px-6 py-3 bg-accent-purple text-white rounded-lg hover:bg-accent-purple/80 transition-colors"
+            >
+              Zur Startseite
+            </button>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full px-6 py-3 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
+            >
+              Erneut versuchen
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -117,7 +190,8 @@ export default function AuthCallbackPage() {
     <div className="min-h-screen bg-bg-primary flex items-center justify-center">
       <div className="text-center">
         <div className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-accent-purple/30 border-t-accent-purple animate-spin"></div>
-        <p className="text-white text-lg">{status}</p>
+        <p className="text-white text-lg font-medium">{status}</p>
+        <p className="text-gray-400 text-sm mt-2">Bitte warte einen Moment...</p>
       </div>
     </div>
   )
