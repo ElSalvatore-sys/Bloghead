@@ -1275,9 +1275,9 @@ export function RegisterModal({
 
       const metadata: Record<string, unknown> = {
         user_type: selectedType,
-        username: sanitizedUsername,
-        first_name: sanitizedFirstName,
-        last_name: sanitizedLastName,
+        membername: sanitizedUsername,
+        vorname: sanitizedFirstName,
+        nachname: sanitizedLastName,
         full_name: `${sanitizedFirstName} ${sanitizedLastName}`,
         newsletter_subscribed: formData.newsletterSubscribed,
       }
