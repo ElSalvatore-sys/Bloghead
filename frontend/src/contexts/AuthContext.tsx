@@ -10,7 +10,7 @@ export interface UserProfile {
   membername: string
   vorname: string | null
   nachname: string | null
-  user_type: 'fan' | 'artist' | 'service_provider' | 'event_organizer' | 'veranstalter' | 'customer'
+  user_type: 'fan' | 'artist' | 'service_provider' | 'event_organizer' | 'veranstalter' | 'customer' | 'community'
   profile_image_url: string | null
   cover_image_url: string | null
   is_verified: boolean
@@ -88,14 +88,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [user?.id, fetchUserProfile])
 
-  // Check if user needs onboarding (no user_type set)
+  // Check if user needs onboarding (no user_type set or default 'community')
   const checkOnboardingNeeded = useCallback((profile: UserProfile | null) => {
     if (!profile) {
       setNeedsOnboarding(false)
       return
     }
-    // Check if user has a user_type in their database profile
-    setNeedsOnboarding(!profile.user_type)
+    // User needs onboarding if:
+    // - No user_type set
+    // - user_type is 'community' (default from OAuth trigger, hasn't explicitly chosen)
+    // Note: Once user completes onboarding, they'll have 'fan', 'artist', 'service_provider', or 'event_organizer'
+    const needsIt = !profile.user_type || profile.user_type === 'community'
+    console.log('[AuthContext] checkOnboardingNeeded:', { user_type: profile.user_type, needsOnboarding: needsIt })
+    setNeedsOnboarding(needsIt)
   }, [])
 
   // Called when onboarding is completed

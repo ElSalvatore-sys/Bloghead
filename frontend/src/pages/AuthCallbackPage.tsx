@@ -184,13 +184,19 @@ export default function AuthCallbackPage() {
         // Small delay to ensure session is fully persisted
         await new Promise(resolve => setTimeout(resolve, 300))
 
-        if (profileError || !profile?.user_type) {
-          // New user or incomplete profile - show onboarding
-          console.log('[AuthCallback] Redirecting to onboarding (no user_type)')
+        // Check if user needs onboarding:
+        // - No profile found (error)
+        // - No user_type set
+        // - user_type is 'community' (default from OAuth, hasn't chosen yet)
+        const needsOnboarding = profileError || !profile?.user_type || profile.user_type === 'community'
+
+        if (needsOnboarding) {
+          // New user or OAuth user who hasn't chosen their type
+          console.log('[AuthCallback] Redirecting to onboarding (user_type:', profile?.user_type, ')')
           navigate('/?onboarding=true', { replace: true })
         } else {
-          // Existing user with complete profile - go to dashboard
-          console.log('[AuthCallback] Redirecting to dashboard')
+          // Existing user with chosen profile type - go to dashboard
+          console.log('[AuthCallback] Redirecting to dashboard (user_type:', profile?.user_type, ')')
           navigate('/dashboard/profile', { replace: true })
         }
       } catch (err) {
