@@ -56,7 +56,7 @@ const userTypes = [
 ]
 
 export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
-  const { user } = useAuth()
+  const { user, refreshUserProfile } = useAuth()
   const [selectedType, setSelectedType] = useState<UserType | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -69,7 +69,13 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
     artistName: '',
   })
 
-  if (!isOpen || !user) return null
+  // Debug logging
+  console.log('[OnboardingModal] Render state:', { isOpen, user: user?.email, step, loading })
+
+  if (!isOpen || !user) {
+    console.log('[OnboardingModal] Not rendering:', { isOpen, hasUser: !!user })
+    return null
+  }
 
   const handleSelectType = (typeId: UserType) => {
     setSelectedType(typeId)
@@ -122,6 +128,8 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
 
       if (upsertError) throw upsertError
 
+      console.log('[OnboardingModal] User record updated, creating profile for type:', finalType)
+
       // Create profile based on type
       if (finalType === 'artist') {
         await supabase.from('artist_profiles').upsert({
@@ -153,6 +161,11 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
       }
+
+      console.log('[OnboardingModal] Onboarding complete, refreshing user profile')
+
+      // Refresh the user profile in AuthContext to update needsOnboarding
+      await refreshUserProfile()
 
       onComplete()
     } catch (err) {

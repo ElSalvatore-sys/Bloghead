@@ -42,28 +42,73 @@ export default function AuthCallbackPage() {
         const code = searchParams.get('code')
 
         if (code) {
-          console.log('[AuthCallback] PKCE code found, exchanging...')
+          console.log('[AuthCallback] PKCE code found, attempting exchange...')
           setStatusMessage('Verifiziere OAuth...')
 
-          const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+          try {
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code)
 
-          if (error) {
-            console.error('[AuthCallback] Code exchange error:', error)
-            // Try getting session anyway (might already be exchanged)
+            if (error) {
+              console.error('[AuthCallback] Code exchange error:', error.message)
+
+              // Handle PKCE code verifier issue specifically
+              if (error.message?.includes('code verifier') || error.message?.includes('PKCE')) {
+                console.log('[AuthCallback] PKCE verifier issue, checking for existing session...')
+                setStatusMessage('Überprüfe bestehende Session...')
+
+                // The code verifier is stored in localStorage and might be lost
+                // Try getting session anyway
+                const { data: { session } } = await supabase.auth.getSession()
+
+                if (session) {
+                  console.log('[AuthCallback] Found existing session despite PKCE error:', session.user?.email)
+                  await handleSuccessfulAuth(session)
+                  return
+                }
+
+                // No session found - redirect to home to try again
+                console.log('[AuthCallback] No session found after PKCE error, redirecting to home')
+                setStatusMessage('Bitte melde dich erneut an...')
+                await new Promise(resolve => setTimeout(resolve, 1500))
+                navigate('/', { replace: true })
+                return
+              }
+
+              // Other errors - try getting session anyway
+              const { data: { session } } = await supabase.auth.getSession()
+              if (session) {
+                console.log('[AuthCallback] Session found despite exchange error:', session.user?.email)
+                await handleSuccessfulAuth(session)
+                return
+              }
+              throw error
+            }
+
+            if (data.session) {
+              console.log('[AuthCallback] Code exchanged successfully:', data.user?.email)
+              setStatusMessage('Erfolgreich angemeldet! Leite weiter...')
+              await handleSuccessfulAuth(data.session)
+              return
+            }
+          } catch (exchangeErr) {
+            console.error('[AuthCallback] Exchange exception:', exchangeErr)
+
+            // Final fallback - check for session one more time
             const { data: { session } } = await supabase.auth.getSession()
             if (session) {
-              console.log('[AuthCallback] Session found despite exchange error:', session.user?.email)
+              console.log('[AuthCallback] Found session after exchange exception:', session.user?.email)
               await handleSuccessfulAuth(session)
               return
             }
-            throw error
-          }
 
-          if (data.session) {
-            console.log('[AuthCallback] Code exchanged successfully:', data.user?.email)
-            setStatusMessage('Erfolgreich angemeldet! Leite weiter...')
-            await handleSuccessfulAuth(data.session)
-            return
+            // If PKCE-related, redirect gracefully instead of showing error
+            if (exchangeErr instanceof Error && exchangeErr.message?.includes('code verifier')) {
+              console.log('[AuthCallback] PKCE error in catch, redirecting to home')
+              navigate('/', { replace: true })
+              return
+            }
+
+            throw exchangeErr
           }
         }
 

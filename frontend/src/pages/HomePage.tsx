@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import {
   HeroSection,
@@ -18,26 +18,54 @@ import { updatePageMeta, pageSEO, injectStructuredData, organizationSchema, webs
 export function HomePage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
-  const { needsOnboarding, completeOnboarding, user } = useAuth()
-  const [searchParams] = useSearchParams()
+  const { needsOnboarding, completeOnboarding, user, userProfile, loading } = useAuth()
+  const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
+  const onboardingTriggeredRef = useRef(false)
+
+  // Debug logging for auth state
+  useEffect(() => {
+    console.log('[HomePage] Auth state:', {
+      user: user?.email,
+      userType: userProfile?.user_type,
+      needsOnboarding,
+      loading,
+      showOnboarding,
+      searchParams: searchParams.toString()
+    })
+  }, [user, userProfile, needsOnboarding, loading, showOnboarding, searchParams])
 
   // Check for onboarding query param (from OAuth callback)
+  // This triggers immediately when URL has ?onboarding=true
   useEffect(() => {
     const onboardingParam = searchParams.get('onboarding')
-    if (onboardingParam === 'true' && user && needsOnboarding) {
-      setShowOnboarding(true)
-      // Clean up URL
-      navigate('/', { replace: true })
-    }
-  }, [searchParams, user, needsOnboarding, navigate])
+    console.log('[HomePage] Checking onboarding param:', onboardingParam, 'user:', !!user, 'loading:', loading)
 
-  // Also show onboarding if needsOnboarding is true from context
-  useEffect(() => {
-    if (user && needsOnboarding && !showOnboarding) {
+    if (onboardingParam === 'true' && user) {
+      console.log('[HomePage] Onboarding param detected, showing modal')
       setShowOnboarding(true)
+      onboardingTriggeredRef.current = true
+      // Clean up URL param
+      const newParams = new URLSearchParams(searchParams)
+      newParams.delete('onboarding')
+      setSearchParams(newParams, { replace: true })
     }
-  }, [user, needsOnboarding, showOnboarding])
+  }, [searchParams, user, loading, setSearchParams])
+
+  // Also show onboarding if needsOnboarding is true from context (after loading completes)
+  useEffect(() => {
+    // Don't trigger if already triggered by URL param
+    if (onboardingTriggeredRef.current) return
+
+    if (!loading && user && needsOnboarding && !showOnboarding) {
+      // Check if user hasn't dismissed onboarding before
+      const dismissed = localStorage.getItem(`onboarding_dismissed_${user.id}`)
+      if (!dismissed) {
+        console.log('[HomePage] needsOnboarding is true, showing modal')
+        setShowOnboarding(true)
+      }
+    }
+  }, [user, needsOnboarding, loading, showOnboarding])
 
   // SEO meta tags and structured data
   useEffect(() => {
@@ -51,7 +79,9 @@ export function HomePage() {
   }
 
   const handleOnboardingComplete = () => {
+    console.log('[HomePage] Onboarding complete, closing modal')
     setShowOnboarding(false)
+    onboardingTriggeredRef.current = false
     completeOnboarding()
     // Redirect to profile edit page after onboarding
     navigate('/profile/edit')
