@@ -2,6 +2,15 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
+/**
+ * AuthCallbackPage - Handles OAuth redirect after Google/Facebook login
+ *
+ * CRITICAL: We do NOT manually call exchangeCodeForSession!
+ * Supabase's detectSessionInUrl: true auto-handles the PKCE exchange.
+ * We just poll for the session to appear.
+ *
+ * Build: 2024-12-19-v2
+ */
 export default function AuthCallbackPage() {
   const navigate = useNavigate()
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing')
@@ -13,7 +22,7 @@ export default function AuthCallbackPage() {
     processedRef.current = true
 
     const handleCallback = async () => {
-      console.log('[AuthCallback] Starting...')
+      console.log('[AuthCallback] Starting... (v2 - no manual exchange)')
       console.log('[AuthCallback] URL:', window.location.href)
 
       // CRITICAL: Redirect www to non-www IMMEDIATELY
@@ -132,15 +141,11 @@ export default function AuthCallbackPage() {
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#171717] flex items-center justify-center p-4">
         <div className="bg-[#232323] p-8 rounded-2xl max-w-md w-full text-center border border-white/10">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
-            <svg className="w-8 h-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
+          <div className="text-6xl mb-4">⚠️</div>
           <h1 className="text-2xl font-bold text-white mb-4">Fehler bei der Anmeldung</h1>
-          <p className="text-red-400 mb-6">{errorMessage}</p>
+          <p className="text-gray-400 mb-6">{errorMessage}</p>
           <button
             onClick={() => navigate('/', { replace: true })}
             className="w-full px-6 py-3 bg-gradient-to-r from-[#610AD1] to-[#FB7A43] text-white font-medium rounded-lg hover:opacity-90 transition-colors"
@@ -153,18 +158,16 @@ export default function AuthCallbackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary flex items-center justify-center">
+    <div className="min-h-screen bg-[#171717] flex items-center justify-center">
       <div className="text-center">
-        <div className="relative w-16 h-16 mx-auto mb-6">
-          <div className="absolute inset-0 rounded-full border-4 border-accent-purple/20"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-accent-purple animate-spin"></div>
+        <div className="w-16 h-16 mx-auto mb-6 relative">
+          <div className="absolute inset-0 rounded-full border-4 border-[#610AD1]/20" />
+          <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#610AD1] animate-spin" />
         </div>
         <h1 className="text-xl font-semibold text-white mb-2">
-          {status === 'success' ? 'Erfolgreich angemeldet!' : 'Anmeldung...'}
+          {status === 'success' ? 'Erfolgreich!' : 'Anmeldung...'}
         </h1>
-        <p className="text-gray-400">
-          {status === 'success' ? 'Du wirst weitergeleitet...' : 'Bitte warte einen Moment...'}
-        </p>
+        <p className="text-gray-400">Bitte warten...</p>
       </div>
     </div>
   )
