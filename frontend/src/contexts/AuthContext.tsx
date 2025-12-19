@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetch user profile from database with retry logic for RLS timing issues
   const fetchUserProfile = useCallback(async (userId: string, retryCount = 0): Promise<UserProfile | null> => {
     const MAX_RETRIES = 3
-    const RETRY_DELAY = 500 // ms
+    const RETRY_DELAY = 300 // ms - reduced for faster retries
 
     try {
       console.log('[AuthContext] fetchUserProfile: Starting query for', userId, retryCount > 0 ? `(retry ${retryCount})` : '')
@@ -54,15 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .from('users')
         .select('id, email, membername, vorname, nachname, user_type, profile_image_url, cover_image_url, is_verified, membership_tier, role')
         .eq('id', userId)
-        .single()
+        .maybeSingle() // Use maybeSingle to avoid error when no row exists yet
 
       console.log('[AuthContext] fetchUserProfile: Query returned', { data: data ? 'exists' : 'null', error: error?.message || 'none', code: error?.code })
 
       if (error) {
-        // PGRST116 = "JSON object requested, multiple (or no) rows returned" - RLS might be blocking
-        // 406 = Not Acceptable - same issue
-        if ((error.code === 'PGRST116' || error.code === '406') && retryCount < MAX_RETRIES) {
-          console.log(`[AuthContext] RLS timing issue detected, retrying in ${RETRY_DELAY}ms...`)
+        // Retry on temporary errors or network issues
+        if (retryCount < MAX_RETRIES) {
+          console.log(`[AuthContext] Query error, retrying in ${RETRY_DELAY}ms...`)
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
           return fetchUserProfile(userId, retryCount + 1)
         }
@@ -72,10 +71,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null
       }
 
+      // No error but no data - user might not exist in public.users yet
+      if (!data) {
+        if (retryCount < MAX_RETRIES) {
+          console.log(`[AuthContext] No profile data yet, retrying in ${RETRY_DELAY}ms...`)
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
+          return fetchUserProfile(userId, retryCount + 1)
+        }
+        console.log('[AuthContext] No profile found after retries')
+        setUserProfile(null)
+        return null
+      }
+
       setUserProfile(data as UserProfile)
       return data as UserProfile
     } catch (err) {
       console.error('Error in fetchUserProfile:', err)
+      if (retryCount < MAX_RETRIES) {
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
+        return fetchUserProfile(userId, retryCount + 1)
+      }
       setUserProfile(null)
       return null
     }
@@ -109,8 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    // Helper to fetch profile with timeout
-    const fetchProfileWithTimeout = async (userId: string, timeoutMs = 10000): Promise<UserProfile | null> => {
+    // Helper to fetch profile with timeout (reduced to 5s for better UX)
+    const fetchProfileWithTimeout = async (userId: string, timeoutMs = 5000): Promise<UserProfile | null> => {
       const timeoutPromise = new Promise<null>((resolve) => {
         setTimeout(() => {
           console.warn('[AuthContext] Profile fetch timed out after', timeoutMs, 'ms')
