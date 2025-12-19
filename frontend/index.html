@@ -4,6 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- CRITICAL: Redirect www to non-www IMMEDIATELY -->
+  <!-- www.blogyydev.xyz and blogyydev.xyz have different localStorage = PKCE auth fails -->
+  <script>
+    if (window.location.hostname === 'www.blogyydev.xyz') {
+      window.location.replace(window.location.href.replace('www.blogyydev.xyz', 'blogyydev.xyz'));
+    }
+  </script>
+
   <!-- Primary Meta Tags -->
   <title>Bloghead - Kuenstler & Event-Services buchen</title>
   <meta name="title" content="Bloghead - Kuenstler & Event-Services buchen" />
