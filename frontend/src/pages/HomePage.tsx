@@ -22,6 +22,7 @@ export function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const onboardingTriggeredRef = useRef(false)
+  const pendingOnboardingRef = useRef(false) // Track if we're waiting for user to load
 
   // Debug logging for auth state
   useEffect(() => {
@@ -31,37 +32,58 @@ export function HomePage() {
       needsOnboarding,
       loading,
       showOnboarding,
+      pendingOnboarding: pendingOnboardingRef.current,
       searchParams: searchParams.toString()
     })
   }, [user, userProfile, needsOnboarding, loading, showOnboarding, searchParams])
 
-  // Check for onboarding query param (from OAuth callback)
-  // This triggers immediately when URL has ?onboarding=true
+  // CRITICAL: Check for onboarding query param (from OAuth callback)
+  // Must handle the case where user is not yet loaded (loading=true)
   useEffect(() => {
     const onboardingParam = searchParams.get('onboarding')
     console.log('[HomePage] Checking onboarding param:', onboardingParam, 'user:', !!user, 'loading:', loading)
 
-    if (onboardingParam === 'true' && user) {
-      console.log('[HomePage] Onboarding param detected, showing modal')
-      setShowOnboarding(true)
-      onboardingTriggeredRef.current = true
-      // Clean up URL param
+    if (onboardingParam === 'true') {
+      // Mark that we want to show onboarding
+      pendingOnboardingRef.current = true
+
+      // Clean up URL param immediately to prevent loops
       const newParams = new URLSearchParams(searchParams)
       newParams.delete('onboarding')
       setSearchParams(newParams, { replace: true })
+
+      // If user is already loaded, show modal now
+      if (user && !loading) {
+        console.log('[HomePage] 🎯 Onboarding param detected, user loaded - showing modal NOW')
+        setShowOnboarding(true)
+        onboardingTriggeredRef.current = true
+        pendingOnboardingRef.current = false
+      } else {
+        console.log('[HomePage] Onboarding param detected, waiting for user to load...')
+      }
     }
-  }, [searchParams, user, loading, setSearchParams])
+  }, [searchParams, setSearchParams, user, loading])
+
+  // CRITICAL: Show onboarding when user finishes loading (if pending)
+  useEffect(() => {
+    if (!loading && user && pendingOnboardingRef.current && !showOnboarding) {
+      console.log('[HomePage] 🎯 User loaded, pending onboarding - showing modal NOW')
+      setShowOnboarding(true)
+      onboardingTriggeredRef.current = true
+      pendingOnboardingRef.current = false
+    }
+  }, [loading, user, showOnboarding])
 
   // Also show onboarding if needsOnboarding is true from context (after loading completes)
   useEffect(() => {
-    // Don't trigger if already triggered by URL param
-    if (onboardingTriggeredRef.current) return
+    // Don't trigger if already triggered by URL param or pending
+    if (onboardingTriggeredRef.current || pendingOnboardingRef.current) return
 
     if (!loading && user && needsOnboarding && !showOnboarding) {
       // Check if user hasn't dismissed onboarding before
       const dismissed = localStorage.getItem(`onboarding_dismissed_${user.id}`)
       if (!dismissed) {
-        console.log('[HomePage] needsOnboarding is true, showing modal')
+        console.log('[HomePage] 🎯 needsOnboarding is true, showing modal')
         setShowOnboarding(true)
       }
     }
