@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
-import { supabase } from '../lib/supabase'
+import { supabase, getOAuthRedirectUrl } from '../lib/supabase'
 
 // Database user profile type (exported for use in other components)
 export interface UserProfile {
@@ -191,22 +191,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signInWithGoogle = async () => {
+    const redirectUrl = getOAuthRedirectUrl()
+    console.log('[AuthContext] signInWithGoogle: Starting OAuth with redirect:', redirectUrl)
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: redirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       }
     })
+
+    if (error) {
+      console.error('[AuthContext] signInWithGoogle: Error:', error)
+    }
     return { error }
   }
 
   const signInWithFacebook = async () => {
+    const redirectUrl = getOAuthRedirectUrl()
+    console.log('[AuthContext] signInWithFacebook: Starting OAuth with redirect:', redirectUrl)
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`
+        redirectTo: redirectUrl,
       }
     })
+
+    if (error) {
+      console.error('[AuthContext] signInWithFacebook: Error:', error)
+    }
     return { error }
   }
 
