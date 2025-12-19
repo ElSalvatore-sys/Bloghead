@@ -5,14 +5,25 @@
   "outputDirectory": "dist",
   "redirects": [
     {
-      "source": "/(.*)",
+      "source": "/",
       "has": [
         {
           "type": "host",
           "value": "www.blogyydev.xyz"
         }
       ],
-      "destination": "https://blogyydev.xyz/$1",
+      "destination": "https://blogyydev.xyz/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.blogyydev.xyz"
+        }
+      ],
+      "destination": "https://blogyydev.xyz/:path*",
       "permanent": true
     }
   ],
