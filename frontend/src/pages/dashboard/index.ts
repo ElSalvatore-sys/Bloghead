@@ -12,6 +12,7 @@ export { MyReviewsPage } from './MyReviewsPage'
 // Artist pages
 export { BookingsPage } from './BookingsPage'
 export { CalendarPage } from './CalendarPage'
+export { AvailabilityPage } from './AvailabilityPage'
 export { ReviewsPage } from './ReviewsPage'
 export { StatsPage } from './StatsPage'
 

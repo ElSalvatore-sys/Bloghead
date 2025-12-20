@@ -31,6 +31,7 @@ const EventsAttendedPage = lazy(() => import('./pages/dashboard/EventsAttendedPa
 const MyReviewsPage = lazy(() => import('./pages/dashboard/MyReviewsPage').then(m => ({ default: m.MyReviewsPage })))
 const BookingsPage = lazy(() => import('./pages/dashboard/BookingsPage').then(m => ({ default: m.BookingsPage })))
 const CalendarPage = lazy(() => import('./pages/dashboard/CalendarPage').then(m => ({ default: m.CalendarPage })))
+const AvailabilityPage = lazy(() => import('./pages/dashboard/AvailabilityPage').then(m => ({ default: m.AvailabilityPage })))
 const ReviewsPage = lazy(() => import('./pages/dashboard/ReviewsPage').then(m => ({ default: m.ReviewsPage })))
 const StatsPage = lazy(() => import('./pages/dashboard/StatsPage').then(m => ({ default: m.StatsPage })))
 const OrdersPage = lazy(() => import('./pages/dashboard/OrdersPage').then(m => ({ default: m.OrdersPage })))
@@ -111,6 +112,7 @@ function App() {
                 {/* Artist pages */}
                 <Route path="bookings" element={<BookingsPage />} />
                 <Route path="calendar" element={<CalendarPage />} />
+                <Route path="availability" element={<AvailabilityPage />} />
                 <Route path="reviews" element={<ReviewsPage />} />
                 <Route path="stats" element={<StatsPage />} />
 

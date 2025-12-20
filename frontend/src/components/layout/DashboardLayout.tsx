@@ -111,6 +111,15 @@ function CalendarPlusIcon({ className = '' }: { className?: string }) {
   )
 }
 
+function ClockIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  )
+}
+
 function HelpCircleIcon({ className = '' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -174,6 +183,7 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
   'calendar-plus': CalendarPlusIcon,
   'help-circle': HelpCircleIcon,
   home: HomeIcon,
+  clock: ClockIcon,
 }
 
 function getIcon(iconName: string | undefined) {
