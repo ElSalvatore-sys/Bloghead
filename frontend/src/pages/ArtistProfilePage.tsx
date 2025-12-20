@@ -1,10 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useMemo, useLayoutEffect } from 'react'
-import { Button } from '../components/ui'
+import { Button, SocialLinksDisplay } from '../components/ui'
 import { ArtistCalendar, AudioPlayer } from '../components/artist'
 import { BookingRequestModal } from '../components/booking'
 import {
-  InstagramIcon,
   PlayIcon,
   CameraIcon,
 } from '../components/icons'
@@ -412,26 +411,27 @@ export function ArtistProfilePage() {
               </section>
             )}
 
-            {/* Instagram Section */}
-            {artist.instagram_profile && (
+            {/* Social Media Section */}
+            {(artist.social_media || artist.instagram_profile || artist.soundcloud_url || artist.website_url) && (
               <section>
                 <div className="flex items-center gap-3 mb-4">
-                  <InstagramIcon size={24} className="text-white/60" />
+                  <svg className="w-6 h-6 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
                   <h3 className="text-lg font-bold text-white uppercase tracking-wide">
-                    See Me On Instagram
+                    Social Media
                   </h3>
                 </div>
-                <a
-                  href={`https://instagram.com/${artist.instagram_profile.replace('@', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-accent-purple hover:text-white transition-colors"
-                >
-                  @{artist.instagram_profile.replace('@', '')}
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
+                <div className="bg-bg-card/30 rounded-lg p-6">
+                  <SocialLinksDisplay
+                    socialMedia={artist.social_media}
+                    instagramProfile={artist.instagram_profile}
+                    soundcloudUrl={artist.soundcloud_url}
+                    websiteUrl={artist.website_url}
+                    size="lg"
+                    className="gap-6"
+                  />
+                </div>
               </section>
             )}
 

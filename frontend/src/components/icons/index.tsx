@@ -285,3 +285,88 @@ export function PlusIcon({ size = 24, className = '', ...props }: IconProps) {
     </Icon>
   )
 }
+
+// TikTok Icon
+export function TikTokIcon({ size = 24, className = '', ...props }: IconProps) {
+  return (
+    <Icon size={size} className={className} {...props}>
+      <path
+        d="M34 8h-6v24a6 6 0 1 1-6-6v-6a12 12 0 1 0 12 12V18c2 2 5 4 8 4v-6c-4 0-8-4-8-8z"
+        fill="currentColor"
+      />
+    </Icon>
+  )
+}
+
+// YouTube Icon
+export function YouTubeIcon({ size = 24, className = '', ...props }: IconProps) {
+  return (
+    <Icon size={size} className={className} {...props}>
+      <rect x="4" y="10" width="40" height="28" rx="6" stroke="currentColor" strokeWidth="3" fill="none" />
+      <path d="M20 18l10 6-10 6V18z" fill="currentColor" />
+    </Icon>
+  )
+}
+
+// Spotify Icon
+export function SpotifyIcon({ size = 24, className = '', ...props }: IconProps) {
+  return (
+    <Icon size={size} className={className} {...props}>
+      <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" fill="none" />
+      <path d="M12 20c8-2 16 0 24 4" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
+      <path d="M14 26c6-1.5 12 0 18 3" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
+      <path d="M16 32c5-1 10 0 14 2" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
+    </Icon>
+  )
+}
+
+// SoundCloud Icon
+export function SoundCloudIcon({ size = 24, className = '', ...props }: IconProps) {
+  return (
+    <Icon size={size} className={className} {...props}>
+      <rect x="6" y="26" width="3" height="12" rx="1" fill="currentColor" />
+      <rect x="12" y="20" width="3" height="18" rx="1" fill="currentColor" />
+      <rect x="18" y="16" width="3" height="22" rx="1" fill="currentColor" />
+      <rect x="24" y="18" width="3" height="20" rx="1" fill="currentColor" />
+      <rect x="30" y="14" width="3" height="24" rx="1" fill="currentColor" />
+      <path d="M36 14c6 0 8 4 8 10s-2 10-8 10" stroke="currentColor" strokeWidth="3" fill="none" />
+    </Icon>
+  )
+}
+
+// LinkedIn Icon
+export function LinkedInIcon({ size = 24, className = '', ...props }: IconProps) {
+  return (
+    <Icon size={size} className={className} {...props}>
+      <rect x="4" y="4" width="40" height="40" rx="4" stroke="currentColor" strokeWidth="3" fill="none" />
+      <circle cx="14" cy="14" r="3" fill="currentColor" />
+      <rect x="11" y="20" width="6" height="20" fill="currentColor" />
+      <path d="M24 20v20M24 28c0-4 3-8 8-8s8 4 8 8v12" stroke="currentColor" strokeWidth="5" strokeLinecap="round" fill="none" />
+    </Icon>
+  )
+}
+
+// Twitter/X Icon
+export function TwitterIcon({ size = 24, className = '', ...props }: IconProps) {
+  return (
+    <Icon size={size} className={className} {...props}>
+      <path
+        d="M8 8l14 16L8 40h4l10-12 8 12h12L28 24l12-16h-4L26 18l-6-10H8z"
+        fill="currentColor"
+      />
+    </Icon>
+  )
+}
+
+// Website/Globe Icon
+export function WebsiteIcon({ size = 24, className = '', ...props }: IconProps) {
+  return (
+    <Icon size={size} className={className} {...props}>
+      <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" fill="none" />
+      <ellipse cx="24" cy="24" rx="8" ry="20" stroke="currentColor" strokeWidth="3" fill="none" />
+      <path d="M4 24h40" stroke="currentColor" strokeWidth="3" />
+      <path d="M8 14h32" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 34h32" stroke="currentColor" strokeWidth="2" />
+    </Icon>
+  )
+}

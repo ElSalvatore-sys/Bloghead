@@ -269,11 +269,16 @@ export default function ProfileEditPage() {
         mapped.technik_vorhanden = (profileData.technik_vorhanden as string[]) || []
         mapped.technik_benoetigt = (profileData.technik_benoetigt as string[]) || []
         mapped.website_url = (profileData.website_url as string) || ''
-        // Map social links from individual fields
-        const artistSocials: { platform: string; url: string }[] = []
-        if (profileData.instagram_profile) artistSocials.push({ platform: 'instagram', url: profileData.instagram_profile as string })
-        if (profileData.soundcloud_url) artistSocials.push({ platform: 'soundcloud', url: profileData.soundcloud_url as string })
-        mapped.social_links = artistSocials
+        // Load social links from social_media jsonb if available, otherwise from individual fields
+        if (profileData.social_media && Array.isArray(profileData.social_media)) {
+          mapped.social_links = profileData.social_media as { platform: string; url: string }[]
+        } else {
+          const artistSocials: { platform: string; url: string }[] = []
+          if (profileData.instagram_profile) artistSocials.push({ platform: 'instagram', url: profileData.instagram_profile as string })
+          if (profileData.soundcloud_url) artistSocials.push({ platform: 'soundcloud', url: profileData.soundcloud_url as string })
+          if (profileData.website_url) artistSocials.push({ platform: 'website', url: profileData.website_url as string })
+          mapped.social_links = artistSocials
+        }
         break
 
       case 'service_provider':
@@ -284,9 +289,15 @@ export default function ProfileEditPage() {
         mapped.max_price = (profileData.max_price as number) || null
         mapped.gallery_urls = (profileData.gallery_urls as string[]) || []
         mapped.website_url = (profileData.website_url as string) || ''
-        const spSocials: { platform: string; url: string }[] = []
-        if (profileData.instagram_handle) spSocials.push({ platform: 'instagram', url: profileData.instagram_handle as string })
-        mapped.social_links = spSocials
+        // Load social links from social_media jsonb if available, otherwise from individual fields
+        if (profileData.social_media && Array.isArray(profileData.social_media)) {
+          mapped.social_links = profileData.social_media as { platform: string; url: string }[]
+        } else {
+          const spSocials: { platform: string; url: string }[] = []
+          if (profileData.instagram_handle) spSocials.push({ platform: 'instagram', url: profileData.instagram_handle as string })
+          if (profileData.website_url) spSocials.push({ platform: 'website', url: profileData.website_url as string })
+          mapped.social_links = spSocials
+        }
         break
 
       case 'event_organizer':
@@ -295,9 +306,15 @@ export default function ProfileEditPage() {
         mapped.venue_name = (profileData.venue_name as string) || ''
         mapped.stadt = (profileData.city as string) || ''
         mapped.website_url = (profileData.website_url as string) || ''
-        const eoSocials: { platform: string; url: string }[] = []
-        if (profileData.instagram_handle) eoSocials.push({ platform: 'instagram', url: profileData.instagram_handle as string })
-        mapped.social_links = eoSocials
+        // Load social links from social_media jsonb if available, otherwise from individual fields
+        if (profileData.social_media && Array.isArray(profileData.social_media)) {
+          mapped.social_links = profileData.social_media as { platform: string; url: string }[]
+        } else {
+          const eoSocials: { platform: string; url: string }[] = []
+          if (profileData.instagram_handle) eoSocials.push({ platform: 'instagram', url: profileData.instagram_handle as string })
+          if (profileData.website_url) eoSocials.push({ platform: 'website', url: profileData.website_url as string })
+          mapped.social_links = eoSocials
+        }
         break
 
       case 'fan':
@@ -349,9 +366,11 @@ export default function ProfileEditPage() {
           intro_video_url: formData.intro_video_url,
           technik_vorhanden: formData.technik_vorhanden,
           technik_benoetigt: formData.technik_benoetigt,
-          website_url: formData.website_url,
+          website_url: formData.social_links.find(l => l.platform === 'website')?.url || formData.website_url || null,
           instagram_profile: formData.social_links.find(l => l.platform === 'instagram')?.url || null,
           soundcloud_url: formData.social_links.find(l => l.platform === 'soundcloud')?.url || null,
+          // Store all social links in social_media jsonb field
+          social_media: formData.social_links.length > 0 ? formData.social_links : null,
         }
         break
 
@@ -363,8 +382,10 @@ export default function ProfileEditPage() {
           min_price: formData.min_price,
           max_price: formData.max_price,
           gallery_urls: formData.gallery_urls,
-          website_url: formData.website_url,
+          website_url: formData.social_links.find(l => l.platform === 'website')?.url || formData.website_url || null,
           instagram_handle: formData.social_links.find(l => l.platform === 'instagram')?.url || null,
+          // Store all social links in social_media jsonb field
+          social_media: formData.social_links.length > 0 ? formData.social_links : null,
         }
         break
 
@@ -374,8 +395,10 @@ export default function ProfileEditPage() {
           business_name: formData.company_name,
           venue_name: formData.venue_name,
           city: formData.stadt,
-          website_url: formData.website_url,
+          website_url: formData.social_links.find(l => l.platform === 'website')?.url || formData.website_url || null,
           instagram_handle: formData.social_links.find(l => l.platform === 'instagram')?.url || null,
+          // Store all social links in social_media jsonb field
+          social_media: formData.social_links.length > 0 ? formData.social_links : null,
         }
         break
 

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
+import { SocialLinksDisplay } from '../components/ui/SocialLinksDisplay'
 import { ReviewsSection } from '../components/reviews'
 import { getServiceProviderById } from '../services/serviceProviderService'
 import type { ServiceProviderListItem } from '../services/serviceProviderService'
@@ -21,26 +22,6 @@ function PhoneIcon({ className = '' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-    </svg>
-  )
-}
-
-function GlobeIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  )
-}
-
-function InstagramIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
     </svg>
   )
 }
@@ -91,6 +72,7 @@ type ProviderDetail = ServiceProviderListItem & {
   linkedin_url?: string | null
   pricing_unit?: string | null
   service_radius_km?: number | null
+  social_media?: { platform: string; url: string }[] | null
 }
 
 export function ServiceProviderProfilePage() {
@@ -330,7 +312,7 @@ export function ServiceProviderProfilePage() {
             {/* Contact Card */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
               <h3 className="text-lg font-bold text-white mb-4">Kontakt</h3>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {provider.phone && (
                   <a
                     href={`tel:${provider.phone}`}
@@ -341,31 +323,21 @@ export function ServiceProviderProfilePage() {
                   </a>
                 )}
 
-                {provider.website_url && (
-                  <a
-                    href={provider.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
-                  >
-                    <GlobeIcon className="w-5 h-5" />
-                    <span>Website besuchen</span>
-                  </a>
+                {/* Social Media Links */}
+                {(provider.social_media || provider.instagram_handle || provider.website_url) && (
+                  <div className="pt-2">
+                    <p className="text-white/50 text-sm mb-3">Social Media</p>
+                    <SocialLinksDisplay
+                      socialMedia={provider.social_media}
+                      instagramProfile={provider.instagram_handle}
+                      websiteUrl={provider.website_url}
+                      size="md"
+                      className="gap-4"
+                    />
+                  </div>
                 )}
 
-                {provider.instagram_handle && (
-                  <a
-                    href={`https://instagram.com/${provider.instagram_handle}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
-                  >
-                    <InstagramIcon className="w-5 h-5" />
-                    <span>@{provider.instagram_handle}</span>
-                  </a>
-                )}
-
-                {!provider.phone && !provider.website_url && !provider.instagram_handle && (
+                {!provider.phone && !provider.website_url && !provider.instagram_handle && !provider.social_media && (
                   <p className="text-white/40 text-sm">
                     Keine Kontaktdaten verfügbar
                   </p>
