@@ -210,3 +210,84 @@ export function isPastDate(date: Date): boolean {
 export function formatDateForApi(date: Date): string {
   return date.toISOString().split('T')[0]
 }
+
+// =====================================================
+// BOOKING MESSAGES
+// =====================================================
+
+export type MessageType = 'text' | 'system' | 'offer' | 'counter_offer' | 'file'
+
+export interface BookingMessage {
+  id: string
+  booking_request_id: string
+  sender_id: string
+  message: string
+  message_type: MessageType
+  attachments: string[]
+  is_read: boolean
+  read_at: string | null
+  created_at: string
+  updated_at: string
+  // Joined data
+  sender?: {
+    id: string
+    vorname: string
+    nachname: string
+    profile_image_url?: string
+  }
+}
+
+// =====================================================
+// BOOKING STATUS HISTORY
+// =====================================================
+
+export interface BookingStatusHistory {
+  id: string
+  booking_request_id: string
+  previous_status: string | null
+  new_status: string
+  changed_by: string | null
+  change_reason: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+  // Joined data
+  changed_by_user?: {
+    id: string
+    vorname: string
+    nachname: string
+  }
+}
+
+// =====================================================
+// EXTENDED STATUS LABELS & COLORS
+// =====================================================
+
+export const BOOKING_REQUEST_STATUS_LABELS: Record<BookingRequestStatus, string> = {
+  pending: 'Ausstehend',
+  accepted: 'Angenommen',
+  rejected: 'Abgelehnt',
+  negotiating: 'In Verhandlung',
+  confirmed: 'Bestätigt',
+  cancelled: 'Storniert',
+  completed: 'Abgeschlossen',
+  expired: 'Abgelaufen'
+}
+
+export const BOOKING_REQUEST_STATUS_COLORS: Record<BookingRequestStatus, { bg: string; text: string; border: string }> = {
+  pending: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500' },
+  accepted: { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500' },
+  rejected: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500' },
+  negotiating: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500' },
+  confirmed: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500' },
+  cancelled: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500' },
+  completed: { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500' },
+  expired: { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500' }
+}
+
+export const MESSAGE_TYPE_LABELS: Record<MessageType, string> = {
+  text: 'Nachricht',
+  system: 'System',
+  offer: 'Angebot',
+  counter_offer: 'Gegenangebot',
+  file: 'Datei'
+}
