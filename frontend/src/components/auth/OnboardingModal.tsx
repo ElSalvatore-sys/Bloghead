@@ -50,8 +50,6 @@ const userTypes = [
     hoverGradient: 'hover:from-emerald-500/30 hover:to-teal-500/30',
     borderColor: 'border-emerald-500/30',
     hoverBorder: 'hover:border-emerald-400',
-    recommended: true,
-    recommendedText: 'Empfohlen',
   }
 ]
 
@@ -67,6 +65,10 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
     username: '',
     phone: '',
     artistName: '',
+    // Artist-specific fields
+    genre: '',
+    description: '',
+    city: '',
   })
 
   // Debug logging
@@ -135,6 +137,9 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
         await supabase.from('artist_profiles').upsert({
           user_id: user.id,
           kuenstlername: formData.artistName || displayName,
+          genre: formData.genre || null,
+          beschreibung: formData.description || null,
+          stadt: formData.city || null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
@@ -178,7 +183,10 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
 
   const canSubmitStep2 = () => {
     if (!selectedType) return false
-    if (selectedType === 'artist') return formData.artistName.trim().length > 0
+    if (selectedType === 'artist') {
+      // Artist requires name and genre (description and city are optional)
+      return formData.artistName.trim().length > 0 && formData.genre.trim().length > 0
+    }
     if (selectedType === 'service_provider' || selectedType === 'event_organizer') {
       return formData.username.trim().length > 0 && formData.phone.trim().length > 0
     }
@@ -236,11 +244,6 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
                     animate-fadeInUp
                   `}
                 >
-                  {type.recommended && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full text-xs font-bold text-black whitespace-nowrap shadow-lg">
-                      ⭐ {type.recommendedText}
-                    </div>
-                  )}
                   <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">
                     {type.icon}
                   </div>
@@ -275,21 +278,77 @@ export function OnboardingModal({ isOpen, onComplete }: OnboardingModalProps) {
             </button>
 
             <div className="space-y-4">
-              {/* Artist Name */}
+              {/* Artist Fields */}
               {selectedType === 'artist' && (
-                <div>
-                  <label className="block text-gray-300 text-sm mb-2">
-                    Künstlername <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.artistName}
-                    onChange={(e) => setFormData({ ...formData, artistName: e.target.value })}
-                    placeholder="Dein Bühnenname"
-                    className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none transition-colors"
-                    disabled={loading}
-                  />
-                </div>
+                <>
+                  {/* Artist Name */}
+                  <div>
+                    <label className="block text-gray-300 text-sm mb-2">
+                      Künstlername <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.artistName}
+                      onChange={(e) => setFormData({ ...formData, artistName: e.target.value })}
+                      placeholder="Dein Bühnenname"
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none transition-colors"
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {/* Genre */}
+                  <div>
+                    <label className="block text-gray-300 text-sm mb-2">
+                      Genre <span className="text-red-400">*</span>
+                    </label>
+                    <select
+                      value={formData.genre}
+                      onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-purple-500 focus:outline-none transition-colors appearance-none cursor-pointer"
+                      disabled={loading}
+                    >
+                      <option value="" className="bg-gray-900">Genre wählen...</option>
+                      <option value="DJ" className="bg-gray-900">DJ</option>
+                      <option value="Live Band" className="bg-gray-900">Live Band</option>
+                      <option value="Sänger/in" className="bg-gray-900">Sänger/in</option>
+                      <option value="Rapper/in" className="bg-gray-900">Rapper/in</option>
+                      <option value="Instrumentalist" className="bg-gray-900">Instrumentalist</option>
+                      <option value="Produzent" className="bg-gray-900">Produzent</option>
+                      <option value="Entertainer" className="bg-gray-900">Entertainer</option>
+                      <option value="Sonstiges" className="bg-gray-900">Sonstiges</option>
+                    </select>
+                  </div>
+
+                  {/* City */}
+                  <div>
+                    <label className="block text-gray-300 text-sm mb-2">
+                      Stadt
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="z.B. Wiesbaden, Frankfurt..."
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none transition-colors"
+                      disabled={loading}
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="block text-gray-300 text-sm mb-2">
+                      Kurze Beschreibung
+                    </label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      placeholder="Erzähl uns etwas über dich und deine Musik..."
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none transition-colors resize-none"
+                      disabled={loading}
+                    />
+                  </div>
+                </>
               )}
 
               {/* Username / Business Name */}

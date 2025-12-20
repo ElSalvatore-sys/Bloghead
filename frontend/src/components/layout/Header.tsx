@@ -117,13 +117,13 @@ function NavDropdown({
   return (
     <div
       ref={dropdownRef}
-      className="absolute top-full left-0 mt-2 min-w-[200px] bg-bg-card border border-white/10 rounded-lg shadow-lg py-2 z-50"
+      className="absolute top-full left-0 mt-2 min-w-[200px] bg-[#1a1a1a] border border-white/20 rounded-lg shadow-xl py-2 z-50"
     >
       {items.map((item) => (
         <Link
           key={item.href}
           to={item.href}
-          className="block px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+          className="block px-4 py-2.5 text-sm text-white/90 hover:text-white hover:bg-white/10 transition-colors"
           onClick={onClose}
         >
           {item.label}
