@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AvailabilityCalendar, AvailabilitySettings, BlockedDatesManager } from '../../components/availability'
+import { CalendarExport } from '../../components/calendar'
 import { useAuth } from '../../contexts/AuthContext'
 
 // Icons
@@ -63,7 +64,17 @@ function ChevronUpIcon({ className = '' }: { className?: string }) {
   )
 }
 
-type TabType = 'calendar' | 'blocked' | 'settings'
+function ExportIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  )
+}
+
+type TabType = 'calendar' | 'blocked' | 'settings' | 'export'
 
 export function AvailabilityPage() {
   const { user } = useAuth()
@@ -82,6 +93,7 @@ export function AvailabilityPage() {
     { id: 'calendar', label: 'Kalender', icon: CalendarIcon },
     { id: 'blocked', label: 'Blockierte Zeiten', icon: BanIcon },
     { id: 'settings', label: 'Einstellungen', icon: SettingsIcon },
+    { id: 'export', label: 'Export', icon: ExportIcon },
   ]
 
   return (
@@ -193,6 +205,12 @@ export function AvailabilityPage() {
 
         {activeTab === 'settings' && (
           <AvailabilitySettings artistId={user.id} />
+        )}
+
+        {activeTab === 'export' && (
+          <div className="max-w-md">
+            <CalendarExport />
+          </div>
         )}
       </motion.div>
     </div>
