@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { getFullNavigationForRole, type UserRole } from '../../config/navigationConfig'
 import { CreateEventButton } from '../event'
@@ -121,6 +121,15 @@ function HelpCircleIcon({ className = '' }: { className?: string }) {
   )
 }
 
+function HomeIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <polyline points="9 22 9 12 15 12 15 22" />
+    </svg>
+  )
+}
+
 function LogoutIcon({ className = '' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -164,6 +173,7 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
   users: UsersIcon,
   'calendar-plus': CalendarPlusIcon,
   'help-circle': HelpCircleIcon,
+  home: HomeIcon,
 }
 
 function getIcon(iconName: string | undefined) {
@@ -246,8 +256,18 @@ export function DashboardLayout() {
           <XIcon className="w-6 h-6" />
         </button>
 
+        {/* Logo - links to homepage */}
+        <div className="p-4 pt-14 md:pt-4 border-b border-white/10">
+          <Link
+            to="/"
+            className="font-display text-2xl text-text-primary hover:opacity-80 transition-opacity block"
+          >
+            BLOGHEAD
+          </Link>
+        </div>
+
         {/* User Info */}
-        <div className="p-6 pt-14 md:pt-6 border-b border-white/10">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent-purple to-accent-red flex items-center justify-center text-white font-bold text-lg">
               {avatarInitial}
@@ -261,6 +281,18 @@ export function DashboardLayout() {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {/* Back to Home link */}
+          <Link
+            to="/"
+            onClick={() => setSidebarOpen(false)}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors mb-2"
+          >
+            <HomeIcon className="w-5 h-5" />
+            <span>Zurück zur Startseite</span>
+          </Link>
+
+          <div className="border-b border-white/10 mb-2" />
+
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -295,15 +327,23 @@ export function DashboardLayout() {
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto min-h-screen">
         {/* Mobile header with hamburger */}
-        <div className="sticky top-0 z-30 bg-bg-card border-b border-white/10 p-4 md:hidden flex items-center gap-4">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 text-white/70 hover:text-white"
-            aria-label="Menü öffnen"
+        <div className="sticky top-0 z-30 bg-bg-card border-b border-white/10 p-4 md:hidden flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 text-white/70 hover:text-white"
+              aria-label="Menü öffnen"
+            >
+              <MenuIcon className="w-6 h-6" />
+            </button>
+            <span className="text-white font-medium">Dashboard</span>
+          </div>
+          <Link
+            to="/"
+            className="font-display text-xl text-text-primary hover:opacity-80 transition-opacity"
           >
-            <MenuIcon className="w-6 h-6" />
-          </button>
-          <span className="text-white font-medium">Dashboard</span>
+            BLOGHEAD
+          </Link>
         </div>
 
         <div className="max-w-5xl mx-auto p-4 md:p-6 lg:p-8">
