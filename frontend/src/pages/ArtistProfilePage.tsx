@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useLayoutEffect } from 'react'
 import { Button } from '../components/ui'
 import { ArtistCalendar, AudioPlayer } from '../components/artist'
 import { BookingRequestModal } from '../components/booking'
@@ -140,6 +140,11 @@ export function ArtistProfilePage() {
   const [isEditMode] = useState(false)
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+
+  // Scroll to top on page load
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   // Handle booking button click
   const handleBookingClick = () => {

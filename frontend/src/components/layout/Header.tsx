@@ -485,13 +485,22 @@ export function Header() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Logo */}
-            <Link
-              to="/"
-              className="font-display text-2xl lg:text-3xl text-text-primary hover:opacity-80 transition-opacity"
-            >
-              BLOGHEAD
-            </Link>
+            {/* Logo - scroll to top on homepage, navigate home on other pages */}
+            {location.pathname === '/' ? (
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="font-display text-2xl lg:text-3xl text-text-primary hover:opacity-80 transition-opacity cursor-pointer"
+              >
+                BLOGHEAD
+              </button>
+            ) : (
+              <Link
+                to="/"
+                className="font-display text-2xl lg:text-3xl text-text-primary hover:opacity-80 transition-opacity"
+              >
+                BLOGHEAD
+              </Link>
+            )}
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-8">
