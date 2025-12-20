@@ -1,12 +1,15 @@
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
+import { ViewToggle, type ViewMode } from '../components/ui/ViewToggle'
 import { FilterBar, type FilterBarFilters } from '../components/filters'
+import { ArtistMapView } from '../components/map'
 import { useArtists } from '../hooks/useArtists'
 import type { ArtistListItem } from '../services/artistService'
+import type { ArtistLocation } from '../services/mapService'
 
 // Location icon
 function LocationIcon({ className = '' }: { className?: string }) {
@@ -140,6 +143,8 @@ function ArtistCardSkeleton() {
 }
 
 export function ArtistsPage() {
+  const navigate = useNavigate()
+
   // Use the artists hook for real data
   const {
     artists,
@@ -152,6 +157,9 @@ export function ArtistsPage() {
     loadMore,
     hasMore,
   } = useArtists()
+
+  // View mode state (grid or map)
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   // Local filter state for FilterBar component
   const [filterBarFilters, setFilterBarFilters] = useState<FilterBarFilters>({
@@ -181,6 +189,11 @@ export function ArtistsPage() {
       category: '',
     })
     clearFilters()
+  }
+
+  // Handle artist click from map
+  const handleArtistMapClick = (artist: ArtistLocation) => {
+    navigate(`/artists/${artist.id}`)
   }
 
   // Note: genres and cities are available from useArtists() hook
@@ -214,15 +227,31 @@ export function ArtistsPage() {
       {/* Filter Bar Section */}
       <section className="py-8 px-4 md:px-6 border-b border-white/10">
         <div className="max-w-7xl mx-auto">
-          <FilterBar
-            filters={filterBarFilters}
-            onFiltersChange={setFilterBarFilters}
-            onApply={handleApplyFilters}
-          />
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            {/* View Toggle */}
+            <ViewToggle
+              view={viewMode}
+              onViewChange={setViewMode}
+            />
+
+            {/* Results Count */}
+            <p className="text-white/60 text-sm">
+              {loading ? 'Laden...' : `${artists.length} Künstler gefunden`}
+            </p>
+          </div>
+
+          {/* Filter Bar - only show in grid view */}
+          {viewMode === 'grid' && (
+            <FilterBar
+              filters={filterBarFilters}
+              onFiltersChange={setFilterBarFilters}
+              onApply={handleApplyFilters}
+            />
+          )}
         </div>
       </section>
 
-      {/* Artists Grid Section */}
+      {/* Content Section */}
       <section className="py-12 md:py-16 px-4 md:px-6">
         <div className="max-w-7xl mx-auto">
           {/* Error State */}
@@ -232,62 +261,89 @@ export function ArtistsPage() {
             </div>
           )}
 
-          {/* Results Count */}
-          <p className="text-text-muted text-sm mb-8">
-            {loading ? 'Laden...' : `${artists.length} Künstler gefunden`}
-          </p>
-
-          {/* Loading State */}
-          {loading && artists.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {[...Array(6)].map((_, i) => (
-                <ArtistCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : artists.length > 0 ? (
-            /* Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-              {artists.map((artist) => (
-                <ArtistCard
-                  key={artist.id}
-                  artist={artist}
+          {/* Animated View Transition */}
+          <AnimatePresence mode="wait">
+            {viewMode === 'map' ? (
+              /* Map View */
+              <motion.div
+                key="map"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.3 }}
+              >
+                <ArtistMapView
+                  userType="artist"
+                  onArtistClick={handleArtistMapClick}
+                  className="shadow-2xl"
                 />
-              ))}
-            </div>
-          ) : (
-            /* Empty State */
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-text-muted text-lg mb-4">
-                Keine Künstler gefunden
-              </p>
-              <p className="text-text-disabled text-sm mb-6">
-                Versuche andere Filtereinstellungen
-              </p>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handleClearFilters}
-                className="rounded-full"
+                <p className="text-center text-white/40 text-sm mt-4">
+                  Klicke auf einen Marker, um das Künstlerprofil zu öffnen
+                </p>
+              </motion.div>
+            ) : (
+              /* Grid View */
+              <motion.div
+                key="grid"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.3 }}
               >
-                Filter zurücksetzen
-              </Button>
-            </div>
-          )}
+                {/* Loading State */}
+                {loading && artists.length === 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {[...Array(6)].map((_, i) => (
+                      <ArtistCardSkeleton key={i} />
+                    ))}
+                  </div>
+                ) : artists.length > 0 ? (
+                  /* Grid */
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                    {artists.map((artist) => (
+                      <ArtistCard
+                        key={artist.id}
+                        artist={artist}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  /* Empty State */
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <p className="text-white/60 text-lg mb-4">
+                      Keine Künstler gefunden
+                    </p>
+                    <p className="text-white/40 text-sm mb-6">
+                      Versuche andere Filtereinstellungen
+                    </p>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleClearFilters}
+                      className="rounded-full"
+                    >
+                      Filter zurücksetzen
+                    </Button>
+                  </div>
+                )}
 
-          {/* Load More Button */}
-          {hasMore && artists.length > 0 && (
-            <div className="flex justify-center mt-12">
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={loadMore}
-                disabled={loading}
-                className="rounded-full px-10 uppercase tracking-wider"
-              >
-                {loading ? 'Laden...' : 'Mehr Laden'}
-              </Button>
-            </div>
-          )}
+                {/* Load More Button */}
+                {hasMore && artists.length > 0 && (
+                  <div className="flex justify-center mt-12">
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={loadMore}
+                      disabled={loading}
+                      className="rounded-full px-10 uppercase tracking-wider"
+                    >
+                      {loading ? 'Laden...' : 'Mehr Laden'}
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
     </div>
