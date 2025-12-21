@@ -83,19 +83,27 @@ export function ArtistMapView({
     }
   }, [initialCenter, initialZoom])
 
-  // Create single shared popup instance (prevents jumping)
+  // Create single shared popup instance AFTER map loads
   useEffect(() => {
     if (!map.current) return
 
-    // Create ONE popup to reuse - key fix for stability
-    popupRef.current = new mapboxgl.Popup({
-      offset: 25, // Simple offset, not array
-      closeButton: false,
-      closeOnClick: false,
-      className: 'artist-popup',
-      anchor: 'bottom',
-      maxWidth: '280px'
-    })
+    const initPopup = () => {
+      // Create ONE popup to reuse - key fix for stability
+      popupRef.current = new mapboxgl.Popup({
+        offset: [0, -22], // Offset above marker (marker is 44px, so -22 centers above)
+        closeButton: false,
+        closeOnClick: false,
+        className: 'artist-popup',
+        anchor: 'bottom', // Popup appears ABOVE the anchor point
+        maxWidth: '300px'
+      })
+    }
+
+    if (map.current.loaded()) {
+      initPopup()
+    } else {
+      map.current.on('load', initPopup)
+    }
 
     return () => {
       popupRef.current?.remove()
@@ -201,11 +209,25 @@ export function ArtistMapView({
           el.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.6)'
           el.style.zIndex = '1000'
 
-          // Update and show the shared popup
-          if (popupRef.current && map.current) {
+          // CRITICAL: Create popup if not exists, then set position BEFORE adding to map
+          if (map.current) {
+            // Create popup on-demand if it doesn't exist
+            if (!popupRef.current) {
+              popupRef.current = new mapboxgl.Popup({
+                offset: [0, -22],
+                closeButton: false,
+                closeOnClick: false,
+                className: 'artist-popup',
+                anchor: 'bottom',
+                maxWidth: '300px'
+              })
+            }
+
+            // CORRECT ORDER: setLngLat FIRST, then setHTML, then addTo
+            const content = getPopupContent(artist, color, emoji)
             popupRef.current
-              .setLngLat([artist.longitude, artist.latitude])
-              .setHTML(getPopupContent(artist, color, emoji))
+              .setLngLat([artist.longitude, artist.latitude]) // Position FIRST!
+              .setHTML(content)
               .addTo(map.current)
           }
         })
@@ -215,8 +237,10 @@ export function ArtistMapView({
           el.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.4)'
           el.style.zIndex = '1'
 
-          // Hide popup
-          popupRef.current?.remove()
+          // Hide popup (don't destroy, just remove from map)
+          if (popupRef.current) {
+            popupRef.current.remove()
+          }
         })
 
         // Click: navigate to artist profile using React Router
