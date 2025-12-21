@@ -261,3 +261,159 @@ export const MARKER_EMOJIS: Record<MarkerCategory, string> = {
   service: '⚡',
   default: '📍',
 };
+
+// =====================================================
+// GERMAN CITY COORDINATES LOOKUP
+// =====================================================
+
+export const GERMAN_CITY_COORDINATES: Record<string, { latitude: number; longitude: number }> = {
+  // Major cities
+  'berlin': { latitude: 52.5200, longitude: 13.4050 },
+  'hamburg': { latitude: 53.5511, longitude: 9.9937 },
+  'münchen': { latitude: 48.1351, longitude: 11.5820 },
+  'munich': { latitude: 48.1351, longitude: 11.5820 },
+  'köln': { latitude: 50.9375, longitude: 6.9603 },
+  'cologne': { latitude: 50.9375, longitude: 6.9603 },
+  'frankfurt': { latitude: 50.1109, longitude: 8.6821 },
+  'frankfurt am main': { latitude: 50.1109, longitude: 8.6821 },
+  'stuttgart': { latitude: 48.7758, longitude: 9.1829 },
+  'düsseldorf': { latitude: 51.2277, longitude: 6.7735 },
+  'dortmund': { latitude: 51.5136, longitude: 7.4653 },
+  'essen': { latitude: 51.4556, longitude: 7.0116 },
+  'leipzig': { latitude: 51.3397, longitude: 12.3731 },
+  'bremen': { latitude: 53.0793, longitude: 8.8017 },
+  'dresden': { latitude: 51.0504, longitude: 13.7373 },
+  'hannover': { latitude: 52.3759, longitude: 9.7320 },
+  'nürnberg': { latitude: 49.4521, longitude: 11.0767 },
+  'nuremberg': { latitude: 49.4521, longitude: 11.0767 },
+  'duisburg': { latitude: 51.4344, longitude: 6.7623 },
+  'bochum': { latitude: 51.4818, longitude: 7.2162 },
+  'wuppertal': { latitude: 51.2562, longitude: 7.1508 },
+  'bielefeld': { latitude: 52.0302, longitude: 8.5325 },
+  'bonn': { latitude: 50.7374, longitude: 7.0982 },
+  'münster': { latitude: 51.9607, longitude: 7.6261 },
+  'karlsruhe': { latitude: 49.0069, longitude: 8.4037 },
+  'mannheim': { latitude: 49.4875, longitude: 8.4660 },
+  'augsburg': { latitude: 48.3705, longitude: 10.8978 },
+  'wiesbaden': { latitude: 50.0782, longitude: 8.2398 },
+  'mainz': { latitude: 49.9929, longitude: 8.2473 },
+  'aachen': { latitude: 50.7753, longitude: 6.0839 },
+  'kiel': { latitude: 54.3233, longitude: 10.1228 },
+  'freiburg': { latitude: 47.9990, longitude: 7.8421 },
+  'lübeck': { latitude: 53.8655, longitude: 10.6866 },
+  'heidelberg': { latitude: 49.3988, longitude: 8.6724 },
+  'darmstadt': { latitude: 49.8728, longitude: 8.6512 },
+  'potsdam': { latitude: 52.3906, longitude: 13.0645 },
+  'würzburg': { latitude: 49.7913, longitude: 9.9534 },
+  'regensburg': { latitude: 49.0134, longitude: 12.1016 },
+  'rostock': { latitude: 54.0924, longitude: 12.0991 },
+  'kassel': { latitude: 51.3127, longitude: 9.4797 },
+  'offenbach': { latitude: 50.0956, longitude: 8.7761 },
+  'ulm': { latitude: 48.4011, longitude: 9.9876 },
+  'trier': { latitude: 49.7490, longitude: 6.6371 },
+  'saarbrücken': { latitude: 49.2402, longitude: 6.9969 },
+  'konstanz': { latitude: 47.6779, longitude: 9.1732 },
+  'bamberg': { latitude: 49.8988, longitude: 10.9028 },
+  'passau': { latitude: 48.5665, longitude: 13.4319 },
+  'magdeburg': { latitude: 52.1205, longitude: 11.6276 },
+  'erfurt': { latitude: 50.9848, longitude: 11.0299 },
+  'chemnitz': { latitude: 50.8278, longitude: 12.9214 },
+  'halle': { latitude: 51.4969, longitude: 11.9688 },
+  'braunschweig': { latitude: 52.2689, longitude: 10.5268 },
+  'göttingen': { latitude: 51.5413, longitude: 9.9158 },
+  'osnabrück': { latitude: 52.2799, longitude: 8.0472 },
+  'oldenburg': { latitude: 53.1435, longitude: 8.2146 },
+  'paderborn': { latitude: 51.7189, longitude: 8.7544 },
+  'siegen': { latitude: 50.8748, longitude: 8.0243 },
+  'gießen': { latitude: 50.5840, longitude: 8.6784 },
+  'marburg': { latitude: 50.8021, longitude: 8.7668 },
+  'fulda': { latitude: 50.5528, longitude: 9.6757 },
+  'coburg': { latitude: 50.2612, longitude: 10.9627 },
+  'schwerin': { latitude: 53.6355, longitude: 11.4012 },
+  'cottbus': { latitude: 51.7563, longitude: 14.3329 },
+  'jena': { latitude: 50.9272, longitude: 11.5892 },
+  'weimar': { latitude: 50.9795, longitude: 11.3235 },
+  'zwickau': { latitude: 50.7189, longitude: 12.4964 },
+  'gera': { latitude: 50.8810, longitude: 12.0833 },
+  'dessau': { latitude: 51.8312, longitude: 12.2461 },
+  'wolfsburg': { latitude: 52.4227, longitude: 10.7865 },
+  'salzgitter': { latitude: 52.1547, longitude: 10.3285 },
+  'hildesheim': { latitude: 52.1508, longitude: 9.9510 },
+  'gütersloh': { latitude: 51.9032, longitude: 8.3858 },
+  'ludwigshafen': { latitude: 49.4774, longitude: 8.4452 },
+  'kaiserslautern': { latitude: 49.4401, longitude: 7.7491 },
+  'koblenz': { latitude: 50.3569, longitude: 7.5890 },
+  'hagen': { latitude: 51.3671, longitude: 7.4633 },
+  'hamm': { latitude: 51.6739, longitude: 7.8160 },
+  'krefeld': { latitude: 51.3388, longitude: 6.5853 },
+  'mönchengladbach': { latitude: 51.1805, longitude: 6.4428 },
+  'oberhausen': { latitude: 51.4963, longitude: 6.8635 },
+  'gelsenkirchen': { latitude: 51.5177, longitude: 7.0857 },
+  'solingen': { latitude: 51.1652, longitude: 7.0671 },
+  'leverkusen': { latitude: 51.0459, longitude: 6.9844 },
+  'neuss': { latitude: 51.2042, longitude: 6.6879 },
+  'mülheim': { latitude: 51.4268, longitude: 6.8825 },
+  'recklinghausen': { latitude: 51.6141, longitude: 7.1979 },
+  'bottrop': { latitude: 51.5247, longitude: 6.9226 },
+  'remscheid': { latitude: 51.1787, longitude: 7.1896 },
+  'moers': { latitude: 51.4527, longitude: 6.6263 },
+  'bergisch gladbach': { latitude: 50.9918, longitude: 7.1308 },
+  'erlangen': { latitude: 49.5897, longitude: 11.0078 },
+  'fürth': { latitude: 49.4774, longitude: 10.9886 },
+  'ingolstadt': { latitude: 48.7665, longitude: 11.4258 },
+  'pforzheim': { latitude: 48.8922, longitude: 8.6946 },
+  'reutlingen': { latitude: 48.4914, longitude: 9.2043 },
+  'heilbronn': { latitude: 49.1427, longitude: 9.2109 },
+};
+
+/**
+ * Get coordinates for a German city (instant lookup, no API call)
+ */
+export function getCityCoordinates(city: string): { latitude: number; longitude: number } | null {
+  if (!city) return null;
+
+  // Normalize: lowercase, trim, remove extra spaces
+  const normalized = city.toLowerCase().trim().replace(/\s+/g, ' ');
+
+  // Direct lookup
+  if (GERMAN_CITY_COORDINATES[normalized]) {
+    return GERMAN_CITY_COORDINATES[normalized];
+  }
+
+  // Try partial match (city might have additions like "am Main")
+  for (const [key, coords] of Object.entries(GERMAN_CITY_COORDINATES)) {
+    if (normalized.includes(key) || key.includes(normalized)) {
+      return coords;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Update user location from city name (uses lookup table first, falls back to geocoding)
+ */
+export async function updateUserLocationFromCity(
+  userId: string,
+  city: string,
+  mapboxToken?: string
+): Promise<{ latitude: number; longitude: number } | null> {
+  // Try instant lookup first
+  const coords = getCityCoordinates(city);
+
+  if (coords) {
+    await updateUserLocation(userId, coords.latitude, coords.longitude, city, city);
+    return coords;
+  }
+
+  // Fallback to Mapbox geocoding if token provided
+  if (mapboxToken) {
+    const geocoded = await geocodeAddress(city, mapboxToken);
+    if (geocoded) {
+      await updateUserLocation(userId, geocoded.latitude, geocoded.longitude, city, geocoded.formatted);
+      return { latitude: geocoded.latitude, longitude: geocoded.longitude };
+    }
+  }
+
+  return null;
+}
