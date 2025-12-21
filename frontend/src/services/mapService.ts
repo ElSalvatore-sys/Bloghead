@@ -54,7 +54,7 @@ async function getArtistsWithLocationsDirect(
 ): Promise<ArtistLocation[]> {
   let query = supabase
     .from('users')
-    .select('id, vorname, nachname, kuenstlername, profile_image_url, stadt, genre, latitude, longitude, user_type')
+    .select('id, vorname, nachname, membername, profile_image_url, location_address, latitude, longitude, user_type')
     .not('latitude', 'is', null)
     .not('longitude', 'is', null)
     .limit(limit);
@@ -72,11 +72,12 @@ async function getArtistsWithLocationsDirect(
     return [];
   }
 
-  // Map stadt to city for consistency
+  // Map to ArtistLocation interface
   return (data || []).map(user => ({
     ...user,
-    city: user.stadt,
-    genre: Array.isArray(user.genre) ? user.genre.join(', ') : user.genre
+    kuenstlername: user.membername,
+    city: user.location_address,
+    genre: null
   })) as ArtistLocation[];
 }
 
