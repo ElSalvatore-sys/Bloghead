@@ -95,64 +95,99 @@ export function ArtistMapView({
         const color = MARKER_COLORS[category]
         const emoji = MARKER_EMOJIS[category]
 
-        // Create custom marker element
+        // Create custom marker element with stable positioning
         const el = document.createElement('div')
         el.className = 'artist-marker'
         el.style.cssText = `
-          width: 40px;
-          height: 40px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+          font-size: 20px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
           cursor: pointer;
-          transition: transform 0.2s ease;
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
           background-color: ${color};
+          border: 3px solid white;
+          z-index: 1;
         `
         el.innerHTML = emoji
-        el.onmouseenter = () => { el.style.transform = 'scale(1.1)' }
-        el.onmouseleave = () => { el.style.transform = 'scale(1)' }
 
-        // Create popup content
+        // Create popup content with profile image
         const popupContent = `
-          <div style="padding: 8px; min-width: 200px; background: #1a1a2e; border-radius: 8px;">
+          <div style="
+            padding: 12px;
+            min-width: 220px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+          ">
             <div style="display: flex; align-items: center; gap: 12px;">
               ${artist.profile_image_url
-                ? `<img src="${artist.profile_image_url}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;" />`
-                : `<div style="width: 48px; height: 48px; border-radius: 50%; background: #374151; display: flex; align-items: center; justify-content: center; font-size: 20px;">${emoji}</div>`
+                ? `<img src="${artist.profile_image_url}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid ${color};" />`
+                : `<div style="width: 56px; height: 56px; border-radius: 50%; background: ${color}; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid white;">${emoji}</div>`
               }
-              <div>
-                <p style="font-weight: 600; color: white; margin: 0;">
+              <div style="flex: 1;">
+                <p style="font-weight: 600; color: white; margin: 0; font-size: 15px;">
                   ${artist.kuenstlername || `${artist.vorname} ${artist.nachname}`}
                 </p>
-                ${artist.genre ? `<p style="font-size: 14px; color: #9ca3af; margin: 4px 0 0 0;">${artist.genre}</p>` : ''}
-                ${artist.city ? `<p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">📍 ${artist.city}</p>` : ''}
-                ${artist.distance_km ? `<p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">${artist.distance_km} km entfernt</p>` : ''}
+                ${artist.genre ? `<p style="font-size: 13px; color: ${color}; margin: 4px 0 0 0; font-weight: 500;">${artist.genre}</p>` : ''}
+                ${artist.city ? `<p style="font-size: 12px; color: #9ca3af; margin: 6px 0 0 0;">📍 ${artist.city}</p>` : ''}
+                ${artist.distance_km ? `<p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">↗ ${artist.distance_km} km</p>` : ''}
               </div>
+            </div>
+            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+              <span style="font-size: 11px; color: #6b7280;">Klicken für Profil</span>
             </div>
           </div>
         `
 
-        // Create popup
+        // Create popup with proper offset for hover (not attached to marker)
         const popup = new mapboxgl.Popup({
-          offset: 25,
+          offset: [0, -50], // Offset above the marker
           closeButton: false,
-          className: 'artist-popup'
-        }).setHTML(popupContent)
-
-        // Create and add marker
-        const marker = new mapboxgl.Marker(el)
+          closeOnClick: false,
+          className: 'artist-popup',
+          anchor: 'bottom'
+        })
           .setLngLat([artist.longitude, artist.latitude])
-          .setPopup(popup)
+          .setHTML(popupContent)
+
+        // Create marker with stable anchor at center
+        const marker = new mapboxgl.Marker({
+          element: el,
+          anchor: 'center' // Stable positioning - marker center at coordinates
+        })
+          .setLngLat([artist.longitude, artist.latitude])
           .addTo(map.current!)
 
-        // Handle click
-        el.addEventListener('click', () => {
+        // Hover events: show/hide popup manually
+        el.addEventListener('mouseenter', () => {
+          el.style.transform = 'scale(1.15)'
+          el.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.5)'
+          el.style.zIndex = '100'
+          popup.addTo(map.current!)
+        })
+
+        el.addEventListener('mouseleave', () => {
+          el.style.transform = 'scale(1)'
+          el.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.4)'
+          el.style.zIndex = '1'
+          popup.remove()
+        })
+
+        // Click: navigate to artist profile
+        el.addEventListener('click', (e) => {
+          e.stopPropagation()
           setSelectedArtist(artist)
           if (onArtistClick) {
             onArtistClick(artist)
+          } else {
+            // Default: navigate to artist profile
+            window.location.href = `/artists/${artist.id}`
           }
         })
 
@@ -163,7 +198,7 @@ export function ArtistMapView({
       if (artists.length > 1) {
         const bounds = new mapboxgl.LngLatBounds()
         artists.forEach(a => bounds.extend([a.longitude, a.latitude]))
-        map.current?.fitBounds(bounds, { padding: 50, maxZoom: 12 })
+        map.current?.fitBounds(bounds, { padding: 60, maxZoom: 11 })
       }
     }
 
