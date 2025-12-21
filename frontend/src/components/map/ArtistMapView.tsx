@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react'
@@ -30,9 +31,12 @@ export function ArtistMapView({
   initialCenter = [8.2275, 50.0782], // Wiesbaden default
   initialZoom = 10,
 }: ArtistMapViewProps) {
+  const navigate = useNavigate()
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
   const markersRef = useRef<mapboxgl.Marker[]>([])
+  // Single shared popup instance - prevents jumping
+  const popupRef = useRef<mapboxgl.Popup | null>(null)
 
   const [artists, setArtists] = useState<ArtistLocation[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -79,6 +83,74 @@ export function ArtistMapView({
     }
   }, [initialCenter, initialZoom])
 
+  // Create single shared popup instance (prevents jumping)
+  useEffect(() => {
+    if (!map.current) return
+
+    // Create ONE popup to reuse - key fix for stability
+    popupRef.current = new mapboxgl.Popup({
+      offset: 25, // Simple offset, not array
+      closeButton: false,
+      closeOnClick: false,
+      className: 'artist-popup',
+      anchor: 'bottom',
+      maxWidth: '280px'
+    })
+
+    return () => {
+      popupRef.current?.remove()
+    }
+  }, [])
+
+  // Helper to generate popup HTML content
+  const getPopupContent = useCallback((artist: ArtistLocation, color: string, emoji: string) => {
+    const displayName = artist.kuenstlername || `${artist.vorname} ${artist.nachname}`
+    const userTypeBadge = artist.user_type === 'service_provider'
+      ? '<span style="background: #7C3AED; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px;">Service</span>'
+      : '<span style="background: #EC4899; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px;">Artist</span>'
+
+    return `
+      <div class="popup-inner" style="
+        padding: 16px;
+        min-width: 240px;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255,255,255,0.15);
+      ">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          ${artist.profile_image_url
+            ? `<img src="${artist.profile_image_url}" alt="${displayName}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid ${color}; flex-shrink: 0;" onerror="this.style.display='none'" />`
+            : `<div style="width: 60px; height: 60px; border-radius: 50%; background: ${color}; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 3px solid white; flex-shrink: 0;">${emoji}</div>`
+          }
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; align-items: center; flex-wrap: wrap;">
+              <p style="font-weight: 700; color: white; margin: 0; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${displayName}
+              </p>
+              ${userTypeBadge}
+            </div>
+            ${artist.genre
+              ? `<p style="font-size: 13px; color: ${color}; margin: 6px 0 0 0; font-weight: 600;">${artist.genre}</p>`
+              : `<p style="font-size: 13px; color: ${color}; margin: 6px 0 0 0; font-weight: 600;">${artist.user_type === 'service_provider' ? 'Dienstleister' : 'Künstler'}</p>`
+            }
+            ${artist.city
+              ? `<p style="font-size: 12px; color: #d1d5db; margin: 6px 0 0 0;">📍 ${artist.city}</p>`
+              : ''
+            }
+            ${artist.distance_km
+              ? `<p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">↗ ${artist.distance_km} km entfernt</p>`
+              : ''
+            }
+          </div>
+        </div>
+        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+          <span style="font-size: 12px; color: #a855f7; font-weight: 500;">🔗 Klicken für Profil</span>
+        </div>
+      </div>
+    `
+  }, [])
+
   // Add markers when artists load
   useEffect(() => {
     if (!map.current || artists.length === 0) return
@@ -95,7 +167,7 @@ export function ArtistMapView({
         const color = MARKER_COLORS[category]
         const emoji = MARKER_EMOJIS[category]
 
-        // Create custom marker element with stable positioning
+        // Create custom marker element
         const el = document.createElement('div')
         el.className = 'artist-marker'
         el.style.cssText = `
@@ -111,83 +183,53 @@ export function ArtistMapView({
           transition: transform 0.15s ease, box-shadow 0.15s ease;
           background-color: ${color};
           border: 3px solid white;
-          z-index: 1;
+          position: relative;
         `
         el.innerHTML = emoji
 
-        // Create popup content with profile image
-        const popupContent = `
-          <div style="
-            padding: 12px;
-            min-width: 220px;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255,255,255,0.1);
-          ">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              ${artist.profile_image_url
-                ? `<img src="${artist.profile_image_url}" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid ${color};" />`
-                : `<div style="width: 56px; height: 56px; border-radius: 50%; background: ${color}; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 2px solid white;">${emoji}</div>`
-              }
-              <div style="flex: 1;">
-                <p style="font-weight: 600; color: white; margin: 0; font-size: 15px;">
-                  ${artist.kuenstlername || `${artist.vorname} ${artist.nachname}`}
-                </p>
-                ${artist.genre ? `<p style="font-size: 13px; color: ${color}; margin: 4px 0 0 0; font-weight: 500;">${artist.genre}</p>` : ''}
-                ${artist.city ? `<p style="font-size: 12px; color: #9ca3af; margin: 6px 0 0 0;">📍 ${artist.city}</p>` : ''}
-                ${artist.distance_km ? `<p style="font-size: 12px; color: #6b7280; margin: 4px 0 0 0;">↗ ${artist.distance_km} km</p>` : ''}
-              </div>
-            </div>
-            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
-              <span style="font-size: 11px; color: #6b7280;">Klicken für Profil</span>
-            </div>
-          </div>
-        `
-
-        // Create popup with proper offset for hover (not attached to marker)
-        const popup = new mapboxgl.Popup({
-          offset: [0, -50], // Offset above the marker
-          closeButton: false,
-          closeOnClick: false,
-          className: 'artist-popup',
-          anchor: 'bottom'
-        })
-          .setLngLat([artist.longitude, artist.latitude])
-          .setHTML(popupContent)
-
-        // Create marker with stable anchor at center
+        // Create marker with stable anchor
         const marker = new mapboxgl.Marker({
           element: el,
-          anchor: 'center' // Stable positioning - marker center at coordinates
+          anchor: 'center'
         })
           .setLngLat([artist.longitude, artist.latitude])
           .addTo(map.current!)
 
-        // Hover events: show/hide popup manually
+        // Hover: show shared popup with this artist's content
         el.addEventListener('mouseenter', () => {
           el.style.transform = 'scale(1.15)'
-          el.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.5)'
-          el.style.zIndex = '100'
-          popup.addTo(map.current!)
+          el.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.6)'
+          el.style.zIndex = '1000'
+
+          // Update and show the shared popup
+          if (popupRef.current && map.current) {
+            popupRef.current
+              .setLngLat([artist.longitude, artist.latitude])
+              .setHTML(getPopupContent(artist, color, emoji))
+              .addTo(map.current)
+          }
         })
 
         el.addEventListener('mouseleave', () => {
           el.style.transform = 'scale(1)'
           el.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.4)'
           el.style.zIndex = '1'
-          popup.remove()
+
+          // Hide popup
+          popupRef.current?.remove()
         })
 
-        // Click: navigate to artist profile
+        // Click: navigate to artist profile using React Router
         el.addEventListener('click', (e) => {
           e.stopPropagation()
+          e.preventDefault()
           setSelectedArtist(artist)
+
           if (onArtistClick) {
             onArtistClick(artist)
           } else {
-            // Default: navigate to artist profile
-            window.location.href = `/artists/${artist.id}`
+            // Use React Router for SPA navigation
+            navigate(`/artists/${artist.id}`)
           }
         })
 
@@ -207,7 +249,7 @@ export function ArtistMapView({
     } else {
       map.current.on('load', addMarkers)
     }
-  }, [artists, onArtistClick])
+  }, [artists, onArtistClick, navigate, getPopupContent])
 
   // Locate me function
   const handleLocateMe = useCallback(async () => {
