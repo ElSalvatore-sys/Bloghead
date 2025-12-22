@@ -6,7 +6,7 @@ import { StarRating } from '../components/ui/StarRating'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
 import { ViewToggle, type ViewMode } from '../components/ui/ViewToggle'
 import { FilterBar, type FilterBarFilters } from '../components/filters'
-import { ArtistMapView } from '../components/map'
+import { ArtistMapLeaflet } from '../components/map'
 import { useArtists } from '../hooks/useArtists'
 import type { ArtistListItem } from '../services/artistService'
 import type { ArtistLocation } from '../services/mapService'
@@ -272,7 +272,7 @@ export function ArtistsPage() {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3 }}
               >
-                <ArtistMapView
+                <ArtistMapLeaflet
                   userType="artist"
                   onArtistClick={handleArtistMapClick}
                   className="shadow-2xl"
