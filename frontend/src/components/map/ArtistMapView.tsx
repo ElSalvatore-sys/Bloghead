@@ -83,28 +83,8 @@ export function ArtistMapView({
     }
   }, [initialCenter, initialZoom])
 
-  // Create single shared popup instance AFTER map loads
+  // Cleanup popup on unmount
   useEffect(() => {
-    if (!map.current) return
-
-    const initPopup = () => {
-      // Create ONE popup to reuse - key fix for stability
-      popupRef.current = new mapboxgl.Popup({
-        offset: [0, -22], // Offset above marker (marker is 44px, so -22 centers above)
-        closeButton: false,
-        closeOnClick: false,
-        className: 'artist-popup',
-        anchor: 'bottom', // Popup appears ABOVE the anchor point
-        maxWidth: '300px'
-      })
-    }
-
-    if (map.current.loaded()) {
-      initPopup()
-    } else {
-      map.current.on('load', initPopup)
-    }
-
     return () => {
       popupRef.current?.remove()
     }
@@ -203,30 +183,29 @@ export function ArtistMapView({
           .setLngLat([artist.longitude, artist.latitude])
           .addTo(map.current!)
 
-        // Hover: show shared popup with this artist's content
+        // Hover: show popup with artist info
         el.addEventListener('mouseenter', () => {
           el.style.transform = 'scale(1.15)'
           el.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.6)'
           el.style.zIndex = '1000'
 
-          // CRITICAL: Create popup if not exists, then set position BEFORE adding to map
           if (map.current) {
-            // Create popup on-demand if it doesn't exist
-            if (!popupRef.current) {
-              popupRef.current = new mapboxgl.Popup({
-                offset: [0, -22],
-                closeButton: false,
-                closeOnClick: false,
-                className: 'artist-popup',
-                anchor: 'bottom',
-                maxWidth: '300px'
-              })
+            // CRITICAL FIX: Remove existing popup first to force position reset
+            if (popupRef.current) {
+              popupRef.current.remove()
             }
 
-            // CORRECT ORDER: setLngLat FIRST, then setHTML, then addTo
+            // Create fresh popup each time (fixes position jumping issue)
             const content = getPopupContent(artist, color, emoji)
-            popupRef.current
-              .setLngLat([artist.longitude, artist.latitude]) // Position FIRST!
+            popupRef.current = new mapboxgl.Popup({
+              offset: [0, -30], // Offset above marker (marker is 44px tall)
+              closeButton: false,
+              closeOnClick: false,
+              className: 'artist-popup',
+              anchor: 'bottom',
+              maxWidth: '300px'
+            })
+              .setLngLat([artist.longitude, artist.latitude])
               .setHTML(content)
               .addTo(map.current)
           }
