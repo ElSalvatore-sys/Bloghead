@@ -250,41 +250,72 @@ export function ArtistMapLeaflet({
               icon={createCustomIcon(emoji, color)}
             >
               <Popup>
-                <div className="min-w-[220px] -m-3">
-                  {/* Header with image and info */}
-                  <div
-                    className="flex items-center gap-3 p-3"
-                    style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' }}
-                  >
-                    <img
-                      src={imageUrl}
-                      alt={name}
-                      className="w-14 h-14 rounded-full object-cover"
-                      style={{ border: `3px solid ${color}` }}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+                <div className="popup-content -m-3">
+                  {/* Beautiful card design */}
+                  <div className="popup-card">
+                    {/* Top gradient header with emoji badge */}
+                    <div
+                      className="popup-header"
+                      style={{
+                        background: `linear-gradient(135deg, ${color}22 0%, ${color}44 100%)`,
+                        borderBottom: `1px solid ${color}33`
                       }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-white text-sm truncate">{name}</div>
-                      <div className="text-xs text-gray-400 mt-0.5">
+                    >
+                      <span className="popup-emoji">{emoji}</span>
+                    </div>
+
+                    {/* Profile image - large and centered */}
+                    <div className="popup-image-container">
+                      <img
+                        src={imageUrl}
+                        alt={name}
+                        className="popup-image"
+                        style={{
+                          border: `4px solid ${color}`,
+                          boxShadow: `0 4px 20px ${color}40`
+                        }}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src =
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=160`;
+                        }}
+                      />
+                    </div>
+
+                    {/* Artist info */}
+                    <div className="popup-info">
+                      {/* Name */}
+                      <h3 className="popup-name">{name}</h3>
+
+                      {/* Category badge */}
+                      <span
+                        className="popup-badge"
+                        style={{ background: `${color}33`, color: color }}
+                      >
                         {artist.genre || (artist.user_type === 'service_provider' ? 'Dienstleister' : 'Künstler')}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        📍 {artist.city || 'Deutschland'}
+                      </span>
+
+                      {/* Location */}
+                      <div className="popup-location">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                          <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <span>{artist.city || 'Deutschland'}</span>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Profile link button */}
-                  <Link
-                    to={`/artists/${artist.id}`}
-                    className="block text-center py-2.5 text-white text-xs font-medium hover:opacity-90 transition-opacity"
-                    style={{ background: color }}
-                  >
-                    Profil ansehen →
-                  </Link>
+                    {/* CTA Button */}
+                    <Link
+                      to={`/artists/${artist.id}`}
+                      className="popup-button"
+                      style={{ background: color }}
+                    >
+                      <span>Profil ansehen</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                      </svg>
+                    </Link>
+                  </div>
                 </div>
               </Popup>
             </Marker>
@@ -294,36 +325,127 @@ export function ArtistMapLeaflet({
 
       {/* Custom Leaflet styles */}
       <style>{`
+        /* Popup wrapper */
         .leaflet-popup-content-wrapper {
           padding: 0 !important;
           background: transparent !important;
-          border-radius: 12px !important;
+          border-radius: 16px !important;
           overflow: hidden;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
         }
         .leaflet-popup-content {
           margin: 0 !important;
-          width: auto !important;
-          min-width: 220px !important;
+          width: 260px !important;
         }
         .leaflet-popup-tip {
-          background: #16213e !important;
+          background: #0f0f1a !important;
         }
         .leaflet-popup-close-button {
           color: white !important;
-          font-size: 18px !important;
-          padding: 4px 8px !important;
-          right: 4px !important;
-          top: 4px !important;
+          font-size: 20px !important;
+          padding: 8px 10px !important;
+          right: 2px !important;
+          top: 2px !important;
+          z-index: 10;
         }
         .leaflet-popup-close-button:hover {
-          background: rgba(255,255,255,0.1) !important;
-          border-radius: 4px;
+          background: rgba(255,255,255,0.15) !important;
+          border-radius: 6px;
         }
+
+        /* Beautiful popup card */
+        .popup-content {
+          font-family: system-ui, -apple-system, sans-serif;
+        }
+        .popup-card {
+          background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
+          border-radius: 16px;
+          overflow: hidden;
+        }
+        .popup-header {
+          padding: 12px;
+          text-align: center;
+        }
+        .popup-emoji {
+          font-size: 28px;
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        .popup-image-container {
+          display: flex;
+          justify-content: center;
+          margin-top: -8px;
+          padding: 0 20px;
+        }
+        .popup-image {
+          width: 88px;
+          height: 88px;
+          border-radius: 50%;
+          object-fit: cover;
+          transition: transform 0.3s ease;
+        }
+        .popup-image:hover {
+          transform: scale(1.05);
+        }
+        .popup-info {
+          padding: 16px 20px;
+          text-align: center;
+        }
+        .popup-name {
+          font-size: 18px !important;
+          font-weight: 700 !important;
+          color: white !important;
+          margin: 0 0 10px 0 !important;
+          line-height: 1.2 !important;
+        }
+        .popup-badge {
+          display: inline-block;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
+        .popup-location {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          color: #94a3b8;
+          font-size: 13px;
+        }
+        .popup-location svg {
+          opacity: 0.7;
+        }
+        .popup-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px 20px;
+          color: white;
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.2s ease;
+        }
+        .popup-button:hover {
+          filter: brightness(1.1);
+          transform: translateY(-1px);
+        }
+        .popup-button svg {
+          transition: transform 0.2s ease;
+        }
+        .popup-button:hover svg {
+          transform: translateX(4px);
+        }
+
+        /* Leaflet container */
         .leaflet-container {
           font-family: system-ui, -apple-system, sans-serif;
           background: #1a1a2e !important;
         }
+
+        /* Custom markers */
         .custom-artist-marker {
           background: transparent !important;
           border: none !important;
@@ -336,6 +458,8 @@ export function ArtistMapLeaflet({
           background: transparent !important;
           border: none !important;
         }
+
+        /* Zoom controls */
         .leaflet-control-zoom {
           border: none !important;
           box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
@@ -348,6 +472,8 @@ export function ArtistMapLeaflet({
         .leaflet-control-zoom a:hover {
           background: rgba(255,255,255,0.1) !important;
         }
+
+        /* Attribution */
         .leaflet-control-attribution {
           background: rgba(26, 26, 46, 0.8) !important;
           color: rgba(255,255,255,0.4) !important;

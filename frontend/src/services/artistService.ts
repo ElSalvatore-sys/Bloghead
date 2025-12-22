@@ -150,10 +150,45 @@ export async function getArtists(filters: ArtistFilters = {}) {
 }
 
 // Get single artist by ID with full details
-// Tries artist_profiles first, then falls back to users table for demo/map artists
+// Tries artist_profiles first (by id, then user_id), then falls back to users table
 export async function getArtistById(artistId: string) {
-  // First try artist_profiles table
-  const { data, error } = await supabase
+  // Helper to flatten artist_profiles data
+  const flattenArtistData = (data: Record<string, unknown>) => {
+    const userData = data.users as {
+      profile_image_url?: string
+      cover_image_url?: string
+      vorname?: string
+      nachname?: string
+      is_verified?: boolean
+      created_at?: string
+    } | null
+
+    return {
+      ...data,
+      profile_image_url: userData?.profile_image_url || getPlaceholderImage(data.id as string),
+      cover_image_url: userData?.cover_image_url,
+      vorname: userData?.vorname,
+      nachname: userData?.nachname,
+      is_verified: userData?.is_verified || false,
+      member_since: userData?.created_at,
+      preis_pro_stunde: data.preis_minimum,
+      // Ensure all required fields have defaults
+      something_about_me: data.something_about_me || '',
+      preis_pauschal: data.preis_pauschal || null,
+      total_followers: data.total_followers || 0,
+      technik_vorhanden: data.technik_vorhanden || '',
+      social_media: data.social_media || null,
+      instagram_profile: data.instagram_profile || '',
+      soundcloud_url: data.soundcloud_url || '',
+      website_url: data.website_url || '',
+      intro_video_url: data.intro_video_url || '',
+      audio_urls: data.audio_urls || [],
+      video_urls: data.video_urls || [],
+    }
+  }
+
+  // 1. Try artist_profiles by ID
+  const { data: dataById } = await supabase
     .from('artist_profiles')
     .select(`
       *,
@@ -169,36 +204,36 @@ export async function getArtistById(artistId: string) {
       )
     `)
     .eq('id', artistId)
-    .single()
+    .maybeSingle()
 
-  // If artist_profiles query succeeded, return the data
-  if (!error && data) {
-    // Flatten user data with placeholder fallbacks
-    const userData = data.users as {
-      profile_image_url?: string
-      cover_image_url?: string
-      vorname?: string
-      nachname?: string
-      is_verified?: boolean
-      created_at?: string
-    } | null
-
-    const flattenedData = {
-      ...data,
-      profile_image_url: userData?.profile_image_url || getPlaceholderImage(data.id),
-      cover_image_url: userData?.cover_image_url,
-      vorname: userData?.vorname,
-      nachname: userData?.nachname,
-      is_verified: userData?.is_verified || false,
-      member_since: userData?.created_at,
-      // Map preis_minimum to preis_pro_stunde for backward compatibility
-      preis_pro_stunde: data.preis_minimum,
-    }
-
-    return { data: flattenedData, error: null }
+  if (dataById) {
+    return { data: flattenArtistData(dataById), error: null }
   }
 
-  // FALLBACK: If not in artist_profiles, try users table directly
+  // 2. Try artist_profiles by user_id (in case artistId is actually a user ID)
+  const { data: dataByUserId } = await supabase
+    .from('artist_profiles')
+    .select(`
+      *,
+      users (
+        id,
+        email,
+        vorname,
+        nachname,
+        profile_image_url,
+        cover_image_url,
+        created_at,
+        is_verified
+      )
+    `)
+    .eq('user_id', artistId)
+    .maybeSingle()
+
+  if (dataByUserId) {
+    return { data: flattenArtistData(dataByUserId), error: null }
+  }
+
+  // 3. FALLBACK: Try users table directly
   // This handles demo artists created via map view that only exist in users table
   console.log('[artistService] Artist not in artist_profiles, trying users table for:', artistId)
 
@@ -217,35 +252,52 @@ export async function getArtistById(artistId: string) {
       longitude,
       user_type,
       created_at,
-      is_verified
+      is_verified,
+      beschreibung
     `)
     .eq('id', artistId)
-    .single()
+    .maybeSingle()
 
-  if (userError || !userData) {
+  if (userError) {
     console.error('[artistService] Error fetching user:', userError)
-    return { data: null, error: userError || new Error('User not found') }
+    return { data: null, error: userError }
   }
 
-  // Transform users table data to match artist_profiles structure
+  if (!userData) {
+    console.error('[artistService] User not found:', artistId)
+    return { data: null, error: new Error('User not found') }
+  }
+
+  // Transform users table data to match artist_profiles structure (all fields)
   const transformedData = {
     id: userData.id,
     user_id: userData.id,
-    kuenstlername: userData.membername || `${userData.vorname} ${userData.nachname}`,
-    genre: [] as string[], // No genre in users table
+    kuenstlername: userData.membername || `${userData.vorname} ${userData.nachname}`.trim() || 'Künstler',
+    genre: [] as string[],
     stadt: userData.location_address || '',
     region: '',
     land: 'Deutschland',
-    bio: `${userData.user_type === 'service_provider' ? 'Dienstleister' : 'Künstler'} auf Bloghead`,
+    bio: userData.beschreibung || `${userData.user_type === 'service_provider' ? 'Dienstleister' : 'Künstler'} auf Bloghead`,
+    something_about_me: '',
     preis_minimum: null,
     preis_pro_stunde: null,
     preis_pro_veranstaltung: null,
+    preis_pauschal: null,
     star_rating: 0,
     total_ratings: 0,
     total_bookings: 0,
+    total_followers: 0,
     is_bookable: true,
     tagged_with: [] as string[],
     jobbezeichnung: userData.user_type === 'service_provider' ? 'Dienstleister' : 'Künstler',
+    technik_vorhanden: '',
+    social_media: null,
+    instagram_profile: '',
+    soundcloud_url: '',
+    website_url: '',
+    intro_video_url: '',
+    audio_urls: [] as string[],
+    video_urls: [] as string[],
     profile_image_url: userData.profile_image_url || getPlaceholderImage(userData.id),
     cover_image_url: userData.cover_image_url,
     vorname: userData.vorname,
@@ -254,7 +306,6 @@ export async function getArtistById(artistId: string) {
     member_since: userData.created_at,
     latitude: userData.latitude,
     longitude: userData.longitude,
-    // Flag to indicate this is from users table (not full artist profile)
     _isBasicProfile: true,
   }
 
