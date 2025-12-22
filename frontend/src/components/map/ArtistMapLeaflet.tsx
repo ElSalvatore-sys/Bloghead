@@ -241,7 +241,7 @@ export function ArtistMapLeaflet({
           const emoji = MARKER_EMOJIS[category];
           const name = artist.kuenstlername || `${artist.vorname} ${artist.nachname}`;
           const imageUrl = artist.profile_image_url ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=200`;
 
           return (
             <Marker
@@ -250,68 +250,56 @@ export function ArtistMapLeaflet({
               icon={createCustomIcon(emoji, color)}
             >
               <Popup>
-                <div className="popup-content -m-3">
-                  {/* Beautiful card design */}
+                <div className="popup-content">
+                  {/* Shadcn-inspired floating card */}
                   <div className="popup-card">
-                    {/* Top gradient header with emoji badge */}
-                    <div
-                      className="popup-header"
-                      style={{
-                        background: `linear-gradient(135deg, ${color}22 0%, ${color}44 100%)`,
-                        borderBottom: `1px solid ${color}33`
-                      }}
-                    >
-                      <span className="popup-emoji">{emoji}</span>
-                    </div>
+                    {/* Main content row */}
+                    <div className="popup-main">
+                      {/* Profile image */}
+                      <div className="popup-avatar-wrap">
+                        <img
+                          src={imageUrl}
+                          alt={name}
+                          className="popup-avatar"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff&size=200`;
+                          }}
+                        />
+                        <div className="popup-avatar-ring" style={{ borderColor: color }} />
+                      </div>
 
-                    {/* Profile image - large and centered */}
-                    <div className="popup-image-container">
-                      <img
-                        src={imageUrl}
-                        alt={name}
-                        className="popup-image"
-                        style={{
-                          border: `4px solid ${color}`,
-                          boxShadow: `0 4px 20px ${color}40`
-                        }}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&size=160`;
-                        }}
-                      />
-                    </div>
+                      {/* Info section */}
+                      <div className="popup-info">
+                        {/* Name */}
+                        <div className="popup-name-row">
+                          <h3 className="popup-name">{name}</h3>
+                        </div>
 
-                    {/* Artist info */}
-                    <div className="popup-info">
-                      {/* Name */}
-                      <h3 className="popup-name">{name}</h3>
+                        {/* Role with emoji */}
+                        <p className="popup-role">
+                          <span className="popup-role-emoji">{emoji}</span>
+                          {artist.genre || (artist.user_type === 'service_provider' ? 'Dienstleister' : 'Künstler')}
+                        </p>
 
-                      {/* Category badge */}
-                      <span
-                        className="popup-badge"
-                        style={{ background: `${color}33`, color: color }}
-                      >
-                        {artist.genre || (artist.user_type === 'service_provider' ? 'Dienstleister' : 'Künstler')}
-                      </span>
-
-                      {/* Location */}
-                      <div className="popup-location">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                          <circle cx="12" cy="10" r="3" />
-                        </svg>
-                        <span>{artist.city || 'Deutschland'}</span>
+                        {/* Location */}
+                        <p className="popup-location">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                          {artist.city || 'Deutschland'}
+                        </p>
                       </div>
                     </div>
 
+                    {/* Divider */}
+                    <div className="popup-divider" />
+
                     {/* CTA Button */}
-                    <Link
-                      to={`/artists/${artist.id}`}
-                      className="popup-button"
-                      style={{ background: color }}
-                    >
+                    <Link to={`/artists/${artist.id}`} className="popup-cta">
                       <span>Profil ansehen</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                         <path d="M5 12h14M12 5l7 7-7 7"/>
                       </svg>
                     </Link>
@@ -325,121 +313,202 @@ export function ArtistMapLeaflet({
 
       {/* Custom Leaflet styles */}
       <style>{`
-        /* Popup wrapper */
+        /* ═══════════════════════════════════════════════════════════════
+           GLASSMORPHISM POPUP - SHADCN INSPIRED
+           No arrow tip, floating card appearance
+        ═══════════════════════════════════════════════════════════════ */
+
+        /* Popup wrapper - glassmorphism effect */
         .leaflet-popup-content-wrapper {
           padding: 0 !important;
-          background: transparent !important;
+          background: rgba(15, 23, 42, 0.92) !important;
+          backdrop-filter: blur(16px) saturate(180%) !important;
+          -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+          border: 1px solid rgba(255, 255, 255, 0.08) !important;
           border-radius: 16px !important;
+          box-shadow:
+            0 25px 50px -12px rgba(0, 0, 0, 0.6),
+            0 0 0 1px rgba(255, 255, 255, 0.05) inset !important;
           overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
         }
+
         .leaflet-popup-content {
           margin: 0 !important;
-          width: 260px !important;
+          width: 280px !important;
+        }
+
+        /* HIDE THE ARROW/TIP COMPLETELY */
+        .leaflet-popup-tip-container {
+          display: none !important;
         }
         .leaflet-popup-tip {
-          background: #0f0f1a !important;
+          display: none !important;
         }
+
+        /* Close button - circular, subtle */
         .leaflet-popup-close-button {
-          color: white !important;
-          font-size: 20px !important;
-          padding: 8px 10px !important;
-          right: 2px !important;
-          top: 2px !important;
+          color: rgba(255, 255, 255, 0.7) !important;
+          font-size: 18px !important;
+          font-weight: 300 !important;
+          top: 10px !important;
+          right: 10px !important;
+          width: 28px !important;
+          height: 28px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          background: rgba(255, 255, 255, 0.08) !important;
+          border-radius: 50% !important;
+          transition: all 0.2s ease !important;
           z-index: 10;
         }
         .leaflet-popup-close-button:hover {
-          background: rgba(255,255,255,0.15) !important;
-          border-radius: 6px;
+          color: white !important;
+          background: rgba(255, 255, 255, 0.15) !important;
+          transform: scale(1.1);
         }
 
-        /* Beautiful popup card */
+        /* ═══════════════════════════════════════════════════════════════
+           POPUP CARD CONTENT
+        ═══════════════════════════════════════════════════════════════ */
+
         .popup-content {
-          font-family: system-ui, -apple-system, sans-serif;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
+
         .popup-card {
-          background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
-          border-radius: 16px;
-          overflow: hidden;
+          padding: 20px;
         }
-        .popup-header {
-          padding: 12px;
-          text-align: center;
-        }
-        .popup-emoji {
-          font-size: 28px;
-          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-        }
-        .popup-image-container {
+
+        /* Main row - avatar + info side by side */
+        .popup-main {
           display: flex;
-          justify-content: center;
-          margin-top: -8px;
-          padding: 0 20px;
+          align-items: flex-start;
+          gap: 16px;
         }
-        .popup-image {
-          width: 88px;
-          height: 88px;
+
+        /* Avatar with ring */
+        .popup-avatar-wrap {
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .popup-avatar {
+          width: 72px;
+          height: 72px;
           border-radius: 50%;
           object-fit: cover;
-          transition: transform 0.3s ease;
+          display: block;
         }
-        .popup-image:hover {
-          transform: scale(1.05);
+
+        .popup-avatar-ring {
+          position: absolute;
+          inset: -3px;
+          border-radius: 50%;
+          border: 2px solid;
+          opacity: 0.8;
         }
+
+        /* Info section */
         .popup-info {
-          padding: 16px 20px;
-          text-align: center;
+          flex: 1;
+          min-width: 0;
+          padding-top: 2px;
         }
+
+        .popup-name-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 6px;
+        }
+
         .popup-name {
-          font-size: 18px !important;
-          font-weight: 700 !important;
+          font-size: 16px !important;
+          font-weight: 600 !important;
           color: white !important;
-          margin: 0 0 10px 0 !important;
-          line-height: 1.2 !important;
+          margin: 0 !important;
+          line-height: 1.3 !important;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
-        .popup-badge {
-          display: inline-block;
-          padding: 4px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 600;
-          margin-bottom: 10px;
+
+        .popup-role {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px !important;
+          color: rgba(255, 255, 255, 0.6) !important;
+          margin: 0 0 6px 0 !important;
         }
+
+        .popup-role-emoji {
+          font-size: 14px;
+        }
+
         .popup-location {
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 6px;
-          color: #94a3b8;
-          font-size: 13px;
+          gap: 5px;
+          font-size: 12px !important;
+          color: rgba(255, 255, 255, 0.45) !important;
+          margin: 0 !important;
         }
+
         .popup-location svg {
-          opacity: 0.7;
+          flex-shrink: 0;
+          opacity: 0.6;
         }
-        .popup-button {
+
+        /* Divider */
+        .popup-divider {
+          height: 1px;
+          background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.1) 20%,
+            rgba(255, 255, 255, 0.1) 80%,
+            transparent 100%
+          );
+          margin: 16px 0;
+        }
+
+        /* CTA Button */
+        .popup-cta {
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 8px;
-          padding: 14px 20px;
+          width: 100%;
+          padding: 12px 16px;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
           color: white;
           text-decoration: none;
           font-size: 14px;
-          font-weight: 600;
+          font-weight: 500;
+          border-radius: 10px;
           transition: all 0.2s ease;
-        }
-        .popup-button:hover {
-          filter: brightness(1.1);
-          transform: translateY(-1px);
-        }
-        .popup-button svg {
-          transition: transform 0.2s ease;
-        }
-        .popup-button:hover svg {
-          transform: translateX(4px);
+          box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
-        /* Leaflet container */
+        .popup-cta:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+          filter: brightness(1.05);
+        }
+
+        .popup-cta svg {
+          transition: transform 0.2s ease;
+        }
+
+        .popup-cta:hover svg {
+          transform: translateX(3px);
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           LEAFLET BASE STYLES
+        ═══════════════════════════════════════════════════════════════ */
+
         .leaflet-container {
           font-family: system-ui, -apple-system, sans-serif;
           background: #1a1a2e !important;
