@@ -1,36 +1,35 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { MapPin, Navigation, Loader2, AlertCircle } from 'lucide-react'
 import {
   getArtistsWithLocations,
-  findArtistsInRadius,
   getCurrentPosition,
+  findArtistsInRadius,
   getMarkerCategory,
   MARKER_COLORS,
   MARKER_EMOJIS,
   type ArtistLocation
 } from '../../services/mapService'
 
-// Get token from env
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
 
-interface ArtistMapViewProps {
+interface ArtistMapViewSimpleProps {
   userType?: 'artist' | 'service_provider' | null
   onArtistClick?: (artist: ArtistLocation) => void
   className?: string
-  initialCenter?: [number, number] // [lng, lat]
+  initialCenter?: [number, number]
   initialZoom?: number
 }
 
-export function ArtistMapView({
+export function ArtistMapViewSimple({
   userType = 'artist',
   onArtistClick,
   className = '',
-  initialCenter = [8.2275, 50.0782], // Wiesbaden default
+  initialCenter = [8.2275, 50.0782],
   initialZoom = 10,
-}: ArtistMapViewProps) {
+}: ArtistMapViewSimpleProps) {
   const navigate = useNavigate()
   const mapContainer = useRef<HTMLDivElement>(null)
   const map = useRef<mapboxgl.Map | null>(null)
@@ -40,7 +39,6 @@ export function ArtistMapView({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isLocating, setIsLocating] = useState(false)
-  const [, setSelectedArtist] = useState<ArtistLocation | null>(null)
 
   // Load artists
   useEffect(() => {
@@ -56,109 +54,95 @@ export function ArtistMapView({
         setIsLoading(false)
       }
     }
-
     loadArtists()
   }, [userType])
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || !MAPBOX_TOKEN) return
+    if (!mapContainer.current || !MAPBOX_TOKEN || map.current) return
 
     mapboxgl.accessToken = MAPBOX_TOKEN
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11', // Dark theme
+      style: 'mapbox://styles/mapbox/dark-v11',
       center: initialCenter,
       zoom: initialZoom,
     })
 
-    // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right')
 
     return () => {
       map.current?.remove()
+      map.current = null
     }
   }, [initialCenter, initialZoom])
 
-
-  // Helper to generate popup HTML content
-  const getPopupContent = useCallback((artist: ArtistLocation, color: string, emoji: string) => {
-    const displayName = artist.kuenstlername || `${artist.vorname} ${artist.nachname}`
-    const userTypeBadge = artist.user_type === 'service_provider'
-      ? '<span style="background: #7C3AED; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px;">Service</span>'
-      : '<span style="background: #EC4899; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px;">Artist</span>'
-
-    return `
-      <div class="popup-inner" style="
-        padding: 16px;
-        min-width: 240px;
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        border: 1px solid rgba(255,255,255,0.15);
-      ">
-        <div style="display: flex; align-items: center; gap: 14px;">
-          ${artist.profile_image_url
-            ? `<img src="${artist.profile_image_url}" alt="${displayName}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid ${color}; flex-shrink: 0;" onerror="this.style.display='none'" />`
-            : `<div style="width: 60px; height: 60px; border-radius: 50%; background: ${color}; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 3px solid white; flex-shrink: 0;">${emoji}</div>`
-          }
-          <div style="flex: 1; min-width: 0;">
-            <div style="display: flex; align-items: center; flex-wrap: wrap;">
-              <p style="font-weight: 700; color: white; margin: 0; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                ${displayName}
-              </p>
-              ${userTypeBadge}
-            </div>
-            ${artist.genre
-              ? `<p style="font-size: 13px; color: ${color}; margin: 6px 0 0 0; font-weight: 600;">${artist.genre}</p>`
-              : `<p style="font-size: 13px; color: ${color}; margin: 6px 0 0 0; font-weight: 600;">${artist.user_type === 'service_provider' ? 'Dienstleister' : 'Künstler'}</p>`
-            }
-            ${artist.city
-              ? `<p style="font-size: 12px; color: #d1d5db; margin: 6px 0 0 0;">📍 ${artist.city}</p>`
-              : ''
-            }
-            ${artist.distance_km
-              ? `<p style="font-size: 11px; color: #9ca3af; margin: 4px 0 0 0;">↗ ${artist.distance_km} km entfernt</p>`
-              : ''
-            }
-          </div>
-        </div>
-        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
-          <span style="font-size: 12px; color: #a855f7; font-weight: 500;">🔗 Klicken für Profil</span>
-        </div>
-      </div>
-    `
-  }, [])
-
-  // Add markers when artists load
+  // Add markers when artists load - USING OFFICIAL MAPBOX PATTERN
   useEffect(() => {
     if (!map.current || artists.length === 0) return
 
-    // Wait for map to be loaded
     const addMarkers = () => {
       // Clear existing markers
       markersRef.current.forEach(marker => marker.remove())
       markersRef.current = []
 
-      // Add new markers
       artists.forEach(artist => {
         const category = getMarkerCategory(artist.genre, artist.user_type)
         const color = MARKER_COLORS[category]
         const emoji = MARKER_EMOJIS[category]
 
-        // Create popup HTML content
-        const popupContent = getPopupContent(artist, color, emoji)
+        const displayName = artist.kuenstlername || `${artist.vorname} ${artist.nachname}`
+        const userTypeBadge = artist.user_type === 'service_provider'
+          ? '<span style="background: #7C3AED; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px;">Service</span>'
+          : '<span style="background: #EC4899; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px;">Artist</span>'
+
+        // Create popup HTML
+        const popupHTML = `
+          <div style="
+            padding: 16px;
+            min-width: 220px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+          ">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              ${artist.profile_image_url
+                ? `<img src="${artist.profile_image_url}" alt="${displayName}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 3px solid ${color}; flex-shrink: 0;" onerror="this.style.display='none'" />`
+                : `<div style="width: 50px; height: 50px; border-radius: 50%; background: ${color}; display: flex; align-items: center; justify-content: center; font-size: 24px; border: 3px solid white; flex-shrink: 0;">${emoji}</div>`
+              }
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                  <p style="font-weight: 700; color: white; margin: 0; font-size: 15px;">
+                    ${displayName}
+                  </p>
+                  ${userTypeBadge}
+                </div>
+                ${artist.genre
+                  ? `<p style="font-size: 12px; color: ${color}; margin: 4px 0 0 0; font-weight: 600;">${artist.genre}</p>`
+                  : ''
+                }
+                ${artist.city
+                  ? `<p style="font-size: 11px; color: #d1d5db; margin: 4px 0 0 0;">📍 ${artist.city}</p>`
+                  : ''
+                }
+              </div>
+            </div>
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+              <span style="font-size: 11px; color: #a855f7; font-weight: 500;">🔗 Klicken für Profil</span>
+            </div>
+          </div>
+        `
 
         // Create popup FIRST - using official Mapbox pattern
-        // offset: 25 pixels above the marker anchor point (Mapbox handles positioning!)
+        // offset: 25 pixels above the marker anchor point
         const popup = new mapboxgl.Popup({
           offset: 25,
           closeButton: false,
           closeOnClick: false,
-          className: 'artist-popup',
           maxWidth: '300px'
-        }).setHTML(popupContent)
+        }).setHTML(popupHTML)
 
         // Create custom marker element
         const el = document.createElement('div')
@@ -178,16 +162,16 @@ export function ArtistMapView({
         `
         el.innerHTML = emoji
 
-        // Create marker WITH popup attached - Mapbox handles positioning automatically!
+        // Create marker WITH popup attached (official Mapbox pattern)
         const marker = new mapboxgl.Marker({
           element: el,
           anchor: 'center'
         })
           .setLngLat([artist.longitude, artist.latitude])
-          .setPopup(popup) // ATTACH popup to marker
+          .setPopup(popup) // ATTACH popup to marker - Mapbox handles positioning!
           .addTo(map.current!)
 
-        // Hover: use togglePopup for proper positioning (official Mapbox pattern)
+        // Hover events - use togglePopup for proper positioning
         el.addEventListener('mouseenter', () => {
           el.style.transform = 'scale(1.15)'
           el.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.6)'
@@ -210,16 +194,14 @@ export function ArtistMapView({
           }
         })
 
-        // Click: navigate to artist profile using React Router
+        // Click: navigate to artist profile
         el.addEventListener('click', (e) => {
           e.stopPropagation()
           e.preventDefault()
-          setSelectedArtist(artist)
 
           if (onArtistClick) {
             onArtistClick(artist)
           } else {
-            // Use React Router for SPA navigation
             navigate(`/artists/${artist.id}`)
           }
         })
@@ -240,10 +222,10 @@ export function ArtistMapView({
     } else {
       map.current.on('load', addMarkers)
     }
-  }, [artists, onArtistClick, navigate, getPopupContent])
+  }, [artists, onArtistClick, navigate])
 
   // Locate me function
-  const handleLocateMe = useCallback(async () => {
+  const handleLocateMe = async () => {
     if (!map.current) return
 
     setIsLocating(true)
@@ -253,14 +235,12 @@ export function ArtistMapView({
       const position = await getCurrentPosition()
       const { latitude, longitude } = position.coords
 
-      // Fly to user location
       map.current.flyTo({
         center: [longitude, latitude],
         zoom: 12,
         essential: true
       })
 
-      // Add user marker
       new mapboxgl.Marker({ color: '#22C55E' })
         .setLngLat([longitude, latitude])
         .setPopup(
@@ -269,7 +249,6 @@ export function ArtistMapView({
         )
         .addTo(map.current)
 
-      // Find nearby artists
       const nearbyArtists = await findArtistsInRadius(
         latitude,
         longitude,
@@ -285,9 +264,8 @@ export function ArtistMapView({
     } finally {
       setIsLocating(false)
     }
-  }, [userType])
+  }
 
-  // No token warning
   if (!MAPBOX_TOKEN) {
     return (
       <div className={`bg-bg-card rounded-xl p-8 text-center ${className}`}>
@@ -296,14 +274,6 @@ export function ArtistMapView({
         <p className="text-white/60 text-sm">
           Bitte füge VITE_MAPBOX_ACCESS_TOKEN in .env.local hinzu
         </p>
-        <div className="mt-4 p-4 bg-white/5 rounded-lg text-left">
-          <p className="text-xs text-white/40 font-mono">
-            1. Gehe zu mapbox.com und erstelle einen Account<br />
-            2. Kopiere deinen Access Token<br />
-            3. Füge ihn in frontend/.env.local ein:<br />
-            <span className="text-accent-purple">VITE_MAPBOX_ACCESS_TOKEN=pk.xxx</span>
-          </p>
-        </div>
       </div>
     )
   }
@@ -325,7 +295,6 @@ export function ArtistMapView({
 
       {/* Controls */}
       <div className="absolute top-4 left-4 flex flex-col gap-2">
-        {/* Locate Me Button */}
         <button
           onClick={handleLocateMe}
           disabled={isLocating}
@@ -339,7 +308,6 @@ export function ArtistMapView({
           <span className="text-sm">Mein Standort</span>
         </button>
 
-        {/* Artist Count */}
         <div className="px-4 py-2 bg-bg-card/90 backdrop-blur-sm border border-white/10 rounded-lg">
           <p className="text-sm text-white/60">
             <MapPin className="w-4 h-4 inline mr-1" />
@@ -367,19 +335,23 @@ export function ArtistMapView({
         </div>
       )}
 
-      {/* Popup Styles */}
+      {/* Popup Styles - minimal override */}
       <style>{`
         .mapboxgl-popup-content {
           background: transparent !important;
           padding: 0 !important;
           box-shadow: none !important;
+          border-radius: 12px !important;
         }
         .mapboxgl-popup-tip {
           display: none !important;
+        }
+        .mapboxgl-popup {
+          z-index: 999 !important;
         }
       `}</style>
     </div>
   )
 }
 
-export default ArtistMapView
+export default ArtistMapViewSimple
