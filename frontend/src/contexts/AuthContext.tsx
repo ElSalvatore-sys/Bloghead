@@ -124,8 +124,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    // Helper to fetch profile with timeout (reduced to 5s for better UX)
-    const fetchProfileWithTimeout = async (userId: string, timeoutMs = 5000): Promise<UserProfile | null> => {
+    // Helper to fetch profile with timeout (10s to accommodate slow networks)
+    const fetchProfileWithTimeout = async (userId: string, timeoutMs = 10000): Promise<UserProfile | null> => {
       const timeoutPromise = new Promise<null>((resolve) => {
         setTimeout(() => {
           console.warn('[AuthContext] Profile fetch timed out after', timeoutMs, 'ms')

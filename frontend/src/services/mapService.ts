@@ -25,7 +25,6 @@ export async function getArtistsWithLocations(
   userType: 'artist' | 'service_provider' | null = null,
   limit: number = 100
 ): Promise<ArtistLocation[]> {
-  console.log('[MapService] getArtistsWithLocations called:', { userType, limit });
 
   // Try RPC first, fallback to direct query if it fails
   try {
@@ -40,7 +39,6 @@ export async function getArtistsWithLocations(
       return await getArtistsWithLocationsDirect(userType, limit);
     }
 
-    console.log('[MapService] RPC success, returned:', data?.length, 'artists');
     return data || [];
   } catch (err) {
     console.warn('[MapService] RPC exception, using direct query:', err);
