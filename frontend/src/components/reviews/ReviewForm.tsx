@@ -1,288 +1,260 @@
+/**
+ * ReviewForm Component - Phase 7
+ * Form for submitting reviews with category ratings
+ */
+
 import { useState } from 'react'
-import { StarRating } from '../ui/StarRating'
-import { Button } from '../ui/Button'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Star, Send, X, AlertCircle } from 'lucide-react'
+import {
+  submitReview,
+  getCategoriesForReviewerType,
+  type ReviewerType,
+  type CategoryRating,
+} from '@/services/reviewService'
 
 interface ReviewFormProps {
-  onSubmit: (data: ReviewFormData) => Promise<void>
+  bookingId: string
+  reviewerType: ReviewerType
+  revieweeName: string
+  eventDate: string
+  onSuccess?: (reviewId: string) => void
   onCancel?: () => void
-  isSubmitting?: boolean
-  showCategoryRatings?: boolean
 }
-
-export interface ReviewFormData {
-  overall_rating: number
-  review_title: string
-  review_text: string
-  quick_feedback: string[]
-  zuverlaessigkeit?: number
-  kommunikation?: number
-  preis_leistung?: number
-  stimmung?: number
-}
-
-// Quick feedback options
-const QUICK_FEEDBACK_OPTIONS = [
-  { id: 'professional', label: 'Professionell' },
-  { id: 'on_time', label: 'Pünktlich' },
-  { id: 'great_music', label: 'Tolle Musik' },
-  { id: 'friendly', label: 'Freundlich' },
-  { id: 'good_communication', label: 'Gute Kommunikation' },
-  { id: 'recommended', label: 'Empfehlenswert' },
-  { id: 'fair_price', label: 'Fairer Preis' },
-  { id: 'creative', label: 'Kreativ' },
-  { id: 'flexible', label: 'Flexibel' },
-  { id: 'high_quality', label: 'Hohe Qualität' },
-]
-
-const MAX_TITLE_LENGTH = 100
-const MAX_TEXT_LENGTH = 1000
 
 export function ReviewForm({
-  onSubmit,
+  bookingId,
+  reviewerType,
+  revieweeName,
+  eventDate,
+  onSuccess,
   onCancel,
-  isSubmitting = false,
-  showCategoryRatings = true,
 }: ReviewFormProps) {
-  // Form state
   const [overallRating, setOverallRating] = useState(0)
-  const [reviewTitle, setReviewTitle] = useState('')
-  const [reviewText, setReviewText] = useState('')
-  const [quickFeedback, setQuickFeedback] = useState<string[]>([])
-
-  // Category ratings
-  const [zuverlaessigkeit, setZuverlaessigkeit] = useState(0)
-  const [kommunikation, setKommunikation] = useState(0)
-  const [preisLeistung, setPreisLeistung] = useState(0)
-  const [stimmung, setStimmung] = useState(0)
-
-  // Error state
+  const [hoverRating, setHoverRating] = useState(0)
+  const [title, setTitle] = useState('')
+  const [content, setContent] = useState('')
+  const [categoryRatings, setCategoryRatings] = useState<Record<string, number>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Toggle quick feedback
-  const toggleQuickFeedback = (id: string) => {
-    setQuickFeedback((prev) =>
-      prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]
-    )
+  const categories = getCategoriesForReviewerType(reviewerType)
+
+  const handleCategoryRating = (category: string, rating: number) => {
+    setCategoryRatings((prev) => ({ ...prev, [category]: rating }))
   }
 
-  // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    // Validate
     if (overallRating === 0) {
-      setError('Bitte gib eine Gesamtbewertung ab.')
+      setError('Bitte gib eine Gesamtbewertung ab')
       return
     }
 
-    const data: ReviewFormData = {
-      overall_rating: overallRating,
-      review_title: reviewTitle.trim(),
-      review_text: reviewText.trim(),
-      quick_feedback: quickFeedback,
+    setIsSubmitting(true)
+
+    // Convert category ratings to array format
+    const categoryArray: CategoryRating[] = Object.entries(categoryRatings)
+      .filter(([_, rating]) => rating > 0)
+      .map(([category, rating]) => ({
+        category: category as CategoryRating['category'],
+        rating,
+      }))
+
+    const { data, error: submitError } = await submitReview(
+      bookingId,
+      overallRating,
+      title || undefined,
+      content || undefined,
+      categoryArray
+    )
+
+    setIsSubmitting(false)
+
+    if (submitError || !data?.success) {
+      setError(data?.error || submitError?.message || 'Fehler beim Absenden der Bewertung')
+      return
     }
 
-    if (showCategoryRatings) {
-      if (zuverlaessigkeit > 0) data.zuverlaessigkeit = zuverlaessigkeit
-      if (kommunikation > 0) data.kommunikation = kommunikation
-      if (preisLeistung > 0) data.preis_leistung = preisLeistung
-      if (stimmung > 0) data.stimmung = stimmung
-    }
+    onSuccess?.(data.review_id!)
+  }
 
-    await onSubmit(data)
+  const renderStars = (
+    rating: number,
+    onRate: (rating: number) => void,
+    onHover?: (rating: number) => void,
+    hoverValue?: number,
+    size: 'sm' | 'lg' = 'lg'
+  ) => {
+    const displayRating = hoverValue || rating
+    const sizeClasses = size === 'lg' ? 'w-8 h-8' : 'w-5 h-5'
+
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => onRate(star)}
+            onMouseEnter={() => onHover?.(star)}
+            onMouseLeave={() => onHover?.(0)}
+            className={`${sizeClasses} transition-all duration-150 ${
+              star <= displayRating
+                ? 'text-yellow-400 scale-110'
+                : 'text-zinc-600 hover:text-yellow-400/50'
+            }`}
+          >
+            <Star className="w-full h-full fill-current" />
+          </button>
+        ))}
+      </div>
+    )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-3 text-red-200 text-sm">
-          {error}
+    <motion.form
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      onSubmit={handleSubmit}
+      className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-6"
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white">
+            {reviewerType === 'client' ? 'Künstler bewerten' : 'Kunde bewerten'}
+          </h3>
+          <p className="text-sm text-zinc-400 mt-1">
+            {revieweeName} • Event am {new Date(eventDate).toLocaleDateString('de-DE')}
+          </p>
         </div>
-      )}
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-zinc-500 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
+      </div>
 
       {/* Overall Rating */}
-      <div className="text-center">
-        <label className="block text-white/60 text-sm uppercase tracking-wider mb-3">
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-zinc-300">
           Gesamtbewertung *
         </label>
-        <div className="flex justify-center">
-          <StarRating
-            rating={overallRating}
-            size="lg"
-            interactive
-            onChange={setOverallRating}
-          />
+        <div className="flex items-center gap-4">
+          {renderStars(overallRating, setOverallRating, setHoverRating, hoverRating)}
+          <span className="text-sm text-zinc-400">
+            {overallRating > 0 ? `${overallRating} von 5 Sternen` : 'Klicke zum Bewerten'}
+          </span>
         </div>
-        <p className="text-white/40 text-sm mt-2">
-          {overallRating === 0 && 'Klicke auf die Sterne'}
-          {overallRating === 1 && 'Schlecht'}
-          {overallRating === 2 && 'Nicht so gut'}
-          {overallRating === 3 && 'Okay'}
-          {overallRating === 4 && 'Gut'}
-          {overallRating === 5 && 'Ausgezeichnet'}
-        </p>
       </div>
 
       {/* Category Ratings */}
-      {showCategoryRatings && (
-        <div className="space-y-4 pt-4 border-t border-white/10">
-          <h4 className="text-white/60 text-sm uppercase tracking-wider">
-            Detailbewertung (optional)
-          </h4>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CategoryRatingInput
-              label="Zuverlässigkeit"
-              rating={zuverlaessigkeit}
-              onChange={setZuverlaessigkeit}
-            />
-            <CategoryRatingInput
-              label="Kommunikation"
-              rating={kommunikation}
-              onChange={setKommunikation}
-            />
-            <CategoryRatingInput
-              label="Preis/Leistung"
-              rating={preisLeistung}
-              onChange={setPreisLeistung}
-            />
-            <CategoryRatingInput
-              label="Stimmung"
-              rating={stimmung}
-              onChange={setStimmung}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Quick Feedback */}
-      <div className="pt-4 border-t border-white/10">
-        <label className="block text-white/60 text-sm uppercase tracking-wider mb-3">
-          Was hat dir gefallen? (optional)
+      <div className="space-y-4">
+        <label className="block text-sm font-medium text-zinc-300">
+          Detailbewertungen (optional)
         </label>
-        <div className="flex flex-wrap gap-2">
-          {QUICK_FEEDBACK_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => toggleQuickFeedback(option.id)}
-              className={`
-                px-3 py-1.5 rounded-full text-sm transition-colors
-                ${
-                  quickFeedback.includes(option.id)
-                    ? 'bg-accent-purple text-white'
-                    : 'bg-white/10 text-white/70 hover:bg-white/20'
-                }
-              `}
+        <div className="grid gap-3">
+          {categories.map((cat) => (
+            <div
+              key={cat.category}
+              className="flex items-center justify-between bg-zinc-800/50 rounded-lg px-4 py-3"
             >
-              {option.label}
-            </button>
+              <div>
+                <p className="text-sm font-medium text-white">{cat.label}</p>
+                <p className="text-xs text-zinc-500">{cat.description}</p>
+              </div>
+              {renderStars(
+                categoryRatings[cat.category] || 0,
+                (rating) => handleCategoryRating(cat.category, rating),
+                undefined,
+                undefined,
+                'sm'
+              )}
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Review Title */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-white/60 text-sm uppercase tracking-wider">
-            Titel (optional)
-          </label>
-          <span className="text-white/30 text-xs">
-            {reviewTitle.length}/{MAX_TITLE_LENGTH}
-          </span>
-        </div>
+      {/* Title */}
+      <div className="space-y-2">
+        <label htmlFor="review-title" className="block text-sm font-medium text-zinc-300">
+          Titel (optional)
+        </label>
         <input
+          id="review-title"
           type="text"
-          value={reviewTitle}
-          onChange={(e) => setReviewTitle(e.target.value.slice(0, MAX_TITLE_LENGTH))}
-          placeholder="Fasse deine Erfahrung in einem Satz zusammen"
-          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-accent-purple"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Kurze Zusammenfassung deiner Erfahrung"
+          maxLength={200}
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none"
         />
       </div>
 
-      {/* Review Text */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-white/60 text-sm uppercase tracking-wider">
-            Deine Bewertung (optional)
-          </label>
-          <span className="text-white/30 text-xs">
-            {reviewText.length}/{MAX_TEXT_LENGTH}
-          </span>
-        </div>
+      {/* Content */}
+      <div className="space-y-2">
+        <label htmlFor="review-content" className="block text-sm font-medium text-zinc-300">
+          Deine Bewertung (optional)
+        </label>
         <textarea
-          value={reviewText}
-          onChange={(e) => setReviewText(e.target.value.slice(0, MAX_TEXT_LENGTH))}
-          placeholder="Erzähle anderen von deiner Erfahrung..."
+          id="review-content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Beschreibe deine Erfahrung..."
           rows={4}
-          className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 focus:outline-none focus:border-accent-purple resize-none"
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none resize-none"
         />
+        <p className="text-xs text-zinc-500 text-right">{content.length} / 2000 Zeichen</p>
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-3 pt-4">
+      {/* Error Message */}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="flex items-center gap-2 text-red-400 bg-red-400/10 rounded-lg px-4 py-3"
+          >
+            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <p className="text-sm">{error}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Submit Button */}
+      <div className="flex justify-end gap-3">
         {onCancel && (
-          <Button
+          <button
             type="button"
-            variant="outline"
             onClick={onCancel}
-            disabled={isSubmitting}
-            className="flex-1"
+            className="px-6 py-2.5 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
           >
             Abbrechen
-          </Button>
+          </button>
         )}
-        <Button
+        <button
           type="submit"
-          variant="primary"
           disabled={isSubmitting || overallRating === 0}
-          className="flex-1"
+          className="flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg transition-colors"
         >
           {isSubmitting ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                />
-              </svg>
-              Wird gesendet...
-            </span>
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
-            'Bewertung abschicken'
+            <Send className="w-4 h-4" />
           )}
-        </Button>
+          Bewertung absenden
+        </button>
       </div>
-    </form>
+    </motion.form>
   )
 }
 
-// Category rating input component
-function CategoryRatingInput({
-  label,
-  rating,
-  onChange,
-}: {
-  label: string
-  rating: number
-  onChange: (value: number) => void
-}) {
-  return (
-    <div className="flex items-center justify-between bg-white/5 rounded-lg px-4 py-3">
-      <span className="text-white/70 text-sm">{label}</span>
-      <StarRating rating={rating} size="sm" interactive onChange={onChange} />
-    </div>
-  )
-}
+export default ReviewForm

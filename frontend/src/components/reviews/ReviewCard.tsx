@@ -1,230 +1,220 @@
-import { StarRating } from '../ui/StarRating'
-import type { Review } from '../../services/reviewService'
+/**
+ * ReviewCard Component - Phase 7
+ * Display individual review with response option
+ */
+
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Star, ThumbsUp, Flag, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react'
+import {
+  voteReviewHelpful,
+  respondToReview,
+  getReviewAgeText,
+  type Review,
+} from '@/services/reviewService'
 
 interface ReviewCardProps {
   review: Review
-  showResponse?: boolean
+  canRespond?: boolean
+  onFlag?: (reviewId: string) => void
 }
 
-// Format date to German locale
-function formatDate(dateString: string): string {
-  const date = new Date(dateString)
-  return date.toLocaleDateString('de-DE', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-}
+export function ReviewCard({
+  review,
+  canRespond = false,
+  onFlag,
+}: ReviewCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isVoted, setIsVoted] = useState(false)
+  const [helpfulCount, setHelpfulCount] = useState(review.helpful_count)
+  const [showResponseInput, setShowResponseInput] = useState(false)
+  const [responseText, setResponseText] = useState('')
+  const [isSubmittingResponse, setIsSubmittingResponse] = useState(false)
+  const [localResponse, setLocalResponse] = useState(review.response)
 
-// Get initials from name
-function getInitials(vorname: string | null, nachname: string | null): string {
-  const first = vorname?.charAt(0)?.toUpperCase() || ''
-  const last = nachname?.charAt(0)?.toUpperCase() || ''
-  return first + last || '?'
-}
-
-// Get display name
-function getDisplayName(
-  vorname: string | null,
-  nachname: string | null,
-  membername: string | null
-): string {
-  if (vorname && nachname) {
-    return `${vorname} ${nachname.charAt(0)}.`
+  const handleVoteHelpful = async () => {
+    const { data } = await voteReviewHelpful(review.id)
+    if (data?.success) {
+      setIsVoted(data.voted)
+      setHelpfulCount(data.helpful_count)
+    }
   }
-  if (membername) {
-    return membername
+
+  const handleSubmitResponse = async () => {
+    if (!responseText.trim()) return
+
+    setIsSubmittingResponse(true)
+    const { data } = await respondToReview(review.id, responseText.trim())
+    setIsSubmittingResponse(false)
+
+    if (data?.success) {
+      setLocalResponse({
+        content: responseText.trim(),
+        created_at: new Date().toISOString(),
+      })
+      setShowResponseInput(false)
+      setResponseText('')
+    }
   }
-  return 'Anonymer Nutzer'
-}
 
-// Quick feedback labels
-const QUICK_FEEDBACK_LABELS: Record<string, string> = {
-  professional: 'Professionell',
-  on_time: 'Pünktlich',
-  great_music: 'Tolle Musik',
-  friendly: 'Freundlich',
-  good_communication: 'Gute Kommunikation',
-  recommended: 'Empfehlenswert',
-  fair_price: 'Fairer Preis',
-  creative: 'Kreativ',
-  flexible: 'Flexibel',
-  high_quality: 'Hohe Qualität',
-}
-
-export function ReviewCard({ review, showResponse = true }: ReviewCardProps) {
-  const initials = getInitials(review.rater?.vorname || null, review.rater?.nachname || null)
-  const displayName = getDisplayName(
-    review.rater?.vorname || null,
-    review.rater?.nachname || null,
-    review.rater?.membername || null
+  const renderStars = (rating: number) => (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`w-4 h-4 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-zinc-600'}`}
+        />
+      ))}
+    </div>
   )
 
+  const contentTooLong = review.content && review.content.length > 200
+
   return (
-    <div className="bg-white/5 rounded-xl p-5 border border-white/10">
-      {/* Header: Avatar, Name, Date, Rating */}
-      <div className="flex items-start gap-4 mb-4">
-        {/* Avatar */}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-zinc-900 border border-zinc-800 rounded-xl p-5"
+    >
+      <div className="flex items-start gap-4">
         <div className="flex-shrink-0">
-          {review.rater?.profile_image_url ? (
+          {review.reviewer?.profile_image_url ? (
             <img
-              src={review.rater.profile_image_url}
-              alt={displayName}
+              src={review.reviewer.profile_image_url}
+              alt={review.reviewer.name}
               className="w-12 h-12 rounded-full object-cover"
             />
           ) : (
-            <div className="w-12 h-12 rounded-full bg-accent-purple/30 flex items-center justify-center text-white font-medium">
-              {initials}
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-semibold">
+              {review.reviewer?.name?.charAt(0) || '?'}
             </div>
           )}
         </div>
 
-        {/* Name and Date */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <h4 className="text-white font-medium truncate">{displayName}</h4>
-            <span className="text-white/40 text-sm flex-shrink-0">
-              {formatDate(review.created_at)}
-            </span>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-white">{review.reviewer?.name}</span>
+            <span className="text-zinc-500 text-sm">•</span>
+            <span className="text-zinc-500 text-sm">{getReviewAgeText(review.created_at)}</span>
           </div>
-
-          {/* Rating */}
-          <div className="flex items-center gap-2 mt-1">
-            <StarRating rating={Number(review.overall_rating)} size="sm" />
-            <span className="text-white/60 text-sm">
-              {Number(review.overall_rating).toFixed(1)}
-            </span>
+          <div className="flex items-center gap-3 mt-1">
+            {renderStars(review.overall_rating)}
+            {review.title && <span className="text-sm font-medium text-white truncate">{review.title}</span>}
           </div>
         </div>
       </div>
 
-      {/* Review Title */}
-      {review.review_title && (
-        <h5 className="text-white font-semibold mb-2">{review.review_title}</h5>
-      )}
-
-      {/* Review Text */}
-      {review.review_text && (
-        <p className="text-white/70 text-sm leading-relaxed mb-4">{review.review_text}</p>
-      )}
-
-      {/* Quick Feedback Tags */}
-      {review.quick_feedback && review.quick_feedback.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {review.quick_feedback.map((feedback) => (
-            <span
-              key={feedback}
-              className="px-2.5 py-1 bg-accent-purple/20 text-accent-purple text-xs rounded-full"
+      {review.content && (
+        <div className="mt-4">
+          <p className={`text-zinc-300 text-sm leading-relaxed ${!isExpanded && contentTooLong ? 'line-clamp-3' : ''}`}>
+            {review.content}
+          </p>
+          {contentTooLong && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-1 text-purple-400 text-sm mt-2 hover:text-purple-300"
             >
-              {QUICK_FEEDBACK_LABELS[feedback] || feedback}
-            </span>
+              {isExpanded ? <><ChevronUp className="w-4 h-4" />Weniger</> : <><ChevronDown className="w-4 h-4" />Mehr</>}
+            </button>
+          )}
+        </div>
+      )}
+
+      {review.categories && review.categories.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {review.categories.map((cat) => (
+            <div key={cat.category} className="flex items-center gap-1.5 bg-zinc-800/50 rounded-full px-3 py-1">
+              <span className="text-xs text-zinc-400 capitalize">{cat.category.replace(/_/g, ' ')}</span>
+              <span className="text-xs font-medium text-yellow-400">{cat.rating}/5</span>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Category Ratings (if available) */}
-      {(review.zuverlaessigkeit ||
-        review.kommunikation ||
-        review.preis_leistung ||
-        review.stimmung) && (
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10 mb-4">
-          {review.zuverlaessigkeit && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-white/50">Zuverlässigkeit</span>
-              <div className="flex items-center gap-1">
-                <StarRating rating={review.zuverlaessigkeit} maxRating={5} size="sm" />
-              </div>
-            </div>
-          )}
-          {review.kommunikation && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-white/50">Kommunikation</span>
-              <div className="flex items-center gap-1">
-                <StarRating rating={review.kommunikation} maxRating={5} size="sm" />
-              </div>
-            </div>
-          )}
-          {review.preis_leistung && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-white/50">Preis/Leistung</span>
-              <div className="flex items-center gap-1">
-                <StarRating rating={review.preis_leistung} maxRating={5} size="sm" />
-              </div>
-            </div>
-          )}
-          {review.stimmung && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-white/50">Stimmung</span>
-              <div className="flex items-center gap-1">
-                <StarRating rating={review.stimmung} maxRating={5} size="sm" />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Verified Badge */}
-      {review.is_verified && (
-        <div className="flex items-center gap-1 text-green-400 text-xs mb-3">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span>Verifizierte Buchung</span>
-        </div>
-      )}
-
-      {/* Response from Artist/Provider */}
-      {showResponse && review.response_text && (
-        <div className="mt-4 pt-4 border-t border-white/10">
-          <div className="bg-white/5 rounded-lg p-4">
+      <AnimatePresence>
+        {localResponse && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            className="mt-4 bg-zinc-800/50 rounded-lg p-4 border-l-2 border-purple-500"
+          >
             <div className="flex items-center gap-2 mb-2">
-              <svg
-                className="w-4 h-4 text-accent-purple"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
-                />
-              </svg>
-              <span className="text-white/60 text-sm font-medium">Antwort vom Anbieter</span>
-              {review.response_at && (
-                <span className="text-white/30 text-xs">• {formatDate(review.response_at)}</span>
-              )}
+              <MessageSquare className="w-4 h-4 text-purple-400" />
+              <span className="text-sm font-medium text-purple-400">Antwort</span>
             </div>
-            <p className="text-white/70 text-sm">{review.response_text}</p>
-          </div>
+            <p className="text-sm text-zinc-300">{localResponse.content}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-zinc-800">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleVoteHelpful}
+            className={`flex items-center gap-1.5 text-sm transition-colors ${isVoted ? 'text-purple-400' : 'text-zinc-500 hover:text-purple-400'}`}
+          >
+            <ThumbsUp className={`w-4 h-4 ${isVoted ? 'fill-current' : ''}`} />
+            <span>Hilfreich ({helpfulCount})</span>
+          </button>
+
+          {onFlag && (
+            <button onClick={() => onFlag(review.id)} className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-red-400">
+              <Flag className="w-4 h-4" /><span>Melden</span>
+            </button>
+          )}
         </div>
-      )}
-    </div>
+
+        {canRespond && !localResponse && !showResponseInput && (
+          <button onClick={() => setShowResponseInput(true)} className="flex items-center gap-1.5 text-sm text-purple-400">
+            <MessageSquare className="w-4 h-4" /><span>Antworten</span>
+          </button>
+        )}
+      </div>
+
+      {/* Response Input Form */}
+      <AnimatePresence>
+        {showResponseInput && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mt-4 pt-4 border-t border-zinc-800"
+          >
+            <textarea
+              value={responseText}
+              onChange={(e) => setResponseText(e.target.value)}
+              placeholder="Deine Antwort..."
+              rows={3}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-2.5 text-white placeholder:text-zinc-500 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 outline-none resize-none text-sm"
+            />
+            <div className="flex justify-end gap-2 mt-3">
+              <button
+                onClick={() => {
+                  setShowResponseInput(false)
+                  setResponseText('')
+                }}
+                className="px-4 py-1.5 text-sm text-zinc-400 hover:text-white"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleSubmitResponse}
+                disabled={!responseText.trim() || isSubmittingResponse}
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-700 disabled:cursor-not-allowed text-white text-sm font-medium rounded-lg"
+              >
+                {isSubmittingResponse ? (
+                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <MessageSquare className="w-3 h-3" />
+                )}
+                Antworten
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }
 
-// Skeleton loader for ReviewCard
-export function ReviewCardSkeleton() {
-  return (
-    <div className="bg-white/5 rounded-xl p-5 border border-white/10 animate-pulse">
-      <div className="flex items-start gap-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-white/10" />
-        <div className="flex-1">
-          <div className="flex justify-between">
-            <div className="h-5 bg-white/10 rounded w-32" />
-            <div className="h-4 bg-white/10 rounded w-24" />
-          </div>
-          <div className="h-4 bg-white/10 rounded w-24 mt-2" />
-        </div>
-      </div>
-      <div className="h-4 bg-white/10 rounded w-3/4 mb-2" />
-      <div className="h-4 bg-white/10 rounded w-full mb-2" />
-      <div className="h-4 bg-white/10 rounded w-2/3" />
-    </div>
-  )
-}
+export default ReviewCard

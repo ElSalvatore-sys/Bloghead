@@ -29,6 +29,7 @@ const SettingsPage = lazy(() => import('./pages/dashboard/SettingsPage').then(m 
 const FavoritesPage = lazy(() => import('./pages/dashboard/FavoritesPage').then(m => ({ default: m.FavoritesPage })))
 const EventsAttendedPage = lazy(() => import('./pages/dashboard/EventsAttendedPage').then(m => ({ default: m.EventsAttendedPage })))
 const MyReviewsPage = lazy(() => import('./pages/dashboard/MyReviewsPage').then(m => ({ default: m.MyReviewsPage })))
+const WriteReviewPage = lazy(() => import('./pages/dashboard/WriteReviewPage').then(m => ({ default: m.WriteReviewPage })))
 const BookingsPage = lazy(() => import('./pages/dashboard/BookingsPage').then(m => ({ default: m.BookingsPage })))
 const CalendarPage = lazy(() => import('./pages/dashboard/CalendarPage').then(m => ({ default: m.CalendarPage })))
 const AvailabilityPage = lazy(() => import('./pages/dashboard/AvailabilityPage').then(m => ({ default: m.AvailabilityPage })))
@@ -108,6 +109,7 @@ function App() {
                 <Route path="favorites" element={<FavoritesPage />} />
                 <Route path="events-attended" element={<EventsAttendedPage />} />
                 <Route path="my-reviews" element={<MyReviewsPage />} />
+                <Route path="bookings/:bookingId/review" element={<WriteReviewPage />} />
 
                 {/* Artist pages */}
                 <Route path="bookings" element={<BookingsPage />} />
