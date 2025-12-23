@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout, DashboardLayout, AdminLayout } from './components/layout'
 import { HomePage } from './pages'
 import { CookieConsent } from './components/ui/CookieConsent'
-import { ProtectedRoute } from './components/auth'
+import { ProtectedRoute, RoleGuard } from './components/auth'
 import { AdminGuard } from './components/admin'
 import { AuthProvider } from './contexts/AuthContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -107,28 +107,28 @@ function App() {
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
 
-                {/* Fan pages */}
-                <Route path="favorites" element={<FavoritesPage />} />
-                <Route path="events-attended" element={<EventsAttendedPage />} />
-                <Route path="my-reviews" element={<MyReviewsPage />} />
-                <Route path="bookings/:bookingId/review" element={<WriteReviewPage />} />
-                <Route path="my-stats" element={<FanAnalyticsPage />} />
+                {/* Fan pages - protected by user_type */}
+                <Route path="favorites" element={<RoleGuard allowedUserTypes={['fan']}><FavoritesPage /></RoleGuard>} />
+                <Route path="events-attended" element={<RoleGuard allowedUserTypes={['fan']}><EventsAttendedPage /></RoleGuard>} />
+                <Route path="my-reviews" element={<RoleGuard allowedUserTypes={['fan']}><MyReviewsPage /></RoleGuard>} />
+                <Route path="bookings/:bookingId/review" element={<RoleGuard allowedUserTypes={['fan']}><WriteReviewPage /></RoleGuard>} />
+                <Route path="my-stats" element={<RoleGuard allowedUserTypes={['fan']}><FanAnalyticsPage /></RoleGuard>} />
 
-                {/* Artist pages */}
-                <Route path="bookings" element={<BookingsPage />} />
-                <Route path="calendar" element={<CalendarPage />} />
-                <Route path="availability" element={<AvailabilityPage />} />
-                <Route path="reviews" element={<ReviewsPage />} />
-                <Route path="stats" element={<StatsPage />} />
-                <Route path="analytics" element={<ArtistAnalyticsPage />} />
+                {/* Artist pages - protected by user_type */}
+                <Route path="bookings" element={<RoleGuard allowedUserTypes={['artist']}><BookingsPage /></RoleGuard>} />
+                <Route path="calendar" element={<RoleGuard allowedUserTypes={['artist']}><CalendarPage /></RoleGuard>} />
+                <Route path="availability" element={<RoleGuard allowedUserTypes={['artist']}><AvailabilityPage /></RoleGuard>} />
+                <Route path="reviews" element={<RoleGuard allowedUserTypes={['artist']}><ReviewsPage /></RoleGuard>} />
+                <Route path="stats" element={<RoleGuard allowedUserTypes={['artist', 'service_provider', 'event_organizer', 'veranstalter']}><StatsPage /></RoleGuard>} />
+                <Route path="analytics" element={<RoleGuard allowedUserTypes={['artist']}><ArtistAnalyticsPage /></RoleGuard>} />
 
-                {/* Service Provider pages */}
-                <Route path="orders" element={<OrdersPage />} />
+                {/* Service Provider pages - protected by user_type */}
+                <Route path="orders" element={<RoleGuard allowedUserTypes={['service_provider']}><OrdersPage /></RoleGuard>} />
 
-                {/* Event Organizer pages */}
-                <Route path="my-events" element={<MyEventsPage />} />
-                <Route path="booking-requests" element={<BookingRequestsPage />} />
-                <Route path="booked-artists" element={<BookedArtistsPage />} />
+                {/* Event Organizer pages - protected by user_type */}
+                <Route path="my-events" element={<RoleGuard allowedUserTypes={['event_organizer', 'veranstalter']}><MyEventsPage /></RoleGuard>} />
+                <Route path="booking-requests" element={<RoleGuard allowedUserTypes={['event_organizer', 'veranstalter']}><BookingRequestsPage /></RoleGuard>} />
+                <Route path="booked-artists" element={<RoleGuard allowedUserTypes={['event_organizer', 'veranstalter']}><BookedArtistsPage /></RoleGuard>} />
 
                 {/* Legacy routes - redirect to new routes or keep for compatibility */}
                 <Route path="requests" element={<LegacyMyRequestsPage />} />
