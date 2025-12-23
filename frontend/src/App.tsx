@@ -39,6 +39,8 @@ const OrdersPage = lazy(() => import('./pages/dashboard/OrdersPage').then(m => (
 const MyEventsPage = lazy(() => import('./pages/dashboard/MyEventsPage').then(m => ({ default: m.MyEventsPage })))
 const BookingRequestsPage = lazy(() => import('./pages/dashboard/BookingRequestsPage').then(m => ({ default: m.BookingRequestsPage })))
 const BookedArtistsPage = lazy(() => import('./pages/dashboard/BookedArtistsPage').then(m => ({ default: m.BookedArtistsPage })))
+const ArtistAnalyticsPage = lazy(() => import('./pages/dashboard/ArtistAnalyticsPage').then(m => ({ default: m.ArtistAnalyticsPage })))
+const FanAnalyticsPage = lazy(() => import('./pages/dashboard/FanAnalyticsPage').then(m => ({ default: m.FanAnalyticsPage })))
 
 // Legacy Dashboard pages (default exports - keeping for backward compatibility)
 const LegacyMyRequestsPage = lazy(() => import('./pages/dashboard/MyRequestsPage'))
@@ -110,6 +112,7 @@ function App() {
                 <Route path="events-attended" element={<EventsAttendedPage />} />
                 <Route path="my-reviews" element={<MyReviewsPage />} />
                 <Route path="bookings/:bookingId/review" element={<WriteReviewPage />} />
+                <Route path="my-stats" element={<FanAnalyticsPage />} />
 
                 {/* Artist pages */}
                 <Route path="bookings" element={<BookingsPage />} />
@@ -117,6 +120,7 @@ function App() {
                 <Route path="availability" element={<AvailabilityPage />} />
                 <Route path="reviews" element={<ReviewsPage />} />
                 <Route path="stats" element={<StatsPage />} />
+                <Route path="analytics" element={<ArtistAnalyticsPage />} />
 
                 {/* Service Provider pages */}
                 <Route path="orders" element={<OrdersPage />} />

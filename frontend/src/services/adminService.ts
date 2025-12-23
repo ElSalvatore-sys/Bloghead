@@ -71,6 +71,44 @@ export interface AnalyticsData {
   usersByType: { type: string; count: number }[]
 }
 
+// Enhanced Dashboard Stats with trends
+export interface EnhancedDashboardStats {
+  totalUsers: { value: number; previousValue: number; changePercent: number; trend: 'up' | 'down' | 'stable' }
+  totalArtists: { value: number; previousValue: number; changePercent: number; trend: 'up' | 'down' | 'stable' }
+  totalBookings: { value: number; previousValue: number; changePercent: number; trend: 'up' | 'down' | 'stable' }
+  totalRevenue: { value: number; previousValue: number; changePercent: number; trend: 'up' | 'down' | 'stable' }
+  newUsersToday: number
+  activeTickets: number
+}
+
+export interface TopArtist {
+  id: string
+  name: string
+  profileImage: string | null
+  bookingsCount: number
+  revenue: number
+  rating: number | null
+}
+
+export interface RecentBooking {
+  id: string
+  artistName: string
+  customerName: string
+  eventDate: string
+  status: string
+  totalPrice: number
+  createdAt: string
+}
+
+export interface RecentUser {
+  id: string
+  membername: string
+  email: string
+  userType: string
+  createdAt: string
+  profileImage: string | null
+}
+
 // Check if user is admin
 export async function checkIsAdmin(userId: string): Promise<boolean> {
   const { data, error } = await supabase
@@ -539,6 +577,476 @@ export async function getActiveAnnouncements(
     return { data: data || [], error: null }
   } catch (err) {
     console.error('Error fetching active announcements:', err)
+    return { data: [], error: err as Error }
+  }
+}
+
+// Enhanced Dashboard Stats with period comparison
+export async function getEnhancedDashboardStats(
+  period: '7d' | '30d' | '90d' | '12m' = '30d'
+): Promise<{ data: EnhancedDashboardStats | null; error: Error | null }> {
+  try {
+    const now = new Date()
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    // Calculate period dates
+    let currentStart: Date
+    let previousStart: Date
+    let previousEnd: Date
+
+    switch (period) {
+      case '7d':
+        currentStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        previousEnd = currentStart
+        previousStart = new Date(previousEnd.getTime() - 7 * 24 * 60 * 60 * 1000)
+        break
+      case '30d':
+        currentStart = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        previousEnd = currentStart
+        previousStart = new Date(previousEnd.getTime() - 30 * 24 * 60 * 60 * 1000)
+        break
+      case '90d':
+        currentStart = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+        previousEnd = currentStart
+        previousStart = new Date(previousEnd.getTime() - 90 * 24 * 60 * 60 * 1000)
+        break
+      case '12m':
+        currentStart = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+        previousEnd = currentStart
+        previousStart = new Date(currentStart.getFullYear() - 1, currentStart.getMonth(), currentStart.getDate())
+        break
+    }
+
+    // Get current period counts
+    const [
+      currentUsers,
+      currentArtists,
+      currentBookings,
+      previousUsers,
+      previousArtists,
+      previousBookings,
+      newUsersResult,
+      ticketsResult
+    ] = await Promise.all([
+      supabase.from('users').select('id', { count: 'exact', head: true }).gte('created_at', currentStart.toISOString()),
+      supabase.from('users').select('id', { count: 'exact', head: true }).eq('user_type', 'artist').gte('created_at', currentStart.toISOString()),
+      supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('created_at', currentStart.toISOString()),
+      supabase.from('users').select('id', { count: 'exact', head: true }).gte('created_at', previousStart.toISOString()).lt('created_at', previousEnd.toISOString()),
+      supabase.from('users').select('id', { count: 'exact', head: true }).eq('user_type', 'artist').gte('created_at', previousStart.toISOString()).lt('created_at', previousEnd.toISOString()),
+      supabase.from('bookings').select('id', { count: 'exact', head: true }).gte('created_at', previousStart.toISOString()).lt('created_at', previousEnd.toISOString()),
+      supabase.from('users').select('id', { count: 'exact', head: true }).gte('created_at', today.toISOString()),
+      supabase.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open')
+    ])
+
+    // Get revenue data
+    const { data: currentRevenue } = await supabase
+      .from('bookings')
+      .select('total_price')
+      .eq('status', 'completed')
+      .gte('created_at', currentStart.toISOString())
+
+    const { data: previousRevenue } = await supabase
+      .from('bookings')
+      .select('total_price')
+      .eq('status', 'completed')
+      .gte('created_at', previousStart.toISOString())
+      .lt('created_at', previousEnd.toISOString())
+
+    const currentRevenueTotal = currentRevenue?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0
+    const previousRevenueTotal = previousRevenue?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0
+
+    const calculateChange = (current: number, previous: number): { changePercent: number; trend: 'up' | 'down' | 'stable' } => {
+      if (previous === 0) return { changePercent: current > 0 ? 100 : 0, trend: current > 0 ? 'up' : 'stable' }
+      const change = ((current - previous) / previous) * 100
+      return {
+        changePercent: Math.abs(Math.round(change * 10) / 10),
+        trend: change > 0 ? 'up' : change < 0 ? 'down' : 'stable'
+      }
+    }
+
+    const usersChange = calculateChange(currentUsers.count || 0, previousUsers.count || 0)
+    const artistsChange = calculateChange(currentArtists.count || 0, previousArtists.count || 0)
+    const bookingsChange = calculateChange(currentBookings.count || 0, previousBookings.count || 0)
+    const revenueChange = calculateChange(currentRevenueTotal, previousRevenueTotal)
+
+    return {
+      data: {
+        totalUsers: {
+          value: currentUsers.count || 0,
+          previousValue: previousUsers.count || 0,
+          ...usersChange
+        },
+        totalArtists: {
+          value: currentArtists.count || 0,
+          previousValue: previousArtists.count || 0,
+          ...artistsChange
+        },
+        totalBookings: {
+          value: currentBookings.count || 0,
+          previousValue: previousBookings.count || 0,
+          ...bookingsChange
+        },
+        totalRevenue: {
+          value: currentRevenueTotal,
+          previousValue: previousRevenueTotal,
+          ...revenueChange
+        },
+        newUsersToday: newUsersResult.count || 0,
+        activeTickets: ticketsResult.count || 0
+      },
+      error: null
+    }
+  } catch (err) {
+    console.error('Error fetching enhanced dashboard stats:', err)
+    return { data: null, error: err as Error }
+  }
+}
+
+// Get top performing artists
+export async function getTopArtists(limit = 5): Promise<{ data: TopArtist[]; error: Error | null }> {
+  try {
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select(`
+        artist_id,
+        total_price,
+        status,
+        artist:artist_id(id, user:user_id(membername, profile_image_url))
+      `)
+      .eq('status', 'completed')
+
+    if (!bookings || bookings.length === 0) {
+      return { data: [], error: null }
+    }
+
+    // Group by artist
+    const artistStats = new Map<string, { bookingsCount: number; revenue: number; name: string; profileImage: string | null }>()
+
+    bookings.forEach(booking => {
+      const artistId = booking.artist_id
+      const artistData = booking.artist as unknown as { id: string; user: { membername: string; profile_image_url: string | null } | null } | null
+
+      if (!artistId || !artistData) return
+
+      const existing = artistStats.get(artistId) || {
+        bookingsCount: 0,
+        revenue: 0,
+        name: artistData.user?.membername || 'Unbekannt',
+        profileImage: artistData.user?.profile_image_url || null
+      }
+
+      artistStats.set(artistId, {
+        ...existing,
+        bookingsCount: existing.bookingsCount + 1,
+        revenue: existing.revenue + (booking.total_price || 0)
+      })
+    })
+
+    // Convert to array and sort by revenue
+    const topArtists: TopArtist[] = Array.from(artistStats.entries())
+      .map(([id, stats]) => ({
+        id,
+        name: stats.name,
+        profileImage: stats.profileImage,
+        bookingsCount: stats.bookingsCount,
+        revenue: stats.revenue,
+        rating: null
+      }))
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, limit)
+
+    return { data: topArtists, error: null }
+  } catch (err) {
+    console.error('Error fetching top artists:', err)
+    return { data: [], error: err as Error }
+  }
+}
+
+// Get recent bookings
+export async function getRecentBookings(limit = 10): Promise<{ data: RecentBooking[]; error: Error | null }> {
+  try {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select(`
+        id,
+        event_date,
+        status,
+        total_price,
+        created_at,
+        artist:artist_id(user:user_id(membername)),
+        customer:customer_id(membername)
+      `)
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+
+    const bookings: RecentBooking[] = (data || []).map(b => {
+      const artist = b.artist as unknown as { user: { membername: string } | null } | null
+      const customer = b.customer as unknown as { membername: string } | null
+
+      return {
+        id: b.id,
+        artistName: artist?.user?.membername || 'Unbekannt',
+        customerName: customer?.membername || 'Unbekannt',
+        eventDate: b.event_date,
+        status: b.status,
+        totalPrice: b.total_price || 0,
+        createdAt: b.created_at
+      }
+    })
+
+    return { data: bookings, error: null }
+  } catch (err) {
+    console.error('Error fetching recent bookings:', err)
+    return { data: [], error: err as Error }
+  }
+}
+
+// Get recent user signups
+export async function getRecentUsers(limit = 10): Promise<{ data: RecentUser[]; error: Error | null }> {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, membername, email, user_type, created_at, profile_image_url')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+
+    const users: RecentUser[] = (data || []).map(u => ({
+      id: u.id,
+      membername: u.membername,
+      email: u.email,
+      userType: u.user_type,
+      createdAt: u.created_at,
+      profileImage: u.profile_image_url
+    }))
+
+    return { data: users, error: null }
+  } catch (err) {
+    console.error('Error fetching recent users:', err)
+    return { data: [], error: err as Error }
+  }
+}
+
+// Get user growth chart data
+export async function getUserGrowthChart(
+  period: '7d' | '30d' | '90d' | '12m' = '30d'
+): Promise<{ data: { date: string; value: number }[]; error: Error | null }> {
+  try {
+    const now = new Date()
+    let startDate: Date
+    let dateFormat: 'day' | 'week' | 'month'
+
+    switch (period) {
+      case '7d':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        dateFormat = 'day'
+        break
+      case '30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        dateFormat = 'day'
+        break
+      case '90d':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+        dateFormat = 'week'
+        break
+      case '12m':
+        startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+        dateFormat = 'month'
+        break
+    }
+
+    const { data: users } = await supabase
+      .from('users')
+      .select('created_at')
+      .gte('created_at', startDate.toISOString())
+      .order('created_at', { ascending: true })
+
+    const groupedData = new Map<string, number>()
+
+    users?.forEach(user => {
+      const date = new Date(user.created_at)
+      let key: string
+
+      switch (dateFormat) {
+        case 'day':
+          key = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+          break
+        case 'week':
+          const weekStart = new Date(date)
+          weekStart.setDate(date.getDate() - date.getDay())
+          key = weekStart.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+          break
+        case 'month':
+          key = date.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' })
+          break
+      }
+
+      groupedData.set(key, (groupedData.get(key) || 0) + 1)
+    })
+
+    const chartData = Array.from(groupedData.entries()).map(([date, value]) => ({
+      date,
+      value
+    }))
+
+    return { data: chartData, error: null }
+  } catch (err) {
+    console.error('Error fetching user growth chart:', err)
+    return { data: [], error: err as Error }
+  }
+}
+
+// Get revenue chart data
+export async function getRevenueChart(
+  period: '7d' | '30d' | '90d' | '12m' = '30d'
+): Promise<{ data: { date: string; value: number }[]; error: Error | null }> {
+  try {
+    const now = new Date()
+    let startDate: Date
+    let dateFormat: 'day' | 'week' | 'month'
+
+    switch (period) {
+      case '7d':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        dateFormat = 'day'
+        break
+      case '30d':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        dateFormat = 'day'
+        break
+      case '90d':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+        dateFormat = 'week'
+        break
+      case '12m':
+        startDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+        dateFormat = 'month'
+        break
+    }
+
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select('created_at, total_price')
+      .eq('status', 'completed')
+      .gte('created_at', startDate.toISOString())
+      .order('created_at', { ascending: true })
+
+    const groupedData = new Map<string, number>()
+
+    bookings?.forEach(booking => {
+      const date = new Date(booking.created_at)
+      let key: string
+
+      switch (dateFormat) {
+        case 'day':
+          key = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+          break
+        case 'week':
+          const weekStart = new Date(date)
+          weekStart.setDate(date.getDate() - date.getDay())
+          key = weekStart.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
+          break
+        case 'month':
+          key = date.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' })
+          break
+      }
+
+      groupedData.set(key, (groupedData.get(key) || 0) + (booking.total_price || 0))
+    })
+
+    const chartData = Array.from(groupedData.entries()).map(([date, value]) => ({
+      date,
+      value
+    }))
+
+    return { data: chartData, error: null }
+  } catch (err) {
+    console.error('Error fetching revenue chart:', err)
+    return { data: [], error: err as Error }
+  }
+}
+
+// Get bookings by status for pie chart
+export async function getBookingsByStatus(): Promise<{ data: { name: string; value: number; color: string }[]; error: Error | null }> {
+  try {
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select('status')
+
+    const statusCounts = new Map<string, number>()
+    bookings?.forEach(b => {
+      statusCounts.set(b.status, (statusCounts.get(b.status) || 0) + 1)
+    })
+
+    const statusColors: Record<string, string> = {
+      pending: '#F59E0B',
+      confirmed: '#3B82F6',
+      completed: '#10B981',
+      cancelled: '#EF4444',
+      disputed: '#8B5CF6'
+    }
+
+    const statusLabels: Record<string, string> = {
+      pending: 'Ausstehend',
+      confirmed: 'Bestätigt',
+      completed: 'Abgeschlossen',
+      cancelled: 'Storniert',
+      disputed: 'Streitfall'
+    }
+
+    const chartData = Array.from(statusCounts.entries()).map(([status, count]) => ({
+      name: statusLabels[status] || status,
+      value: count,
+      color: statusColors[status] || '#6B7280'
+    }))
+
+    return { data: chartData, error: null }
+  } catch (err) {
+    console.error('Error fetching bookings by status:', err)
+    return { data: [], error: err as Error }
+  }
+}
+
+// Get users by type for pie chart
+export async function getUsersByType(): Promise<{ data: { name: string; value: number; color: string }[]; error: Error | null }> {
+  try {
+    const { data: users } = await supabase
+      .from('users')
+      .select('user_type')
+
+    const typeCounts = new Map<string, number>()
+    users?.forEach(u => {
+      const type = u.user_type || 'fan'
+      typeCounts.set(type, (typeCounts.get(type) || 0) + 1)
+    })
+
+    const typeColors: Record<string, string> = {
+      fan: '#7C3AED',
+      artist: '#EC4899',
+      service_provider: '#F59E0B',
+      event_organizer: '#10B981'
+    }
+
+    const typeLabels: Record<string, string> = {
+      fan: 'Fans',
+      artist: 'Künstler',
+      service_provider: 'Dienstleister',
+      event_organizer: 'Veranstalter'
+    }
+
+    const chartData = Array.from(typeCounts.entries()).map(([type, count]) => ({
+      name: typeLabels[type] || type,
+      value: count,
+      color: typeColors[type] || '#6B7280'
+    }))
+
+    return { data: chartData, error: null }
+  } catch (err) {
+    console.error('Error fetching users by type:', err)
     return { data: [], error: err as Error }
   }
 }

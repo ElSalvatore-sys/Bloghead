@@ -1,96 +1,190 @@
+/**
+ * AdminDashboardPage - Phase 8.5
+ * Enhanced admin dashboard with analytics, charts, and tables
+ */
+
 import { useEffect, useState } from 'react'
-import { StatsCard } from '../../components/admin'
-import { getDashboardStats, type DashboardStats } from '../../services/adminService'
+import { Link } from 'react-router-dom'
+import {
+  Users,
+  Music,
+  Calendar,
+  Euro,
+  UserPlus,
+  Ticket,
+  TrendingUp,
+  RefreshCw,
+  Loader2,
+  ExternalLink,
+} from 'lucide-react'
+import {
+  StatCard,
+  DateRangePicker,
+  ChartContainer,
+  AnalyticsLineChart,
+  AnalyticsPieChart,
+} from '@/components/analytics'
+import { getPeriodLabel } from '@/services/analyticsService'
+import {
+  getEnhancedDashboardStats,
+  getTopArtists,
+  getRecentBookings,
+  getRecentUsers,
+  getUserGrowthChart,
+  getRevenueChart,
+  getBookingsByStatus,
+  getUsersByType,
+  type EnhancedDashboardStats,
+  type TopArtist,
+  type RecentBooking,
+  type RecentUser,
+} from '@/services/adminService'
 
-// Icons
-const UsersIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-  </svg>
-)
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount)
+}
 
-const ArtistIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-  </svg>
-)
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  })
+}
 
-const BookingIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-)
+const getStatusColor = (status: string) => {
+  const colors: Record<string, string> = {
+    pending: 'bg-yellow-500/20 text-yellow-400',
+    confirmed: 'bg-blue-500/20 text-blue-400',
+    completed: 'bg-green-500/20 text-green-400',
+    cancelled: 'bg-red-500/20 text-red-400',
+    disputed: 'bg-purple-500/20 text-purple-400',
+  }
+  return colors[status] || 'bg-gray-500/20 text-gray-400'
+}
 
-const RevenueIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.121 15.536c-1.171 1.952-3.07 1.952-4.242 0-1.172-1.953-1.172-5.119 0-7.072 1.171-1.952 3.07-1.952 4.242 0M8 10.5h4m-4 3h4m9-1.5a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-)
+const getStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    pending: 'Ausstehend',
+    confirmed: 'Bestätigt',
+    completed: 'Abgeschlossen',
+    cancelled: 'Storniert',
+    disputed: 'Streitfall',
+  }
+  return labels[status] || status
+}
 
-const NewUsersIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-  </svg>
-)
+const getUserTypeLabel = (type: string) => {
+  const labels: Record<string, string> = {
+    fan: 'Fan',
+    artist: 'Künstler',
+    service_provider: 'Dienstleister',
+    event_organizer: 'Veranstalter',
+  }
+  return labels[type] || type
+}
 
-const TicketIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-  </svg>
-)
+const getUserTypeColor = (type: string) => {
+  const colors: Record<string, string> = {
+    fan: 'bg-accent-purple/20 text-accent-purple',
+    artist: 'bg-pink-500/20 text-pink-400',
+    service_provider: 'bg-yellow-500/20 text-yellow-400',
+    event_organizer: 'bg-green-500/20 text-green-400',
+  }
+  return colors[type] || 'bg-gray-500/20 text-gray-400'
+}
 
 export function AdminDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null)
+  // Exclude 'all' from admin dashboard - use a valid subset
+  const [period, setPeriod] = useState<'7d' | '30d' | '90d' | '12m'>('30d')
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadStats()
-  }, [])
+  // Data states
+  const [stats, setStats] = useState<EnhancedDashboardStats | null>(null)
+  const [topArtists, setTopArtists] = useState<TopArtist[]>([])
+  const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([])
+  const [recentUsers, setRecentUsers] = useState<RecentUser[]>([])
+  const [userGrowthData, setUserGrowthData] = useState<{ date: string; value: number }[]>([])
+  const [revenueData, setRevenueData] = useState<{ date: string; value: number }[]>([])
+  const [bookingStatusData, setBookingStatusData] = useState<{ name: string; value: number; color: string }[]>([])
+  const [userTypeData, setUserTypeData] = useState<{ name: string; value: number; color: string }[]>([])
 
-  const loadStats = async () => {
-    setLoading(true)
-    const { data, error } = await getDashboardStats()
-    if (error) {
-      setError('Fehler beim Laden der Statistiken')
+  const loadData = async (showRefreshing = false) => {
+    if (showRefreshing) {
+      setRefreshing(true)
     } else {
-      setStats(data)
+      setLoading(true)
     }
-    setLoading(false)
+    setError(null)
+
+    try {
+      // Load all data in parallel
+      const [
+        statsResult,
+        topArtistsResult,
+        recentBookingsResult,
+        recentUsersResult,
+        userGrowthResult,
+        revenueResult,
+        bookingStatusResult,
+        userTypeResult,
+      ] = await Promise.all([
+        getEnhancedDashboardStats(period),
+        getTopArtists(5),
+        getRecentBookings(8),
+        getRecentUsers(8),
+        getUserGrowthChart(period),
+        getRevenueChart(period),
+        getBookingsByStatus(),
+        getUsersByType(),
+      ])
+
+      if (statsResult.error) {
+        setError(statsResult.error.message)
+      } else {
+        setStats(statsResult.data)
+      }
+
+      setTopArtists(topArtistsResult.data)
+      setRecentBookings(recentBookingsResult.data)
+      setRecentUsers(recentUsersResult.data)
+      setUserGrowthData(userGrowthResult.data)
+      setRevenueData(revenueResult.data)
+      setBookingStatusData(bookingStatusResult.data)
+      setUserTypeData(userTypeResult.data)
+    } catch (err) {
+      console.error('Error loading dashboard data:', err)
+      setError('Fehler beim Laden der Dashboard-Daten')
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
   }
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: 'EUR'
-    }).format(amount)
+  useEffect(() => {
+    loadData()
+  }, [period])
+
+  const handleRefresh = () => {
+    loadData(true)
   }
 
   if (loading) {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="bg-[#262626] rounded-xl p-6 animate-pulse">
-              <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
-              <div className="h-8 bg-gray-700 rounded w-1/3"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <div className="bg-red-600/20 border border-red-600 rounded-xl p-6 text-red-400">
-          {error}
-          <button onClick={loadStats} className="ml-4 underline">
-            Erneut versuchen
-          </button>
+        <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 text-accent-purple animate-spin" />
+            <p className="text-white/60">Dashboard wird geladen...</p>
+          </div>
         </div>
       </div>
     )
@@ -98,121 +192,328 @@ export function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <button
-          onClick={loadStats}
-          className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-        >
-          Aktualisieren
-        </button>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-white/60 text-sm mt-1">{getPeriodLabel(period)}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <DateRangePicker
+            value={period}
+            onChange={(newPeriod) => {
+              if (newPeriod !== 'all') {
+                setPeriod(newPeriod)
+              }
+            }}
+          />
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatsCard
-          title="Benutzer gesamt"
-          value={stats?.totalUsers || 0}
-          icon={<UsersIcon />}
-          color="purple"
+      {/* Error State */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">
+          {error}
+          <button onClick={handleRefresh} className="ml-4 underline">
+            Erneut versuchen
+          </button>
+        </div>
+      )}
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <StatCard
+          title="Neue Benutzer"
+          value={stats?.totalUsers.value || 0}
+          icon={<Users className="w-5 h-5" />}
+          trend={{
+            value: stats?.totalUsers.changePercent || 0,
+            direction: stats?.totalUsers.trend || 'stable',
+          }}
+          variant="gradient"
         />
-        <StatsCard
-          title="Kuenstler"
-          value={stats?.totalArtists || 0}
-          icon={<ArtistIcon />}
-          color="orange"
+        <StatCard
+          title="Neue Künstler"
+          value={stats?.totalArtists.value || 0}
+          icon={<Music className="w-5 h-5" />}
+          trend={{
+            value: stats?.totalArtists.changePercent || 0,
+            direction: stats?.totalArtists.trend || 'stable',
+          }}
         />
-        <StatsCard
+        <StatCard
           title="Buchungen"
-          value={stats?.totalBookings || 0}
-          icon={<BookingIcon />}
-          color="blue"
+          value={stats?.totalBookings.value || 0}
+          icon={<Calendar className="w-5 h-5" />}
+          trend={{
+            value: stats?.totalBookings.changePercent || 0,
+            direction: stats?.totalBookings.trend || 'stable',
+          }}
         />
-        <StatsCard
-          title="Gesamtumsatz"
-          value={formatCurrency(stats?.totalRevenue || 0)}
-          icon={<RevenueIcon />}
-          color="green"
+        <StatCard
+          title="Umsatz"
+          value={formatCurrency(stats?.totalRevenue.value || 0)}
+          icon={<Euro className="w-5 h-5" />}
+          trend={{
+            value: stats?.totalRevenue.changePercent || 0,
+            direction: stats?.totalRevenue.trend || 'stable',
+          }}
         />
-        <StatsCard
-          title="Neue Benutzer heute"
+        <StatCard
+          title="Heute registriert"
           value={stats?.newUsersToday || 0}
-          icon={<NewUsersIcon />}
-          color="purple"
+          icon={<UserPlus className="w-5 h-5" />}
         />
-        <StatsCard
+        <StatCard
           title="Offene Tickets"
           value={stats?.activeTickets || 0}
-          icon={<TicketIcon />}
-          color="red"
+          icon={<Ticket className="w-5 h-5" />}
         />
       </div>
 
+      {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-[#262626] rounded-xl p-6 border border-gray-800">
-          <h2 className="text-white font-medium mb-4">Schnellzugriff</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <a
-              href="/admin/users"
-              className="p-4 bg-[#1a1a1a] rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <UsersIcon />
-              <span className="text-white mt-2 block">Benutzerverwaltung</span>
-            </a>
-            <a
-              href="/admin/reports"
-              className="p-4 bg-[#1a1a1a] rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <span className="text-white mt-2 block">Meldungen</span>
-            </a>
-            <a
-              href="/admin/announcements"
-              className="p-4 bg-[#1a1a1a] rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
-              </svg>
-              <span className="text-white mt-2 block">Ankuendigungen</span>
-            </a>
-            <a
-              href="/admin/tickets"
-              className="p-4 bg-[#1a1a1a] rounded-lg hover:bg-gray-800 transition-colors"
-            >
-              <TicketIcon />
-              <span className="text-white mt-2 block">Support-Tickets</span>
-            </a>
+        {/* User Growth Chart */}
+        <ChartContainer
+          title="Benutzer-Wachstum"
+          subtitle={`${userGrowthData.reduce((sum, d) => sum + d.value, 0)} neue Benutzer`}
+          isEmpty={userGrowthData.length === 0}
+          emptyMessage="Keine Daten für diesen Zeitraum"
+        >
+          <AnalyticsLineChart
+            data={userGrowthData}
+            height={280}
+            lines={[{ dataKey: 'value', name: 'Benutzer', color: '#7C3AED', showArea: true }]}
+          />
+        </ChartContainer>
+
+        {/* Revenue Chart */}
+        <ChartContainer
+          title="Umsatz-Entwicklung"
+          subtitle={`Gesamt: ${formatCurrency(revenueData.reduce((sum, d) => sum + d.value, 0))}`}
+          isEmpty={revenueData.length === 0}
+          emptyMessage="Keine Umsatzdaten für diesen Zeitraum"
+        >
+          <AnalyticsLineChart
+            data={revenueData}
+            formatYAxis="currency"
+            height={280}
+            lines={[{ dataKey: 'value', name: 'Umsatz', color: '#10B981', showArea: true }]}
+          />
+        </ChartContainer>
+      </div>
+
+      {/* Pie Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Bookings by Status */}
+        <ChartContainer
+          title="Buchungen nach Status"
+          isEmpty={bookingStatusData.length === 0}
+        >
+          <AnalyticsPieChart
+            data={bookingStatusData}
+            height={260}
+            innerRadius={50}
+            outerRadius={80}
+            centerValue={bookingStatusData.reduce((sum, d) => sum + d.value, 0).toString()}
+            centerLabel="Gesamt"
+          />
+        </ChartContainer>
+
+        {/* Users by Type */}
+        <ChartContainer
+          title="Benutzer nach Typ"
+          isEmpty={userTypeData.length === 0}
+        >
+          <AnalyticsPieChart
+            data={userTypeData}
+            height={260}
+            innerRadius={50}
+            outerRadius={80}
+            centerValue={userTypeData.reduce((sum, d) => sum + d.value, 0).toString()}
+            centerLabel="Gesamt"
+          />
+        </ChartContainer>
+      </div>
+
+      {/* Tables Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Top Artists */}
+        <div className="bg-bg-card border border-white/10 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between">
+            <h2 className="text-white font-semibold flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-accent-purple" />
+              Top Künstler
+            </h2>
+            <Link to="/admin/users?filter=artist" className="text-accent-purple text-sm hover:underline">
+              Alle anzeigen
+            </Link>
+          </div>
+          <div className="divide-y divide-white/5">
+            {topArtists.length === 0 ? (
+              <div className="p-6 text-center text-white/40 text-sm">
+                Keine Daten verfügbar
+              </div>
+            ) : (
+              topArtists.map((artist, index) => (
+                <div key={artist.id} className="p-3 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-accent-purple/20 flex items-center justify-center text-accent-purple text-xs font-bold">
+                      {index + 1}
+                    </div>
+                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
+                      {artist.profileImage ? (
+                        <img src={artist.profileImage} alt={artist.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-accent-purple to-accent-red flex items-center justify-center text-white text-xs font-bold">
+                          {artist.name.charAt(0)}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{artist.name}</p>
+                      <p className="text-white/40 text-xs">{artist.bookingsCount} Buchungen</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-white text-sm font-medium">{formatCurrency(artist.revenue)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
-        <div className="bg-[#262626] rounded-xl p-6 border border-gray-800">
-          <h2 className="text-white font-medium mb-4">Systemstatus</h2>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Datenbankverbindung</span>
-              <span className="flex items-center gap-2 text-green-400">
-                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                Online
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Authentifizierung</span>
-              <span className="flex items-center gap-2 text-green-400">
-                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                Aktiv
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-400">Speicher</span>
-              <span className="flex items-center gap-2 text-green-400">
-                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                Verfuegbar
-              </span>
-            </div>
+        {/* Recent Bookings */}
+        <div className="bg-bg-card border border-white/10 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between">
+            <h2 className="text-white font-semibold flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-accent-purple" />
+              Letzte Buchungen
+            </h2>
+            <Link to="/admin/analytics" className="text-accent-purple text-sm hover:underline flex items-center gap-1">
+              Mehr <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="divide-y divide-white/5">
+            {recentBookings.length === 0 ? (
+              <div className="p-6 text-center text-white/40 text-sm">
+                Keine Buchungen vorhanden
+              </div>
+            ) : (
+              recentBookings.slice(0, 5).map((booking) => (
+                <div key={booking.id} className="p-3 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-white text-sm font-medium truncate max-w-[120px]">
+                      {booking.artistName}
+                    </p>
+                    <span className={`px-2 py-0.5 rounded-full text-xs ${getStatusColor(booking.status)}`}>
+                      {getStatusLabel(booking.status)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-white/40">{formatDate(booking.eventDate)}</span>
+                    <span className="text-white/60">{formatCurrency(booking.totalPrice)}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
+
+        {/* Recent Users */}
+        <div className="bg-bg-card border border-white/10 rounded-xl overflow-hidden">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between">
+            <h2 className="text-white font-semibold flex items-center gap-2">
+              <UserPlus className="w-4 h-4 text-accent-purple" />
+              Neue Benutzer
+            </h2>
+            <Link to="/admin/users" className="text-accent-purple text-sm hover:underline">
+              Alle anzeigen
+            </Link>
+          </div>
+          <div className="divide-y divide-white/5">
+            {recentUsers.length === 0 ? (
+              <div className="p-6 text-center text-white/40 text-sm">
+                Keine neuen Benutzer
+              </div>
+            ) : (
+              recentUsers.slice(0, 5).map((user) => (
+                <div key={user.id} className="p-3 hover:bg-white/5 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
+                      {user.profileImage ? (
+                        <img src={user.profileImage} alt={user.membername} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-accent-purple/50 to-accent-red/50 flex items-center justify-center text-white text-xs font-bold">
+                          {user.membername.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-medium truncate">{user.membername}</p>
+                      <p className="text-white/40 text-xs truncate">{user.email}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${getUserTypeColor(user.userType)}`}>
+                        {getUserTypeLabel(user.userType)}
+                      </span>
+                      <span className="text-white/30 text-xs">{formatDate(user.createdAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Links */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Link
+          to="/admin/users"
+          className="p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-purple/50 transition-colors group"
+        >
+          <Users className="w-6 h-6 text-accent-purple mb-2" />
+          <p className="text-white font-medium group-hover:text-accent-purple transition-colors">Benutzerverwaltung</p>
+          <p className="text-white/40 text-sm">Benutzer verwalten</p>
+        </Link>
+        <Link
+          to="/admin/reports"
+          className="p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-purple/50 transition-colors group"
+        >
+          <svg className="w-6 h-6 text-accent-purple mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <p className="text-white font-medium group-hover:text-accent-purple transition-colors">Meldungen</p>
+          <p className="text-white/40 text-sm">Reports bearbeiten</p>
+        </Link>
+        <Link
+          to="/admin/tickets"
+          className="p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-purple/50 transition-colors group"
+        >
+          <Ticket className="w-6 h-6 text-accent-purple mb-2" />
+          <p className="text-white font-medium group-hover:text-accent-purple transition-colors">Support-Tickets</p>
+          <p className="text-white/40 text-sm">Anfragen beantworten</p>
+        </Link>
+        <Link
+          to="/admin/analytics"
+          className="p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-purple/50 transition-colors group"
+        >
+          <TrendingUp className="w-6 h-6 text-accent-purple mb-2" />
+          <p className="text-white font-medium group-hover:text-accent-purple transition-colors">Detaillierte Statistiken</p>
+          <p className="text-white/40 text-sm">Alle Analysen anzeigen</p>
+        </Link>
       </div>
     </div>
   )
 }
+
+export default AdminDashboardPage

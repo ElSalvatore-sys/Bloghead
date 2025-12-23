@@ -16,6 +16,7 @@ export const roleNavigation: Record<UserRole, NavItem[]> = {
     { label: 'Meine Favoriten', path: '/dashboard/favorites', icon: 'heart' },
     { label: 'Besuchte Events', path: '/dashboard/events-attended', icon: 'calendar' },
     { label: 'Meine Bewertungen', path: '/dashboard/my-reviews', icon: 'star' },
+    { label: 'Meine Statistiken', path: '/dashboard/my-stats', icon: 'chart' },
   ],
   artist: [
     { label: 'Mein Profil', path: '/dashboard/profile', icon: 'user' },
@@ -24,7 +25,7 @@ export const roleNavigation: Record<UserRole, NavItem[]> = {
     { label: 'Mein Kalender', path: '/dashboard/calendar', icon: 'calendar' },
     { label: 'Verfügbarkeit', path: '/dashboard/availability', icon: 'clock' },
     { label: 'Bewertungen', path: '/dashboard/reviews', icon: 'star' },
-    { label: 'Statistiken', path: '/dashboard/stats', icon: 'chart' },
+    { label: 'Statistiken', path: '/dashboard/analytics', icon: 'chart' },
   ],
   service_provider: [
     { label: 'Mein Profil', path: '/dashboard/profile', icon: 'user' },
