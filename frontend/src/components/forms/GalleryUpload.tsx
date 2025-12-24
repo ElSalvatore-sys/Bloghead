@@ -135,6 +135,8 @@ export function GalleryUpload({
               <img
                 src={url}
                 alt={`Gallery ${index + 1}`}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
                 draggable={false}
               />

@@ -81,6 +81,8 @@ export function ImageUpload({
           <img
             src={displayImage}
             alt="Cover"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover grayscale"
           />
         ) : (
@@ -126,6 +128,8 @@ export function ImageUpload({
           <img
             src={displayImage}
             alt="Avatar"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover"
           />
         ) : (

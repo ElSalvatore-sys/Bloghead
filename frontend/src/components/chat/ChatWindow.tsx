@@ -147,6 +147,8 @@ export function ChatWindow({
           <img
             src={otherParticipant.profile_image_url}
             alt={displayName}
+            loading="lazy"
+            decoding="async"
             className="w-10 h-10 rounded-full object-cover border-2 border-white/10"
           />
         ) : (

@@ -75,6 +75,35 @@ export default defineConfig({
           if (id.includes('node_modules/@supabase')) {
             return 'vendor-supabase'
           }
+          // Framer Motion (heavy animation library)
+          if (id.includes('node_modules/framer-motion')) {
+            return 'vendor-framer'
+          }
+          // Recharts (heavy charting library)
+          if (id.includes('node_modules/recharts') ||
+              id.includes('node_modules/d3-')) {
+            return 'vendor-recharts'
+          }
+          // Stripe
+          if (id.includes('node_modules/@stripe')) {
+            return 'vendor-stripe'
+          }
+          // Maps (Leaflet)
+          if (id.includes('node_modules/leaflet') ||
+              id.includes('node_modules/react-leaflet')) {
+            return 'vendor-maps'
+          }
+          // Date utilities
+          if (id.includes('node_modules/date-fns') ||
+              id.includes('node_modules/react-day-picker')) {
+            return 'vendor-dates'
+          }
+          // Form handling
+          if (id.includes('node_modules/react-hook-form') ||
+              id.includes('node_modules/@hookform') ||
+              id.includes('node_modules/zod')) {
+            return 'vendor-forms'
+          }
           // Security
           if (id.includes('node_modules/dompurify')) {
             return 'vendor-security'

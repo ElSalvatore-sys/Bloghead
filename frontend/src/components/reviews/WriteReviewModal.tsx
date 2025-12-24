@@ -189,6 +189,8 @@ export function WriteReviewModal({
                 <img
                   src={entityImage}
                   alt={entityName}
+                  loading="lazy"
+                  decoding="async"
                   className="w-16 h-16 rounded-full object-cover"
                 />
               ) : (

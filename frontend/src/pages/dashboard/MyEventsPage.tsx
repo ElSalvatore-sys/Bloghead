@@ -173,6 +173,8 @@ export function MyEventsPage() {
                   <img
                     src={event.image}
                     alt={event.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                   <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-medium rounded-full ${statusConfig[event.status].className}`}>
@@ -249,6 +251,8 @@ export function MyEventsPage() {
                 <img
                   src={event.image}
                   alt={event.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-24 h-24 rounded-lg object-cover opacity-75"
                 />
                 <div className="flex-1">

@@ -612,6 +612,8 @@ export function ProfileEditPage() {
                             <img
                               src={`https://picsum.photos/200?random=${i}`}
                               alt={`Instagram post ${i}`}
+                              loading="lazy"
+                              decoding="async"
                               className="w-full h-full object-cover"
                             />
                           </div>

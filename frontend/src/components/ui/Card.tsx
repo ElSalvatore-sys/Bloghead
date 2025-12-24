@@ -85,7 +85,7 @@ export function ArtistCard({
       {/* Image Container */}
       <div className="relative aspect-square bg-bg-card-hover overflow-hidden">
         {image ? (
-          <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+          <img src={image} alt={name} loading="lazy" decoding="async" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-text-muted">
             <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">

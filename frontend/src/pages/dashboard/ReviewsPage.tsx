@@ -209,6 +209,8 @@ export function ReviewsPage() {
                     <img
                       src={review.reviewer.profile_image_url}
                       alt={review.reviewer.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (

@@ -178,6 +178,8 @@ export function ServiceProviderProfilePage() {
         <img
           src={imageUrl}
           alt={provider.business_name}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/60 to-transparent" />
@@ -296,6 +298,8 @@ export function ServiceProviderProfilePage() {
                       <img
                         src={url}
                         alt={`${provider.business_name} - Bild ${index + 1}`}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                       />
                     </div>

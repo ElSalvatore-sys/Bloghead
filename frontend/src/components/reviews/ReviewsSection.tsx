@@ -28,6 +28,8 @@ function LegacyReviewCard({ review }: { review: LegacyReview }) {
             <img
               src={raterImage}
               alt={raterName}
+              loading="lazy"
+              decoding="async"
               className="w-12 h-12 rounded-full object-cover"
             />
           ) : (

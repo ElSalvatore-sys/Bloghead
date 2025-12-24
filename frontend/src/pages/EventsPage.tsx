@@ -72,6 +72,8 @@ export function EventsPage() {
         <img
           src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600"
           alt="Events background"
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-bg-primary" />

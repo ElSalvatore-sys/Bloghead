@@ -41,6 +41,8 @@ export function MessageBubble({ message, isOwn, showAvatar = true }: MessageBubb
             <img
               src={message.sender.profile_image_url}
               alt={senderName}
+              loading="lazy"
+              decoding="async"
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
@@ -78,6 +80,8 @@ export function MessageBubble({ message, isOwn, showAvatar = true }: MessageBubb
                 <img
                   src={message.file_url}
                   alt={message.file_name || 'Bild'}
+                  loading="lazy"
+                  decoding="async"
                   className="max-w-full rounded-lg max-h-60 object-cover"
                 />
               ) : message.message_type === 'audio' ? (

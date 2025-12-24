@@ -164,6 +164,8 @@ export function ImageUpload({
               <img
                 src={value}
                 alt="Preview"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3">

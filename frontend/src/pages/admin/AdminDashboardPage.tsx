@@ -391,7 +391,7 @@ export function AdminDashboardPage() {
                     </div>
                     <div className="w-8 h-8 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
                       {artist.profileImage ? (
-                        <img src={artist.profileImage} alt={artist.name} className="w-full h-full object-cover" />
+                        <img src={artist.profileImage} alt={artist.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-accent-purple to-accent-red flex items-center justify-center text-white text-xs font-bold">
                           {artist.name.charAt(0)}
@@ -471,7 +471,7 @@ export function AdminDashboardPage() {
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg overflow-hidden bg-white/10 flex-shrink-0">
                       {user.profileImage ? (
-                        <img src={user.profileImage} alt={user.membername} className="w-full h-full object-cover" />
+                        <img src={user.profileImage} alt={user.membername} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-accent-purple/50 to-accent-red/50 flex items-center justify-center text-white text-xs font-bold">
                           {user.membername.charAt(0).toUpperCase()}

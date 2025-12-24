@@ -92,6 +92,8 @@ function FollowerCard({
             <img
               src={user.profile_image_url}
               alt={displayName}
+              loading="lazy"
+              decoding="async"
               className="w-14 h-14 rounded-full object-cover border-2 border-purple-500/30"
             />
           ) : (
@@ -211,6 +213,8 @@ function ArtistCard({
             <img
               src={artist.profilbild_url}
               alt={displayName}
+              loading="lazy"
+              decoding="async"
               className="w-14 h-14 rounded-full object-cover border-2 border-purple-500/30"
             />
           ) : (

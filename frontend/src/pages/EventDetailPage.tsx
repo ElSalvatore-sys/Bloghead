@@ -125,6 +125,8 @@ export function EventDetailPage() {
         <img
           src={event.cover_image_url || defaultImage}
           alt={event.title}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-black/40 to-black/20" />

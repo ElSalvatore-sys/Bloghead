@@ -280,6 +280,8 @@ export function ArtistProfilePage() {
           <img
             src={coverImage}
             alt={`${artist.kuenstlername} cover`}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover filter grayscale"
           />
           {/* Gradient Overlay */}
@@ -311,6 +313,8 @@ export function ArtistProfilePage() {
                 <img
                   src={avatarImage}
                   alt={artist.kuenstlername}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               </div>

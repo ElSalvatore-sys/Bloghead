@@ -57,6 +57,8 @@ function ArtistCard({ artist }: ArtistCardProps) {
         <img
           src={imageUrl}
           alt={artist.kuenstlername || 'Künstler'}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
         {/* Favorite Button */}
@@ -210,6 +212,8 @@ export function ArtistsPage() {
           <img
             src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1920&h=600&fit=crop"
             alt="Artists background"
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover grayscale"
           />
           {/* Dark Overlay */}
