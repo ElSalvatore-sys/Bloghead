@@ -59,6 +59,8 @@ const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPage').the
 const AdminAnnouncementsPage = lazy(() => import('./pages/admin/AdminAnnouncementsPage').then(m => ({ default: m.AdminAnnouncementsPage })))
 const AdminTicketsPage = lazy(() => import('./pages/admin/AdminTicketsPage').then(m => ({ default: m.AdminTicketsPage })))
 const AdminAnalyticsPage = lazy(() => import('./pages/admin/AdminAnalyticsPage').then(m => ({ default: m.AdminAnalyticsPage })))
+const AdminPayoutsPage = lazy(() => import('./pages/admin/AdminPayoutsPage').then(m => ({ default: m.AdminPayoutsPage })))
+const AdminAuditLogPage = lazy(() => import('./pages/admin/AdminAuditLogPage').then(m => ({ default: m.AdminAuditLogPage })))
 
 // Loading spinner component
 function LoadingSpinner() {
@@ -158,6 +160,8 @@ function App() {
                 <Route path="announcements" element={<AdminAnnouncementsPage />} />
                 <Route path="tickets" element={<AdminTicketsPage />} />
                 <Route path="analytics" element={<AdminAnalyticsPage />} />
+                <Route path="payouts" element={<AdminPayoutsPage />} />
+                <Route path="audit" element={<AdminAuditLogPage />} />
               </Route>
             </Routes>
           </Suspense>

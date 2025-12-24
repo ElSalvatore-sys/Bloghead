@@ -19,8 +19,40 @@ export interface AdminUser {
   user_type: string
   role: string
   is_verified: boolean
+  is_banned: boolean
+  banned_at: string | null
+  banned_reason: string | null
+  banned_by: string | null
   created_at: string
   last_sign_in_at: string | null
+}
+
+export interface Payout {
+  id: string
+  artist_id: string
+  amount: number
+  currency: string
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'on_hold'
+  stripe_transfer_id: string | null
+  created_at: string
+  processed_at: string | null
+  hold_reason: string | null
+  artist?: {
+    kuenstlername: string
+    user?: { email: string; membername: string }
+  }
+}
+
+export interface AuditLog {
+  id: string
+  user_id: string
+  action: string
+  target_id: string | null
+  target_type: string | null
+  details: Record<string, unknown>
+  ip_address: string | null
+  created_at: string
+  user?: { membername: string; email: string }
 }
 
 export interface Report {
@@ -178,7 +210,7 @@ export async function getUsers(
   try {
     let query = supabase
       .from('users')
-      .select('id, email, membername, vorname, nachname, user_type, role, is_verified, created_at, last_sign_in_at', { count: 'exact' })
+      .select('id, email, membername, vorname, nachname, user_type, role, is_verified, is_banned, banned_at, banned_reason, banned_by, created_at, last_sign_in_at', { count: 'exact' })
 
     if (search) {
       query = query.or(`email.ilike.%${search}%,membername.ilike.%${search}%`)
@@ -875,11 +907,12 @@ export async function getUserGrowthChart(
         case 'day':
           key = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
           break
-        case 'week':
+        case 'week': {
           const weekStart = new Date(date)
           weekStart.setDate(date.getDate() - date.getDay())
           key = weekStart.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
           break
+        }
         case 'month':
           key = date.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' })
           break
@@ -945,11 +978,12 @@ export async function getRevenueChart(
         case 'day':
           key = date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
           break
-        case 'week':
+        case 'week': {
           const weekStart = new Date(date)
           weekStart.setDate(date.getDate() - date.getDay())
           key = weekStart.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
           break
+        }
         case 'month':
           key = date.toLocaleDateString('de-DE', { month: 'short', year: '2-digit' })
           break
@@ -1048,5 +1082,316 @@ export async function getUsersByType(): Promise<{ data: { name: string; value: n
   } catch (err) {
     console.error('Error fetching users by type:', err)
     return { data: [], error: err as Error }
+  }
+}
+
+// =====================================================
+// BAN/UNBAN USER FUNCTIONS
+// =====================================================
+
+export async function banUser(
+  userId: string,
+  reason: string
+): Promise<{ error: Error | null }> {
+  try {
+    const { data: { user: currentUser } } = await supabase.auth.getUser()
+    if (!currentUser) throw new Error('Nicht authentifiziert')
+
+    const { error } = await supabase
+      .from('users')
+      .update({
+        is_banned: true,
+        banned_at: new Date().toISOString(),
+        banned_reason: reason,
+        banned_by: currentUser.id
+      })
+      .eq('id', userId)
+
+    if (error) throw error
+
+    // Log admin action
+    await logAdminAction('user_banned', userId, 'user', { reason })
+
+    return { error: null }
+  } catch (err) {
+    return { error: err as Error }
+  }
+}
+
+export async function unbanUser(userId: string): Promise<{ error: Error | null }> {
+  try {
+    const { error } = await supabase
+      .from('users')
+      .update({
+        is_banned: false,
+        banned_at: null,
+        banned_reason: null,
+        banned_by: null
+      })
+      .eq('id', userId)
+
+    if (error) throw error
+
+    // Log admin action
+    await logAdminAction('user_unbanned', userId, 'user', {})
+
+    return { error: null }
+  } catch (err) {
+    return { error: err as Error }
+  }
+}
+
+// =====================================================
+// AUDIT LOG FUNCTIONS
+// =====================================================
+
+export async function logAdminAction(
+  action: string,
+  targetId: string | null,
+  targetType: string | null,
+  details: Record<string, unknown>
+): Promise<void> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    await supabase.from('audit_logs').insert({
+      user_id: user.id,
+      action,
+      target_id: targetId,
+      target_type: targetType,
+      details,
+      created_at: new Date().toISOString()
+    })
+  } catch {
+    // Silent fail for audit logging
+  }
+}
+
+export async function getAuditLogs(
+  filters?: {
+    action?: string
+    userId?: string
+    dateFrom?: string
+    dateTo?: string
+  },
+  page = 1,
+  limit = 50
+): Promise<{ data: AuditLog[]; total: number; error: Error | null }> {
+  try {
+    let query = supabase
+      .from('audit_logs')
+      .select(`
+        *,
+        user:users!audit_logs_user_id_fkey(membername, email)
+      `, { count: 'exact' })
+      .order('created_at', { ascending: false })
+
+    if (filters?.action) {
+      query = query.eq('action', filters.action)
+    }
+    if (filters?.userId) {
+      query = query.eq('user_id', filters.userId)
+    }
+    if (filters?.dateFrom) {
+      query = query.gte('created_at', filters.dateFrom)
+    }
+    if (filters?.dateTo) {
+      query = query.lte('created_at', filters.dateTo)
+    }
+
+    const offset = (page - 1) * limit
+    query = query.range(offset, offset + limit - 1)
+
+    const { data, count, error } = await query
+
+    if (error) throw error
+
+    return { data: data || [], total: count || 0, error: null }
+  } catch (err) {
+    return { data: [], total: 0, error: err as Error }
+  }
+}
+
+export async function getAuditLogActionTypes(): Promise<string[]> {
+  return [
+    'user_banned',
+    'user_unbanned',
+    'user_role_changed',
+    'user_deleted',
+    'user_verified',
+    'payout_approved',
+    'payout_held',
+    'payout_released',
+    'ticket_assigned',
+    'ticket_closed',
+    'report_resolved',
+    'announcement_created',
+    'announcement_updated',
+    'announcement_deleted',
+    'settings_changed'
+  ]
+}
+
+// =====================================================
+// PAYOUT MANAGEMENT FUNCTIONS
+// =====================================================
+
+export async function getPayouts(
+  filters?: {
+    status?: string
+    artistId?: string
+    dateFrom?: string
+    dateTo?: string
+  },
+  page = 1,
+  limit = 20
+): Promise<{ data: Payout[]; total: number; error: Error | null }> {
+  try {
+    let query = supabase
+      .from('payouts')
+      .select(`
+        *,
+        artist:artist_profiles!payouts_artist_id_fkey(
+          kuenstlername,
+          user:users!artist_profiles_user_id_fkey(email, membername)
+        )
+      `, { count: 'exact' })
+      .order('created_at', { ascending: false })
+
+    if (filters?.status && filters.status !== 'all') {
+      query = query.eq('status', filters.status)
+    }
+    if (filters?.artistId) {
+      query = query.eq('artist_id', filters.artistId)
+    }
+    if (filters?.dateFrom) {
+      query = query.gte('created_at', filters.dateFrom)
+    }
+    if (filters?.dateTo) {
+      query = query.lte('created_at', filters.dateTo)
+    }
+
+    const offset = (page - 1) * limit
+    query = query.range(offset, offset + limit - 1)
+
+    const { data, count, error } = await query
+
+    if (error) throw error
+
+    return { data: data || [], total: count || 0, error: null }
+  } catch (err) {
+    return { data: [], total: 0, error: err as Error }
+  }
+}
+
+export async function getPayoutStats(): Promise<{
+  data: {
+    pendingCount: number
+    pendingAmount: number
+    processedThisMonth: number
+    processedAmountThisMonth: number
+  } | null
+  error: Error | null
+}> {
+  try {
+    const now = new Date()
+    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+
+    const [pending, processed] = await Promise.all([
+      supabase
+        .from('payouts')
+        .select('amount')
+        .eq('status', 'pending'),
+      supabase
+        .from('payouts')
+        .select('amount')
+        .eq('status', 'completed')
+        .gte('processed_at', firstOfMonth)
+    ])
+
+    const pendingAmount = pending.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+    const processedAmount = processed.data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+
+    return {
+      data: {
+        pendingCount: pending.data?.length || 0,
+        pendingAmount,
+        processedThisMonth: processed.data?.length || 0,
+        processedAmountThisMonth: processedAmount
+      },
+      error: null
+    }
+  } catch (err) {
+    return { data: null, error: err as Error }
+  }
+}
+
+export async function updatePayoutStatus(
+  payoutId: string,
+  status: Payout['status']
+): Promise<{ error: Error | null }> {
+  try {
+    const updateData: Record<string, unknown> = { status }
+
+    if (status === 'completed') {
+      updateData.processed_at = new Date().toISOString()
+    }
+
+    const { error } = await supabase
+      .from('payouts')
+      .update(updateData)
+      .eq('id', payoutId)
+
+    if (error) throw error
+
+    await logAdminAction(`payout_${status}`, payoutId, 'payout', { status })
+
+    return { error: null }
+  } catch (err) {
+    return { error: err as Error }
+  }
+}
+
+export async function holdPayout(
+  payoutId: string,
+  reason: string
+): Promise<{ error: Error | null }> {
+  try {
+    const { error } = await supabase
+      .from('payouts')
+      .update({
+        status: 'on_hold',
+        hold_reason: reason
+      })
+      .eq('id', payoutId)
+
+    if (error) throw error
+
+    await logAdminAction('payout_held', payoutId, 'payout', { reason })
+
+    return { error: null }
+  } catch (err) {
+    return { error: err as Error }
+  }
+}
+
+export async function releasePayout(payoutId: string): Promise<{ error: Error | null }> {
+  try {
+    const { error } = await supabase
+      .from('payouts')
+      .update({
+        status: 'pending',
+        hold_reason: null
+      })
+      .eq('id', payoutId)
+
+    if (error) throw error
+
+    await logAdminAction('payout_released', payoutId, 'payout', {})
+
+    return { error: null }
+  } catch (err) {
+    return { error: err as Error }
   }
 }

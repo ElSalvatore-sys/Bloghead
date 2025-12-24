@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { TicketCard } from '../../components/admin'
 import { getTickets, updateTicket, assignTicket, type SupportTicket } from '../../services/adminService'
 import { useAuth } from '../../contexts/AuthContext'
+import { exportToCSV, formatDateTimeCSV, type CSVColumn } from '../../utils/csvExport'
 
 export function AdminTicketsPage() {
   const { user } = useAuth()
@@ -61,6 +62,35 @@ export function AdminTicketsPage() {
 
   const { open, inProgress } = getStatusCounts()
 
+  const statusLabels: Record<string, string> = {
+    open: 'Offen',
+    in_progress: 'In Bearbeitung',
+    resolved: 'Geloest',
+    closed: 'Geschlossen'
+  }
+
+  const priorityLabels: Record<string, string> = {
+    urgent: 'Dringend',
+    high: 'Hoch',
+    medium: 'Mittel',
+    low: 'Niedrig'
+  }
+
+  const handleExportCSV = () => {
+    const columns: CSVColumn<SupportTicket>[] = [
+      { key: 'subject', label: 'Betreff' },
+      { key: (row) => row.user?.membername || '', label: 'Benutzer' },
+      { key: (row) => row.user?.email || '', label: 'E-Mail' },
+      { key: 'category', label: 'Kategorie' },
+      { key: (row) => statusLabels[row.status] || row.status, label: 'Status' },
+      { key: (row) => priorityLabels[row.priority] || row.priority, label: 'Prioritaet' },
+      { key: 'description', label: 'Beschreibung' },
+      { key: (row) => formatDateTimeCSV(row.created_at), label: 'Erstellt' },
+      { key: (row) => formatDateTimeCSV(row.updated_at), label: 'Aktualisiert' }
+    ]
+    exportToCSV(tickets, 'support_tickets', columns)
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -76,6 +106,16 @@ export function AdminTicketsPage() {
               {inProgress} in Bearbeitung
             </span>
           )}
+          <button
+            onClick={handleExportCSV}
+            disabled={tickets.length === 0}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            CSV Export
+          </button>
         </div>
       </div>
 
