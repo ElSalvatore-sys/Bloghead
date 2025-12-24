@@ -332,7 +332,7 @@ export function ArtistAnalyticsPage() {
             title="Monatsvergleich"
             subtitle="Aktueller vs. vorheriger Monat"
           >
-            <div className="grid grid-cols-3 gap-4 h-full">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 h-full">
               {/* Earnings Comparison */}
               <div className="bg-white/5 rounded-xl p-4 flex flex-col justify-between">
                 <div>

@@ -241,7 +241,7 @@ function AvailabilityModal({
             <>
               <div>
                 <label className="block text-sm text-gray-400 mb-2">Status</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
                   {(Object.entries(AVAILABILITY_STATUS_CONFIG) as [AvailabilityStatus, typeof AVAILABILITY_STATUS_CONFIG['available']][])
                     .filter(([status]) => status !== 'booked' && status !== 'pending')
                     .map(([status, config]) => (

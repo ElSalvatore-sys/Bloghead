@@ -242,7 +242,7 @@ export function CalendarPage() {
       </div>
 
       {/* Legend */}
-      <div className="flex gap-6 mt-6">
+      <div className="flex flex-wrap gap-4 sm:gap-6 mt-6">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-accent-salmon" />
           <span className="text-text-muted text-sm">Buchung</span>

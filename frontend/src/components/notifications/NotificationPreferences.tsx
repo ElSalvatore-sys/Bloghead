@@ -408,7 +408,7 @@ export function NotificationPreferences() {
           title="Ruhezeiten"
           description="Keine Benachrichtigungen während dieser Zeit"
         />
-        <div className="mt-4 grid grid-cols-2 gap-4">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-white/70 mb-2">Von</label>
             <input

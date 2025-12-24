@@ -603,7 +603,7 @@ export function ProfileEditPage() {
                       <p className="text-xs text-white/40 mb-3">
                         Vorschau von @{instagramHandle}
                       </p>
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         {[1, 2, 3, 4, 5, 6].map((i) => (
                           <div
                             key={i}

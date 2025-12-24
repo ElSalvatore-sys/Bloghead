@@ -66,7 +66,7 @@ export function AnnouncementForm({ announcement, onSubmit, onCancel, userId }: A
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-gray-300 text-sm mb-2">Typ</label>
           <select

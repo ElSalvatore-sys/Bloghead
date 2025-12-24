@@ -485,7 +485,7 @@ function Step3Venue({ data, onUpdate }: { data: EventData; onUpdate: (updates: P
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-white/70 mb-2">PLZ</label>
           <input
@@ -569,7 +569,7 @@ function Step4Catering({ data, onUpdate }: { data: EventData; onUpdate: (updates
         <>
           <div>
             <label className="block text-sm font-medium text-white/70 mb-3">Catering-Art</label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {cateringTypes.map((type) => (
                 <button
                   key={type.id}
@@ -702,7 +702,7 @@ function Step6Extras({ data, onUpdate }: { data: EventData; onUpdate: (updates: 
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <label className="flex items-center gap-3 cursor-pointer p-4 bg-white/5 rounded-xl border border-white/10 hover:border-white/20 transition-colors">
           <input
             type="checkbox"

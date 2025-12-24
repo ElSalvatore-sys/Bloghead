@@ -58,7 +58,7 @@ function BalanceCard({
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
+      <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4 pt-4 border-t border-white/10">
         <div>
           <p className="text-xs text-gray-500">Erhalten</p>
           <p className="text-sm text-green-400">+{formatCoinAmount(wallet.total_received, symbol)}</p>
@@ -684,7 +684,7 @@ export default function MyCoinsPage() {
             {/* Coin Packages */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Coin-Pakete</h2>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {COIN_PACKAGES.map(pkg => (
                   <PackageCard
                     key={pkg.id}

@@ -504,7 +504,7 @@ function RegistrationFormStep({
         <div>
           <SectionHeader number={1} title="Account" color="purple" />
           <div className="space-y-4 pl-10">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Vorname *</label>
                 <input
@@ -589,7 +589,7 @@ function RegistrationFormStep({
               {errors.confirmEmail && <p className="mt-1 text-xs text-red-400">{errors.confirmEmail}</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">Passwort *</label>
                 <input
@@ -712,7 +712,7 @@ function RegistrationFormStep({
                 {errors.address && <p className="mt-1 text-xs text-red-400">{errors.address}</p>}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs text-gray-400 mb-1.5 uppercase tracking-wider">
                     {userType === 'artist' ? 'Steuernr. / USt-IdNr.' : 'USt-IdNr.'}
@@ -862,7 +862,7 @@ function RegistrationFormStep({
               <label className="flex items-center gap-2 text-white text-sm font-medium mb-3">
                 <span>💡</span> Must-have Services?
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {mustHaveServiceOptions.map(service => (
                   <button
                     key={service.value}

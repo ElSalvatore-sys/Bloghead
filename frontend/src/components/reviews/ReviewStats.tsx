@@ -90,7 +90,7 @@ export function ReviewStats({ stats, compact = false }: ReviewStatsProps) {
       {Object.keys(stats.category_averages).length > 0 && (
         <div className="border-t border-zinc-800 pt-6">
           <h4 className="text-sm font-medium text-zinc-300 mb-4">Detailbewertungen</h4>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {Object.entries(stats.category_averages).map(([category, avg]) => (
               <div key={category} className="flex items-center justify-between">
                 <span className="text-sm text-zinc-400 capitalize">

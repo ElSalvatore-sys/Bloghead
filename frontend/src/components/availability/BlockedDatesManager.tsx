@@ -185,7 +185,7 @@ export function BlockedDatesManager({
             className="overflow-hidden"
           >
             <div className="p-6 border-b border-white/10 bg-white/5 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-2">
                     Startdatum
