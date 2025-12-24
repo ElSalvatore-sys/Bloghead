@@ -1,10 +1,11 @@
 /**
- * AdminDashboardPage - Phase 8.5
+ * AdminDashboardPage - Phase 8.5 + Polished UI
  * Enhanced admin dashboard with analytics, charts, and tables
  */
 
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import {
   Users,
   Music,
@@ -14,8 +15,9 @@ import {
   Ticket,
   TrendingUp,
   RefreshCw,
-  Loader2,
   ExternalLink,
+  LayoutDashboard,
+  Flag,
 } from 'lucide-react'
 import {
   StatCard,
@@ -24,6 +26,12 @@ import {
   AnalyticsLineChart,
   AnalyticsPieChart,
 } from '@/components/analytics'
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminButton,
+  PageSkeleton,
+} from '@/components/admin/ui'
 import { getPeriodLabel } from '@/services/analyticsService'
 import {
   getEnhancedDashboardStats,
@@ -177,45 +185,58 @@ export function AdminDashboardPage() {
   }
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-        <div className="flex items-center justify-center py-20">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-10 h-10 text-accent-purple animate-spin" />
-            <p className="text-white/60">Dashboard wird geladen...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <PageSkeleton />
+  }
+
+  // Animation variants for staggered children
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' as const } }
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          <p className="text-white/60 text-sm mt-1">{getPeriodLabel(period)}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <DateRangePicker
-            value={period}
-            onChange={(newPeriod) => {
-              if (newPeriod !== 'all') {
-                setPeriod(newPeriod)
-              }
-            }}
-          />
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors disabled:opacity-50"
-          >
-            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </div>
+      <AdminPageHeader
+        icon={LayoutDashboard}
+        title="Dashboard"
+        description={getPeriodLabel(period)}
+        actions={
+          <div className="flex items-center gap-3">
+            <DateRangePicker
+              value={period}
+              onChange={(newPeriod) => {
+                if (newPeriod !== 'all') {
+                  setPeriod(newPeriod)
+                }
+              }}
+            />
+            <AdminButton
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={refreshing}
+              icon={RefreshCw}
+              loading={refreshing}
+            >
+              {!refreshing && 'Aktualisieren'}
+            </AdminButton>
+          </div>
+        }
+      />
 
       {/* Error State */}
       {error && (
@@ -228,7 +249,7 @@ export function AdminDashboardPage() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <StatCard
           title="Neue Benutzer"
           value={stats?.totalUsers.value || 0}
@@ -276,10 +297,10 @@ export function AdminDashboardPage() {
           value={stats?.activeTickets || 0}
           icon={<Ticket className="w-5 h-5" />}
         />
-      </div>
+      </motion.div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* User Growth Chart */}
         <ChartContainer
           title="Benutzer-Wachstum"
@@ -308,10 +329,10 @@ export function AdminDashboardPage() {
             lines={[{ dataKey: 'value', name: 'Umsatz', color: '#10B981', showArea: true }]}
           />
         </ChartContainer>
-      </div>
+      </motion.div>
 
       {/* Pie Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Bookings by Status */}
         <ChartContainer
           title="Buchungen nach Status"
@@ -341,12 +362,12 @@ export function AdminDashboardPage() {
             centerLabel="Gesamt"
           />
         </ChartContainer>
-      </div>
+      </motion.div>
 
       {/* Tables Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Top Artists */}
-        <div className="bg-bg-card border border-white/10 rounded-xl overflow-hidden">
+        <AdminCard className="overflow-hidden" hover={false}>
           <div className="p-4 border-b border-white/10 flex items-center justify-between">
             <h2 className="text-white font-semibold flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-accent-purple" />
@@ -389,27 +410,27 @@ export function AdminDashboardPage() {
               ))
             )}
           </div>
-        </div>
+        </AdminCard>
 
         {/* Recent Bookings */}
-        <div className="bg-bg-card border border-white/10 rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-white/10 flex items-center justify-between">
+        <AdminCard className="overflow-hidden" hover={false}>
+          <div className="p-4 border-b border-gray-800/50 flex items-center justify-between">
             <h2 className="text-white font-semibold flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-accent-purple" />
+              <Calendar className="w-4 h-4 text-purple-400" />
               Letzte Buchungen
             </h2>
-            <Link to="/admin/analytics" className="text-accent-purple text-sm hover:underline flex items-center gap-1">
+            <Link to="/admin/analytics" className="text-purple-400 text-sm hover:text-purple-300 flex items-center gap-1">
               Mehr <ExternalLink className="w-3 h-3" />
             </Link>
           </div>
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-gray-800/30">
             {recentBookings.length === 0 ? (
-              <div className="p-6 text-center text-white/40 text-sm">
+              <div className="p-6 text-center text-gray-500 text-sm">
                 Keine Buchungen vorhanden
               </div>
             ) : (
               recentBookings.slice(0, 5).map((booking) => (
-                <div key={booking.id} className="p-3 hover:bg-white/5 transition-colors">
+                <div key={booking.id} className="p-3 hover:bg-gray-800/30 transition-colors">
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-white text-sm font-medium truncate max-w-[120px]">
                       {booking.artistName}
@@ -419,17 +440,17 @@ export function AdminDashboardPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-white/40">{formatDate(booking.eventDate)}</span>
-                    <span className="text-white/60">{formatCurrency(booking.totalPrice)}</span>
+                    <span className="text-gray-500">{formatDate(booking.eventDate)}</span>
+                    <span className="text-gray-400">{formatCurrency(booking.totalPrice)}</span>
                   </div>
                 </div>
               ))
             )}
           </div>
-        </div>
+        </AdminCard>
 
         {/* Recent Users */}
-        <div className="bg-bg-card border border-white/10 rounded-xl overflow-hidden">
+        <AdminCard className="overflow-hidden" hover={false}>
           <div className="p-4 border-b border-white/10 flex items-center justify-between">
             <h2 className="text-white font-semibold flex items-center gap-2">
               <UserPlus className="w-4 h-4 text-accent-purple" />
@@ -472,47 +493,41 @@ export function AdminDashboardPage() {
               ))
             )}
           </div>
-        </div>
-      </div>
+        </AdminCard>
+      </motion.div>
 
       {/* Quick Links */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link
-          to="/admin/users"
-          className="p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-purple/50 transition-colors group"
-        >
-          <Users className="w-6 h-6 text-accent-purple mb-2" />
-          <p className="text-white font-medium group-hover:text-accent-purple transition-colors">Benutzerverwaltung</p>
-          <p className="text-white/40 text-sm">Benutzer verwalten</p>
+      <motion.div variants={itemVariants} className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Link to="/admin/users">
+          <AdminCard className="p-4 h-full">
+            <Users className="w-6 h-6 text-purple-400 mb-2" />
+            <p className="text-white font-medium">Benutzerverwaltung</p>
+            <p className="text-gray-500 text-sm">Benutzer verwalten</p>
+          </AdminCard>
         </Link>
-        <Link
-          to="/admin/reports"
-          className="p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-purple/50 transition-colors group"
-        >
-          <svg className="w-6 h-6 text-accent-purple mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <p className="text-white font-medium group-hover:text-accent-purple transition-colors">Meldungen</p>
-          <p className="text-white/40 text-sm">Reports bearbeiten</p>
+        <Link to="/admin/reports">
+          <AdminCard className="p-4 h-full">
+            <Flag className="w-6 h-6 text-purple-400 mb-2" />
+            <p className="text-white font-medium">Meldungen</p>
+            <p className="text-gray-500 text-sm">Reports bearbeiten</p>
+          </AdminCard>
         </Link>
-        <Link
-          to="/admin/tickets"
-          className="p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-purple/50 transition-colors group"
-        >
-          <Ticket className="w-6 h-6 text-accent-purple mb-2" />
-          <p className="text-white font-medium group-hover:text-accent-purple transition-colors">Support-Tickets</p>
-          <p className="text-white/40 text-sm">Anfragen beantworten</p>
+        <Link to="/admin/tickets">
+          <AdminCard className="p-4 h-full">
+            <Ticket className="w-6 h-6 text-purple-400 mb-2" />
+            <p className="text-white font-medium">Support-Tickets</p>
+            <p className="text-gray-500 text-sm">Anfragen beantworten</p>
+          </AdminCard>
         </Link>
-        <Link
-          to="/admin/analytics"
-          className="p-4 bg-bg-card border border-white/10 rounded-xl hover:border-accent-purple/50 transition-colors group"
-        >
-          <TrendingUp className="w-6 h-6 text-accent-purple mb-2" />
-          <p className="text-white font-medium group-hover:text-accent-purple transition-colors">Detaillierte Statistiken</p>
-          <p className="text-white/40 text-sm">Alle Analysen anzeigen</p>
+        <Link to="/admin/analytics">
+          <AdminCard className="p-4 h-full">
+            <TrendingUp className="w-6 h-6 text-purple-400 mb-2" />
+            <p className="text-white font-medium">Detaillierte Statistiken</p>
+            <p className="text-gray-500 text-sm">Alle Analysen anzeigen</p>
+          </AdminCard>
         </Link>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

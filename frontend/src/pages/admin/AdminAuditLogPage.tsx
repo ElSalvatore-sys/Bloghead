@@ -1,10 +1,20 @@
 import { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { FileText, Download, X, Search } from 'lucide-react'
 import {
   getAuditLogs,
   getAuditLogActionTypes,
   type AuditLog
 } from '../../services/adminService'
 import { exportToCSV, formatDateTimeCSV, type CSVColumn } from '../../utils/csvExport'
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminButton,
+  AdminPagination,
+  AdminEmptyState,
+  TableSkeleton
+} from '@/components/admin/ui'
 
 const actionLabels: Record<string, string> = {
   user_banned: 'Benutzer gesperrt',
@@ -142,62 +152,74 @@ export function AdminAuditLogPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Audit-Log</h1>
-        <button
-          onClick={handleExportCSV}
-          disabled={logs.length === 0}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          CSV Export
-        </button>
-      </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-6"
+    >
+      <AdminPageHeader
+        icon={FileText}
+        title="Audit-Log"
+        description={`${total} Eintraege gesamt`}
+        actions={
+          <AdminButton
+            variant="secondary"
+            icon={Download}
+            onClick={handleExportCSV}
+            disabled={logs.length === 0}
+          >
+            CSV Export
+          </AdminButton>
+        }
+      />
 
-      {error && (
-        <div className="bg-red-600/20 border border-red-600 rounded-xl p-4 text-red-400">
-          {error}
-          <button onClick={() => setError(null)} className="ml-4 underline">
-            Schliessen
-          </button>
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 flex items-center justify-between"
+          >
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="p-1 hover:bg-red-500/20 rounded">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Filters */}
-      <div className="bg-[#262626] rounded-xl p-4 space-y-4">
-        <div className="flex flex-wrap gap-4">
+      <AdminCard hover={false}>
+        <div className="p-4 flex flex-wrap gap-4">
           {/* Search */}
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-[200px] relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input
               type="text"
               placeholder="Suche nach Admin, Aktion..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-2 bg-[#171717] text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 bg-[#171717] text-white border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all"
             />
           </div>
 
           {/* Action Filter */}
-          <div>
-            <select
-              value={actionFilter}
-              onChange={(e) => {
-                setActionFilter(e.target.value)
-                setPage(1)
-              }}
-              className="px-4 py-2 bg-[#171717] text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            >
-              <option value="all">Alle Aktionen</option>
-              {actionTypes.map(action => (
-                <option key={action} value={action}>
-                  {actionLabels[action] || action}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={actionFilter}
+            onChange={(e) => {
+              setActionFilter(e.target.value)
+              setPage(1)
+            }}
+            className="px-4 py-2.5 bg-[#171717] text-white border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all"
+          >
+            <option value="all">Alle Aktionen</option>
+            {actionTypes.map(action => (
+              <option key={action} value={action}>
+                {actionLabels[action] || action}
+              </option>
+            ))}
+          </select>
 
           {/* Date From */}
           <div className="flex items-center gap-2">
@@ -209,7 +231,7 @@ export function AdminAuditLogPage() {
                 setDateFrom(e.target.value)
                 setPage(1)
               }}
-              className="px-3 py-2 bg-[#171717] text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="px-3 py-2.5 bg-[#171717] text-white border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all"
             />
           </div>
 
@@ -223,13 +245,14 @@ export function AdminAuditLogPage() {
                 setDateTo(e.target.value)
                 setPage(1)
               }}
-              className="px-3 py-2 bg-[#171717] text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              className="px-3 py-2.5 bg-[#171717] text-white border border-gray-700 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all"
             />
           </div>
 
           {/* Clear Filters */}
           {(actionFilter !== 'all' || dateFrom || dateTo || searchQuery) && (
-            <button
+            <AdminButton
+              variant="ghost"
               onClick={() => {
                 setActionFilter('all')
                 setDateFrom('')
@@ -237,37 +260,25 @@ export function AdminAuditLogPage() {
                 setSearchQuery('')
                 setPage(1)
               }}
-              className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
             >
               Filter zuruecksetzen
-            </button>
+            </AdminButton>
           )}
         </div>
-      </div>
+      </AdminCard>
 
       {/* Logs Table */}
-      {loading ? (
-        <div className="bg-[#262626] rounded-xl overflow-hidden">
-          <div className="animate-pulse">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="p-4 border-b border-gray-700 flex gap-4">
-                <div className="h-4 bg-gray-700 rounded w-32"></div>
-                <div className="h-4 bg-gray-700 rounded w-24"></div>
-                <div className="h-4 bg-gray-700 rounded w-40"></div>
-                <div className="h-4 bg-gray-700 rounded flex-1"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : filteredLogs.length === 0 ? (
-        <div className="bg-[#262626] rounded-xl p-12 text-center">
-          <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          <p className="text-gray-400">Keine Audit-Logs gefunden</p>
-        </div>
-      ) : (
-        <div className="bg-[#262626] rounded-xl overflow-hidden">
+      <AdminCard hover={false} className="overflow-hidden">
+        {loading ? (
+          <TableSkeleton rows={10} cols={5} />
+        ) : filteredLogs.length === 0 ? (
+          <AdminEmptyState
+            icon={FileText}
+            title="Keine Audit-Logs"
+            description="Es wurden keine Audit-Logs mit den aktuellen Filtern gefunden."
+          />
+        ) : (
+          <>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-[#1a1a1a]">
@@ -335,31 +346,20 @@ export function AdminAuditLogPage() {
               </tbody>
             </table>
           </div>
-        </div>
-      )}
+          </>
+        )}
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Zurueck
-          </button>
-          <span className="text-gray-400">
-            Seite {page} von {totalPages} ({total} Eintraege)
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Weiter
-          </button>
-        </div>
-      )}
-    </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-6 pt-6 border-t border-gray-800/50">
+            <AdminPagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
+      </AdminCard>
+    </motion.div>
   )
 }

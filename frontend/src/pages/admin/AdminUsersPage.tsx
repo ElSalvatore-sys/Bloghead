@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Users, Download, Search, X } from 'lucide-react'
 import { UserTable } from '../../components/admin'
 import {
   getUsers,
@@ -10,6 +12,13 @@ import {
   type AdminUser
 } from '../../services/adminService'
 import { exportToCSV, formatDateTimeCSV, type CSVColumn } from '../../utils/csvExport'
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminButton,
+  AdminPagination,
+  TableSkeleton,
+} from '@/components/admin/ui'
 
 export function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -134,102 +143,111 @@ export function AdminUsersPage() {
   const totalPages = Math.ceil(total / limit)
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Benutzerverwaltung</h1>
-        <div className="flex items-center gap-4">
-          <span className="text-gray-400">{total} Benutzer gesamt</span>
-          <button
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-6"
+    >
+      <AdminPageHeader
+        icon={Users}
+        title="Benutzerverwaltung"
+        description={`${total} Benutzer gesamt`}
+        actions={
+          <AdminButton
+            variant="secondary"
+            icon={Download}
             onClick={handleExportCSV}
             disabled={users.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
             CSV Export
-          </button>
-        </div>
-      </div>
+          </AdminButton>
+        }
+      />
 
-      {error && (
-        <div className="bg-red-600/20 border border-red-600 rounded-xl p-4 text-red-400">
-          {error}
-          <button onClick={() => setError(null)} className="ml-4 underline">
-            Schliessen
-          </button>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="bg-green-600/20 border border-green-600 rounded-xl p-4 text-green-400">
-          {successMessage}
-        </div>
-      )}
-
-      <div className="bg-[#262626] rounded-xl p-6 border border-gray-800">
-        <form onSubmit={handleSearch} className="flex gap-4 mb-6">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Suche nach Name oder E-Mail..."
-            className="flex-1 px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-          />
-          <select
-            value={userType}
-            onChange={(e) => {
-              setUserType(e.target.value)
-              setPage(1)
-            }}
-            className="px-4 py-2 bg-[#1a1a1a] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500"
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 flex items-center justify-between"
           >
-            <option value="all">Alle Typen</option>
-            <option value="fan">Fans</option>
-            <option value="artist">Kuenstler</option>
-            <option value="service_provider">Dienstleister</option>
-            <option value="event_organizer">Veranstalter</option>
-          </select>
-          <button
-            type="submit"
-            className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-          >
-            Suchen
-          </button>
-        </form>
-
-        <UserTable
-          users={users}
-          onUpdateRole={handleUpdateRole}
-          onToggleVerification={handleToggleVerification}
-          onDeleteUser={handleDeleteUser}
-          onBanUser={handleBanClick}
-          onUnbanUser={handleUnban}
-          loading={loading}
-        />
-
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-700">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Zurueck
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="p-1 hover:bg-red-500/20 rounded">
+              <X className="w-4 h-4" />
             </button>
-            <span className="text-gray-400">
-              Seite {page} von {totalPages}
-            </span>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Weiter
-            </button>
-          </div>
+          </motion.div>
         )}
-      </div>
+
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-green-400"
+          >
+            {successMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AdminCard hover={false}>
+        <div className="p-6">
+          <form onSubmit={handleSearch} className="flex gap-4 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Suche nach Name oder E-Mail..."
+                className="w-full pl-10 pr-4 py-2.5 bg-[#171717] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all"
+              />
+            </div>
+            <select
+              value={userType}
+              onChange={(e) => {
+                setUserType(e.target.value)
+                setPage(1)
+              }}
+              className="px-4 py-2.5 bg-[#171717] border border-gray-700 rounded-lg text-white focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 transition-all"
+            >
+              <option value="all">Alle Typen</option>
+              <option value="fan">Fans</option>
+              <option value="artist">Künstler</option>
+              <option value="service_provider">Dienstleister</option>
+              <option value="event_organizer">Veranstalter</option>
+            </select>
+            <AdminButton type="submit" icon={Search}>
+              Suchen
+            </AdminButton>
+          </form>
+
+          {loading ? (
+            <TableSkeleton rows={10} cols={6} />
+          ) : (
+            <UserTable
+              users={users}
+              onUpdateRole={handleUpdateRole}
+              onToggleVerification={handleToggleVerification}
+              onDeleteUser={handleDeleteUser}
+              onBanUser={handleBanClick}
+              onUnbanUser={handleUnban}
+              loading={false}
+            />
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-6 pt-6 border-t border-gray-800/50">
+              <AdminPagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+        </div>
+      </AdminCard>
 
       {/* Ban Modal */}
       {banModalOpen && (
@@ -268,6 +286,6 @@ export function AdminUsersPage() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }

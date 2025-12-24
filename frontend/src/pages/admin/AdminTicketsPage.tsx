@@ -1,8 +1,19 @@
 import { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Ticket, Download, X, CheckCircle } from 'lucide-react'
 import { TicketCard } from '../../components/admin'
 import { getTickets, updateTicket, assignTicket, type SupportTicket } from '../../services/adminService'
 import { useAuth } from '../../contexts/AuthContext'
 import { exportToCSV, formatDateTimeCSV, type CSVColumn } from '../../utils/csvExport'
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminButton,
+  AdminBadge,
+  AdminPagination,
+  AdminEmptyState,
+  CardSkeleton
+} from '@/components/admin/ui'
 
 export function AdminTicketsPage() {
   const { user } = useAuth()
@@ -92,141 +103,152 @@ export function AdminTicketsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Support-Tickets</h1>
-        <div className="flex items-center gap-4">
-          {open > 0 && (
-            <span className="px-3 py-1 bg-yellow-600/20 text-yellow-400 rounded-full text-sm">
-              {open} offen
-            </span>
-          )}
-          {inProgress > 0 && (
-            <span className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm">
-              {inProgress} in Bearbeitung
-            </span>
-          )}
-          <button
-            onClick={handleExportCSV}
-            disabled={tickets.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-6"
+    >
+      <AdminPageHeader
+        icon={Ticket}
+        title="Support-Tickets"
+        description={`${total} Tickets gesamt`}
+        actions={
+          <div className="flex items-center gap-3">
+            {open > 0 && (
+              <AdminBadge variant="warning">{open} offen</AdminBadge>
+            )}
+            {inProgress > 0 && (
+              <AdminBadge variant="info">{inProgress} in Bearbeitung</AdminBadge>
+            )}
+            <AdminButton
+              variant="secondary"
+              icon={Download}
+              onClick={handleExportCSV}
+              disabled={tickets.length === 0}
+            >
+              CSV Export
+            </AdminButton>
+          </div>
+        }
+      />
+
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 flex items-center justify-between"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            CSV Export
-          </button>
-        </div>
-      </div>
-
-      {error && (
-        <div className="bg-red-600/20 border border-red-600 rounded-xl p-4 text-red-400">
-          {error}
-          <button onClick={() => setError(null)} className="ml-4 underline">
-            Schliessen
-          </button>
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-4">
-        <div className="flex gap-2">
-          <span className="text-gray-400 self-center">Status:</span>
-          {['all', 'open', 'in_progress', 'resolved', 'closed'].map(s => (
-            <button
-              key={s}
-              onClick={() => {
-                setStatus(s)
-                setPage(1)
-              }}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                status === s
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-[#262626] text-gray-400 hover:text-white'
-              }`}
-            >
-              {s === 'all' ? 'Alle' :
-               s === 'open' ? 'Offen' :
-               s === 'in_progress' ? 'In Bearbeitung' :
-               s === 'resolved' ? 'Geloest' : 'Geschlossen'}
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="p-1 hover:bg-red-500/20 rounded">
+              <X className="w-4 h-4" />
             </button>
-          ))}
-        </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        <div className="flex gap-2">
-          <span className="text-gray-400 self-center">Prioritaet:</span>
-          {['all', 'urgent', 'high', 'medium', 'low'].map(p => (
-            <button
-              key={p}
-              onClick={() => {
-                setPriority(p)
-                setPage(1)
-              }}
-              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                priority === p
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-[#262626] text-gray-400 hover:text-white'
-              }`}
-            >
-              {p === 'all' ? 'Alle' :
-               p === 'urgent' ? 'Dringend' :
-               p === 'high' ? 'Hoch' :
-               p === 'medium' ? 'Mittel' : 'Niedrig'}
-            </button>
-          ))}
+      {/* Filters */}
+      <AdminCard hover={false}>
+        <div className="p-4 flex flex-wrap gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">Status:</span>
+            <div className="flex gap-2">
+              {['all', 'open', 'in_progress', 'resolved', 'closed'].map(s => (
+                <motion.button
+                  key={s}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setStatus(s)
+                    setPage(1)
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                    status === s
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-800 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {s === 'all' ? 'Alle' :
+                   s === 'open' ? 'Offen' :
+                   s === 'in_progress' ? 'In Bearbeitung' :
+                   s === 'resolved' ? 'Geloest' : 'Geschlossen'}
+                </motion.button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-400">Prioritaet:</span>
+            <div className="flex gap-2">
+              {['all', 'urgent', 'high', 'medium', 'low'].map(p => (
+                <motion.button
+                  key={p}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setPriority(p)
+                    setPage(1)
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                    priority === p
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-800 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {p === 'all' ? 'Alle' :
+                   p === 'urgent' ? 'Dringend' :
+                   p === 'high' ? 'Hoch' :
+                   p === 'medium' ? 'Mittel' : 'Niedrig'}
+                </motion.button>
+              ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </AdminCard>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-[#262626] rounded-xl p-6 animate-pulse">
-              <div className="h-5 bg-gray-700 rounded w-3/4 mb-4"></div>
-              <div className="h-4 bg-gray-700 rounded w-1/2 mb-2"></div>
-              <div className="h-4 bg-gray-700 rounded w-full"></div>
-            </div>
+            <CardSkeleton key={i} />
           ))}
         </div>
       ) : tickets.length === 0 ? (
-        <div className="bg-[#262626] rounded-xl p-12 text-center">
-          <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-gray-400">Keine Tickets gefunden</p>
-        </div>
+        <AdminEmptyState
+          icon={CheckCircle}
+          title="Keine Tickets"
+          description="Es wurden keine Tickets mit den aktuellen Filtern gefunden."
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {tickets.map(ticket => (
-            <TicketCard
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+          {tickets.map((ticket, index) => (
+            <motion.div
               key={ticket.id}
-              ticket={ticket}
-              onUpdateStatus={handleUpdateStatus}
-              onAssign={handleAssign}
-            />
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <TicketCard
+                ticket={ticket}
+                onUpdateStatus={handleUpdateStatus}
+                onAssign={handleAssign}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Zurueck
-          </button>
-          <span className="text-gray-400">
-            Seite {page} von {totalPages}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Weiter
-          </button>
-        </div>
+        <AdminPagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
-    </div>
+    </motion.div>
   )
 }

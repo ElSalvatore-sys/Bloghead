@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Banknote,
   Clock,
@@ -13,10 +14,8 @@ import {
   Play,
   Download,
   RefreshCw,
-  Loader2,
-  ChevronLeft,
-  ChevronRight,
-  Euro
+  Euro,
+  X
 } from 'lucide-react'
 import {
   getPayouts,
@@ -27,6 +26,15 @@ import {
   type Payout
 } from '../../services/adminService'
 import { exportToCSV, formatCurrencyCSV, formatDateTimeCSV } from '../../utils/csvExport'
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminButton,
+  AdminStatCard,
+  AdminPagination,
+  AdminEmptyState,
+  TableSkeleton
+} from '@/components/admin/ui'
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount)
@@ -145,113 +153,116 @@ export function AdminPayoutsPage() {
   const statuses = ['all', 'pending', 'processing', 'completed', 'on_hold', 'failed']
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-6"
+    >
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Auszahlungen</h1>
-          <p className="text-gray-400 text-sm mt-1">Verwalten Sie Künstler-Auszahlungen</p>
-        </div>
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-        >
-          <Download className="w-4 h-4" />
-          CSV Export
-        </button>
-      </div>
+      <AdminPageHeader
+        icon={Banknote}
+        title="Auszahlungen"
+        description="Verwalten Sie Künstler-Auszahlungen"
+        actions={
+          <AdminButton
+            variant="secondary"
+            icon={Download}
+            onClick={handleExport}
+            disabled={payouts.length === 0}
+          >
+            CSV Export
+          </AdminButton>
+        }
+      />
 
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-[#1f1f1f] border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-yellow-500/20 rounded-lg">
-                <Clock className="w-5 h-5 text-yellow-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Ausstehend</p>
-                <p className="text-xl font-bold text-white">{stats.pendingCount}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-[#1f1f1f] border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-500/20 rounded-lg">
-                <Euro className="w-5 h-5 text-orange-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Ausstehender Betrag</p>
-                <p className="text-xl font-bold text-white">{formatCurrency(stats.pendingAmount)}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-[#1f1f1f] border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-green-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Diesen Monat</p>
-                <p className="text-xl font-bold text-white">{stats.processedThisMonth}</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-[#1f1f1f] border border-white/10 rounded-xl p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-500/20 rounded-lg">
-                <Banknote className="w-5 h-5 text-purple-400" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Ausgezahlt (Monat)</p>
-                <p className="text-xl font-bold text-white">{formatCurrency(stats.processedAmountThisMonth)}</p>
-              </div>
-            </div>
-          </div>
+          <AdminStatCard
+            title="Ausstehend"
+            value={stats.pendingCount}
+            icon={Clock}
+            color="orange"
+            delay={0}
+          />
+          <AdminStatCard
+            title="Ausstehender Betrag"
+            value={formatCurrency(stats.pendingAmount)}
+            icon={Euro}
+            color="orange"
+            delay={0.05}
+          />
+          <AdminStatCard
+            title="Diesen Monat"
+            value={stats.processedThisMonth}
+            icon={CheckCircle}
+            color="green"
+            delay={0.1}
+          />
+          <AdminStatCard
+            title="Ausgezahlt (Monat)"
+            value={formatCurrency(stats.processedAmountThisMonth)}
+            icon={Banknote}
+            color="purple"
+            delay={0.15}
+          />
         </div>
       )}
 
       {/* Filters */}
-      <div className="flex items-center gap-4 bg-[#1f1f1f] border border-white/10 rounded-xl p-4">
-        <span className="text-sm text-gray-400">Status:</span>
-        <div className="flex gap-2 flex-wrap">
-          {statuses.map((s) => (
-            <button
-              key={s}
-              onClick={() => {
-                setStatus(s)
-                setPage(1)
-              }}
-              className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                status === s
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-              }`}
-            >
-              {s === 'all' ? 'Alle' : STATUS_CONFIG[s as keyof typeof STATUS_CONFIG]?.label || s}
-            </button>
-          ))}
+      <AdminCard hover={false}>
+        <div className="p-4 flex items-center gap-4">
+          <span className="text-sm text-gray-400">Status:</span>
+          <div className="flex gap-2 flex-wrap">
+            {statuses.map((s) => (
+              <motion.button
+                key={s}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setStatus(s)
+                  setPage(1)
+                }}
+                className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
+                  status === s
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                {s === 'all' ? 'Alle' : STATUS_CONFIG[s as keyof typeof STATUS_CONFIG]?.label || s}
+              </motion.button>
+            ))}
+          </div>
         </div>
-      </div>
+      </AdminCard>
 
       {/* Error Message */}
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl">
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 flex items-center justify-between"
+          >
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="p-1 hover:bg-red-500/20 rounded">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Payouts Table */}
-      <div className="bg-[#1f1f1f] border border-white/10 rounded-xl overflow-hidden">
+      <AdminCard hover={false} className="overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-          </div>
+          <TableSkeleton rows={8} cols={6} />
         ) : payouts.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <Banknote className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>Keine Auszahlungen gefunden</p>
-          </div>
+          <AdminEmptyState
+            icon={Banknote}
+            title="Keine Auszahlungen"
+            description="Es wurden keine Auszahlungen mit den aktuellen Filtern gefunden."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -357,29 +368,15 @@ export function AdminPayoutsPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-4 py-3 border-t border-gray-800">
-            <p className="text-sm text-gray-400">
-              Seite {page} von {totalPages} ({total} gesamt)
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
+          <div className="mt-6 pt-6 border-t border-gray-800/50">
+            <AdminPagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         )}
-      </div>
+      </AdminCard>
 
       {/* Hold Reason Modal */}
       {holdModalOpen && (
@@ -421,7 +418,7 @@ export function AdminPayoutsPage() {
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

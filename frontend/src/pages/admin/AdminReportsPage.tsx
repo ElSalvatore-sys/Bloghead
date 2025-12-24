@@ -1,7 +1,17 @@
 import { useEffect, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Flag, CheckCircle, X } from 'lucide-react'
 import { ReportCard } from '../../components/admin'
 import { getReports, updateReportStatus, type Report } from '../../services/adminService'
 import { useAuth } from '../../contexts/AuthContext'
+import {
+  AdminPageHeader,
+  AdminCard,
+  AdminBadge,
+  AdminPagination,
+  AdminEmptyState,
+  CardSkeleton
+} from '@/components/admin/ui'
 
 export function AdminReportsPage() {
   const { user } = useAuth()
@@ -55,104 +65,112 @@ export function AdminReportsPage() {
   const { pending, reviewing } = getStatusCounts()
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Meldungen</h1>
-        <div className="flex items-center gap-4">
-          {pending > 0 && (
-            <span className="px-3 py-1 bg-yellow-600/20 text-yellow-400 rounded-full text-sm">
-              {pending} ausstehend
-            </span>
-          )}
-          {reviewing > 0 && (
-            <span className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm">
-              {reviewing} in Bearbeitung
-            </span>
-          )}
-        </div>
-      </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-6"
+    >
+      <AdminPageHeader
+        icon={Flag}
+        title="Meldungen"
+        description={`${total} Meldungen gesamt`}
+        actions={
+          <div className="flex items-center gap-3">
+            {pending > 0 && (
+              <AdminBadge variant="warning">{pending} ausstehend</AdminBadge>
+            )}
+            {reviewing > 0 && (
+              <AdminBadge variant="info">{reviewing} in Bearbeitung</AdminBadge>
+            )}
+          </div>
+        }
+      />
 
-      {error && (
-        <div className="bg-red-600/20 border border-red-600 rounded-xl p-4 text-red-400">
-          {error}
-          <button onClick={() => setError(null)} className="ml-4 underline">
-            Schliessen
-          </button>
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        {['all', 'pending', 'reviewing', 'resolved', 'dismissed'].map(s => (
-          <button
-            key={s}
-            onClick={() => {
-              setStatus(s)
-              setPage(1)
-            }}
-            className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-              status === s
-                ? 'bg-purple-600 text-white'
-                : 'bg-[#262626] text-gray-400 hover:text-white'
-            }`}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 flex items-center justify-between"
           >
-            {s === 'all' ? 'Alle' :
-             s === 'pending' ? 'Ausstehend' :
-             s === 'reviewing' ? 'In Bearbeitung' :
-             s === 'resolved' ? 'Geloest' : 'Abgelehnt'}
-          </button>
-        ))}
-      </div>
+            <span>{error}</span>
+            <button onClick={() => setError(null)} className="p-1 hover:bg-red-500/20 rounded">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Filters */}
+      <AdminCard hover={false}>
+        <div className="p-4 flex items-center gap-2">
+          <span className="text-sm text-gray-400 mr-2">Status:</span>
+          {['all', 'pending', 'reviewing', 'resolved', 'dismissed'].map(s => (
+            <motion.button
+              key={s}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                setStatus(s)
+                setPage(1)
+              }}
+              className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                status === s
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-800 text-gray-400 hover:text-white'
+              }`}
+            >
+              {s === 'all' ? 'Alle' :
+               s === 'pending' ? 'Ausstehend' :
+               s === 'reviewing' ? 'In Bearbeitung' :
+               s === 'resolved' ? 'Geloest' : 'Abgelehnt'}
+            </motion.button>
+          ))}
+        </div>
+      </AdminCard>
 
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-[#262626] rounded-xl p-6 animate-pulse">
-              <div className="h-4 bg-gray-700 rounded w-1/4 mb-4"></div>
-              <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-              <div className="h-4 bg-gray-700 rounded w-1/2"></div>
-            </div>
+            <CardSkeleton key={i} />
           ))}
         </div>
       ) : reports.length === 0 ? (
-        <div className="bg-[#262626] rounded-xl p-12 text-center">
-          <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-gray-400">Keine Meldungen gefunden</p>
-        </div>
+        <AdminEmptyState
+          icon={CheckCircle}
+          title="Keine Meldungen"
+          description="Es wurden keine Meldungen mit den aktuellen Filtern gefunden."
+        />
       ) : (
-        <div className="space-y-4">
-          {reports.map(report => (
-            <ReportCard
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="space-y-4"
+        >
+          {reports.map((report, index) => (
+            <motion.div
               key={report.id}
-              report={report}
-              onUpdateStatus={handleUpdateStatus}
-            />
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <ReportCard
+                report={report}
+                onUpdateStatus={handleUpdateStatus}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Zurueck
-          </button>
-          <span className="text-gray-400">
-            Seite {page} von {totalPages}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Weiter
-          </button>
-        </div>
+        <AdminPagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
       )}
-    </div>
+    </motion.div>
   )
 }
