@@ -42,6 +42,10 @@ const BookedArtistsPage = lazy(() => import('./pages/dashboard/BookedArtistsPage
 const ArtistAnalyticsPage = lazy(() => import('./pages/dashboard/ArtistAnalyticsPage').then(m => ({ default: m.ArtistAnalyticsPage })))
 const FanAnalyticsPage = lazy(() => import('./pages/dashboard/FanAnalyticsPage').then(m => ({ default: m.FanAnalyticsPage })))
 
+// Notification pages
+const NotificationCenterPage = lazy(() => import('./pages/dashboard/NotificationCenterPage').then(m => ({ default: m.NotificationCenterPage })))
+const NotificationPreferencesPage = lazy(() => import('./pages/dashboard/NotificationPreferencesPage').then(m => ({ default: m.NotificationPreferencesPage })))
+
 // Legacy Dashboard pages (default exports - keeping for backward compatibility)
 const LegacyMyRequestsPage = lazy(() => import('./pages/dashboard/MyRequestsPage'))
 const LegacyMyCommunityPage = lazy(() => import('./pages/dashboard/MyCommunityPage'))
@@ -106,6 +110,8 @@ function App() {
                 {/* Common pages (all roles) */}
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="notifications" element={<NotificationCenterPage />} />
+                <Route path="settings/notifications" element={<NotificationPreferencesPage />} />
 
                 {/* Fan pages - protected by user_type */}
                 <Route path="favorites" element={<RoleGuard allowedUserTypes={['fan']}><FavoritesPage /></RoleGuard>} />

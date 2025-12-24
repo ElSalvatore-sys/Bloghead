@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-do
 import { useAuth } from '../../contexts/AuthContext'
 import { getFullNavigationForRole, type UserRole } from '../../config/navigationConfig'
 import { CreateEventButton } from '../event'
+import { NotificationToastContainer } from '../notifications'
 
 // Icons for sidebar navigation
 function UserIcon({ className = '' }: { className?: string }) {
@@ -139,6 +140,15 @@ function HomeIcon({ className = '' }: { className?: string }) {
   )
 }
 
+function BellIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  )
+}
+
 function LogoutIcon({ className = '' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -184,6 +194,7 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
   'help-circle': HelpCircleIcon,
   home: HomeIcon,
   clock: ClockIcon,
+  bell: BellIcon,
 }
 
 function getIcon(iconName: string | undefined) {
@@ -363,6 +374,9 @@ export function DashboardLayout() {
         {/* Floating Create Event Button - Only for Event Organizers */}
         <CreateEventButton />
       </main>
+
+      {/* Real-time notification toasts */}
+      <NotificationToastContainer />
     </div>
   )
 }

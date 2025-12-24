@@ -13,6 +13,7 @@ export const roleNavigation: Record<UserRole, NavItem[]> = {
   fan: [
     { label: 'Mein Profil', path: '/dashboard/profile', icon: 'user' },
     { label: 'Einstellungen', path: '/dashboard/settings', icon: 'settings' },
+    { label: 'Benachrichtigungen', path: '/dashboard/notifications', icon: 'bell' },
     { label: 'Meine Favoriten', path: '/dashboard/favorites', icon: 'heart' },
     { label: 'Besuchte Events', path: '/dashboard/events-attended', icon: 'calendar' },
     { label: 'Meine Bewertungen', path: '/dashboard/my-reviews', icon: 'star' },
@@ -21,6 +22,7 @@ export const roleNavigation: Record<UserRole, NavItem[]> = {
   artist: [
     { label: 'Mein Profil', path: '/dashboard/profile', icon: 'user' },
     { label: 'Einstellungen', path: '/dashboard/settings', icon: 'settings' },
+    { label: 'Benachrichtigungen', path: '/dashboard/notifications', icon: 'bell' },
     { label: 'Meine Buchungen', path: '/dashboard/bookings', icon: 'book' },
     { label: 'Mein Kalender', path: '/dashboard/calendar', icon: 'calendar' },
     { label: 'Verfügbarkeit', path: '/dashboard/availability', icon: 'clock' },
@@ -30,6 +32,7 @@ export const roleNavigation: Record<UserRole, NavItem[]> = {
   service_provider: [
     { label: 'Mein Profil', path: '/dashboard/profile', icon: 'user' },
     { label: 'Einstellungen', path: '/dashboard/settings', icon: 'settings' },
+    { label: 'Benachrichtigungen', path: '/dashboard/notifications', icon: 'bell' },
     { label: 'Meine Aufträge', path: '/dashboard/orders', icon: 'clipboard' },
     { label: 'Mein Kalender', path: '/dashboard/calendar', icon: 'calendar' },
     { label: 'Verfügbarkeit', path: '/dashboard/availability', icon: 'clock' },
@@ -39,6 +42,7 @@ export const roleNavigation: Record<UserRole, NavItem[]> = {
   event_organizer: [
     { label: 'Mein Profil', path: '/dashboard/profile', icon: 'user' },
     { label: 'Einstellungen', path: '/dashboard/settings', icon: 'settings' },
+    { label: 'Benachrichtigungen', path: '/dashboard/notifications', icon: 'bell' },
     { label: 'Meine Events', path: '/dashboard/my-events', icon: 'calendar-plus' },
     { label: 'Buchungsanfragen', path: '/dashboard/booking-requests', icon: 'inbox' },
     { label: 'Gebuchte Künstler', path: '/dashboard/booked-artists', icon: 'users' },

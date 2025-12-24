@@ -1,2 +1,5 @@
 export { NotificationBell } from './NotificationBell'
 export { NotificationItem } from './NotificationItem'
+export { NotificationCenter } from './NotificationCenter'
+export { NotificationPreferences } from './NotificationPreferences'
+export { NotificationToastContainer } from './NotificationToast'
