@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Loader2, Star, MessageCircle, ThumbsUp } from 'lucide-react'
+import { Star, MessageCircle, ThumbsUp } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   getUserReviews,
@@ -15,6 +15,7 @@ import {
 } from '@/services/reviewService'
 import { ReviewStats } from '@/components/reviews/ReviewStats'
 import { ReviewBadge } from '@/components/reviews/ReviewBadge'
+import { ReviewsPageSkeleton } from '@/components/ui/DashboardSkeletons'
 
 // Tab filter type
 type ReviewFilter = 'all' | 'pending_response' | 'responded'
@@ -113,11 +114,7 @@ export function ReviewsPage() {
   const totalPages = Math.ceil(total / itemsPerPage)
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-accent-purple animate-spin" />
-      </div>
-    )
+    return <ReviewsPageSkeleton />
   }
 
   return (

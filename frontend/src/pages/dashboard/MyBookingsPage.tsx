@@ -5,7 +5,6 @@ import {
   Users,
   Euro,
   ExternalLink,
-  Loader2,
   Clock,
   CheckCircle2,
   AlertCircle,
@@ -16,6 +15,7 @@ import {
   Wallet,
   Building2
 } from 'lucide-react'
+import { BookingsPageSkeleton } from '@/components/ui/DashboardSkeletons'
 import DashboardLayout from '../../components/dashboard/DashboardLayout'
 import { useBookings, useBookingStats } from '../../hooks/useBookings'
 import {
@@ -564,11 +564,7 @@ export default function MyBookingsPage() {
       </div>
 
       {/* Loading State */}
-      {loading && !useMockData && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-        </div>
-      )}
+      {loading && !useMockData && <BookingsPageSkeleton />}
 
       {/* Bookings List */}
       {!loading && (

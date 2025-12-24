@@ -16,6 +16,7 @@ import {
   MapPin,
   Euro
 } from 'lucide-react'
+import { CalendarPageSkeleton } from '@/components/ui/DashboardSkeletons'
 import DashboardLayout from '../../components/dashboard/DashboardLayout'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -747,9 +748,7 @@ export default function MyCalendarPage() {
 
         {/* Calendar grid */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-          </div>
+          <CalendarPageSkeleton />
         ) : (
           <div className="grid grid-cols-7 gap-2">
             {calendarDays.map((date, index) => {

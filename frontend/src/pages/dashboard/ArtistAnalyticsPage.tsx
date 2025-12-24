@@ -12,7 +12,6 @@ import {
   Star,
   MessageCircle,
   Users,
-  Loader2,
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import {
@@ -36,6 +35,7 @@ import {
   type BookingsChartData,
   type MonthlyComparison,
 } from '@/services/analyticsService'
+import { AnalyticsPageSkeleton } from '@/components/ui/DashboardSkeletons'
 
 export function ArtistAnalyticsPage() {
   const { user } = useAuth()
@@ -144,14 +144,7 @@ export function ArtistAnalyticsPage() {
   ]
 
   if (loading && !stats) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-10 h-10 text-accent-purple animate-spin" />
-          <p className="text-white/60">Statistiken werden geladen...</p>
-        </div>
-      </div>
-    )
+    return <AnalyticsPageSkeleton />
   }
 
   return (

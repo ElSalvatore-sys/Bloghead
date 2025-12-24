@@ -5,7 +5,6 @@ import {
   XCircle,
   MessageCircle,
   Filter,
-  Loader2,
   MapPin,
   ExternalLink,
   Users,
@@ -18,8 +17,10 @@ import {
   TrendingUp,
   Inbox,
   Send,
-  Ban
+  Ban,
+  Loader2
 } from 'lucide-react'
+import { RequestsPageSkeleton } from '@/components/ui/DashboardSkeletons'
 import DashboardLayout from '../../components/dashboard/DashboardLayout'
 import { useBookingRequests, useRequestStats } from '../../hooks/useBookings'
 import {
@@ -404,11 +405,7 @@ export default function MyRequestsPage() {
       </div>
 
       {/* Loading State */}
-      {loading && !useMockData && (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-        </div>
-      )}
+      {loading && !useMockData && <RequestsPageSkeleton />}
 
       {/* Requests List */}
       {!loading && (

@@ -11,6 +11,7 @@ import {
   PriceRangeInput,
   SearchableMultiSelect
 } from '../../components/forms'
+import { ProfilePageSkeleton } from '../../components/ui/DashboardSkeletons'
 import {
   GENRE_OPTIONS,
   SERVICE_CATEGORY_OPTIONS,
@@ -464,8 +465,8 @@ export default function ProfileEditPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#171717] flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-[#610AD1] border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen bg-[#171717] p-6">
+        <ProfilePageSkeleton />
       </div>
     )
   }

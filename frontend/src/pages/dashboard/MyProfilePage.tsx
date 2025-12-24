@@ -22,6 +22,7 @@ import {
 import DashboardLayout from '../../components/dashboard/DashboardLayout'
 import { useAuth } from '../../contexts/AuthContext'
 import { useProfile } from '../../hooks/useProfile'
+import { ProfilePageSkeleton } from '../../components/ui/DashboardSkeletons'
 
 // Calculate profile completeness percentage
 function calculateCompleteness(
@@ -169,9 +170,7 @@ export default function MyProfilePage() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
-        </div>
+        <ProfilePageSkeleton />
       </DashboardLayout>
     )
   }

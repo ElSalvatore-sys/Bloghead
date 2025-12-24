@@ -5,13 +5,14 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Loader2, Star, Clock, AlertCircle, ChevronRight } from 'lucide-react'
+import { Star, Clock, AlertCircle, ChevronRight } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import {
   getUserReviews,
   getPendingReviewsForUser,
   type Review,
 } from '@/services/reviewService'
+import { ReviewsPageSkeleton } from '@/components/ui/DashboardSkeletons'
 
 // Tab filter type
 type ReviewTab = 'written' | 'pending'
@@ -69,11 +70,7 @@ export function MyReviewsPage() {
   const totalPages = Math.ceil(total / itemsPerPage)
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-accent-purple animate-spin" />
-      </div>
-    )
+    return <ReviewsPageSkeleton />
   }
 
   return (

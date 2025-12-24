@@ -5,11 +5,12 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { Loader2, ArrowLeft, CheckCircle } from 'lucide-react'
+import { ArrowLeft, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { ReviewForm } from '@/components/reviews/ReviewForm'
 import type { ReviewerType } from '@/services/reviewService'
+import { ProfileSkeleton } from '@/components/ui/DashboardSkeletons'
 
 interface BookingData {
   id: string
@@ -169,11 +170,7 @@ export function WriteReviewPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="w-8 h-8 text-accent-purple animate-spin" />
-      </div>
-    )
+    return <ProfileSkeleton />
   }
 
   if (error) {

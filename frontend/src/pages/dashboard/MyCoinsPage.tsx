@@ -14,6 +14,7 @@ import {
   type CoinTransaction,
   type CoinStats
 } from '../../services/coinsService'
+import { CoinsPageSkeleton } from '../../components/ui/DashboardSkeletons'
 
 type TabType = 'all' | 'earned' | 'spent' | 'purchased'
 
@@ -578,9 +579,7 @@ export default function MyCoinsPage() {
         )}
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
-          </div>
+          <CoinsPageSkeleton />
         ) : (
           <>
             {/* Balance Card */}

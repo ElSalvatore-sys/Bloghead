@@ -18,6 +18,7 @@ import {
   type Favorite,
   type CommunityStats
 } from '../../services/communityService'
+import { CommunityPageSkeleton } from '../../components/ui/DashboardSkeletons'
 
 type TabType = 'followers' | 'following' | 'favorites'
 type SortOption = 'newest' | 'oldest' | 'name'
@@ -781,9 +782,7 @@ export default function MyCommunityPage() {
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
-          </div>
+          <CommunityPageSkeleton />
         ) : (
           <AnimatePresence mode="wait">
             {/* Followers Tab */}
