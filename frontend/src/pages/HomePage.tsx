@@ -18,7 +18,7 @@ import { updatePageMeta, pageSEO, injectStructuredData, organizationSchema, webs
 export function HomePage() {
   const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
-  const { needsOnboarding, completeOnboarding, user, userProfile, loading } = useAuth()
+  const { needsOnboarding, completeOnboarding, user, loading } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const onboardingTriggeredRef = useRef(false)

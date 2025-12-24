@@ -14,7 +14,7 @@ export interface CSVColumn<T> {
  * @param filename - Base filename (without extension)
  * @param columns - Column definitions with keys and labels
  */
-export function exportToCSV<T extends Record<string, unknown>>(
+export function exportToCSV<T extends object>(
   data: T[],
   filename: string,
   columns: CSVColumn<T>[]
