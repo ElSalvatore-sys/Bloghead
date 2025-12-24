@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from 'react'
+import * as Sentry from '@sentry/react'
 
 interface ErrorBoundaryProps {
   children: ReactNode
@@ -8,28 +9,35 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean
   error: Error | null
+  eventId: string | null
 }
 
 /**
  * Error Boundary component that catches JavaScript errors anywhere in the child component tree.
- * Displays a German error message with Bloghead styling.
+ * Reports errors to Sentry and displays a German error message with Bloghead styling.
  */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props)
-    this.state = { hasError: false, error: null }
+    this.state = { hasError: false, error: null, eventId: null }
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return { hasError: true, error }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    // Log error to console in development
+    // Log error to console
     console.error('ErrorBoundary caught an error:', error, errorInfo)
 
-    // TODO: Send to error tracking service in production
-    // Example: Sentry.captureException(error, { extra: errorInfo })
+    // Report to Sentry in production
+    const eventId = Sentry.captureException(error, {
+      extra: {
+        componentStack: errorInfo.componentStack,
+      },
+    })
+
+    this.setState({ eventId })
   }
 
   handleReload = (): void => {
@@ -38,6 +46,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   handleGoHome = (): void => {
     window.location.href = '/'
+  }
+
+  handleReset = (): void => {
+    this.setState({ hasError: false, error: null, eventId: null })
   }
 
   render(): ReactNode {
@@ -62,9 +74,16 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             </h1>
 
             {/* Description */}
-            <p className="text-white/70 mb-6">
-              Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut oder kehre zur Startseite zurueck.
+            <p className="text-white/70 mb-4">
+              Ein unerwarteter Fehler ist aufgetreten. Unser Team wurde automatisch benachrichtigt.
             </p>
+
+            {/* Error ID for support */}
+            {this.state.eventId && (
+              <p className="text-white/40 text-xs mb-6">
+                Fehler-ID: {this.state.eventId}
+              </p>
+            )}
 
             {/* Error details in development */}
             {import.meta.env.DEV && this.state.error && (
@@ -87,10 +106,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
-                onClick={this.handleReload}
+                onClick={this.handleReset}
                 className="px-6 py-3 bg-gradient-to-r from-[#610AD1] to-[#F92B02] text-white font-semibold rounded-xl hover:opacity-90 transition-opacity"
               >
-                Seite neu laden
+                Erneut versuchen
               </button>
               <button
                 onClick={this.handleGoHome}
@@ -105,6 +124,22 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     }
 
     return this.props.children
+  }
+}
+
+/**
+ * HOC to wrap functional components with error boundary
+ */
+export function withErrorBoundary<P extends object>(
+  WrappedComponent: React.ComponentType<P>,
+  fallback?: ReactNode
+) {
+  return function WithErrorBoundary(props: P) {
+    return (
+      <ErrorBoundary fallback={fallback}>
+        <WrappedComponent {...props} />
+      </ErrorBoundary>
+    )
   }
 }
 
