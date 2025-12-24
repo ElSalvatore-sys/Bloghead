@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { updatePageMeta, pageSEO } from '../lib/seo'
 
 interface AccordionItemProps {
   title: string
@@ -41,6 +42,10 @@ function AccordionItem({ title, children, isOpen, onToggle }: AccordionItemProps
 }
 
 export default function DatenschutzPage() {
+  useEffect(() => {
+    updatePageMeta(pageSEO.datenschutz)
+  }, [])
+
   const [openSection, setOpenSection] = useState<number | null>(0)
 
   const toggleSection = (index: number) => {

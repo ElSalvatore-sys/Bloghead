@@ -1,8 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { sanitizeInput, sanitizeHTML, isValidEmail } from '../lib/security/sanitize'
+import { updatePageMeta, pageSEO } from '../lib/seo'
 
 export default function KontaktPage() {
+  useEffect(() => {
+    updatePageMeta(pageSEO.kontakt)
+  }, [])
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',

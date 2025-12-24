@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { updatePageMeta, pageSEO } from '../lib/seo'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
@@ -159,6 +160,11 @@ export function ArtistsPage() {
     loadMore,
     hasMore,
   } = useArtists()
+
+  // SEO
+  useEffect(() => {
+    updatePageMeta(pageSEO.artists)
+  }, [])
 
   // View mode state (grid or map)
   const [viewMode, setViewMode] = useState<ViewMode>('grid')

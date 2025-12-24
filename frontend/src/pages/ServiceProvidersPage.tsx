@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '../components/ui/Button'
+import { updatePageMeta, pageSEO } from '../lib/seo'
 import { ServiceProviderCard, ServiceProviderCardSkeleton } from '../components/services'
 import { getServiceProviders, getServiceCategories, getProviderCities } from '../services/serviceProviderService'
 import type { ServiceProviderListItem, ServiceCategory } from '../services/serviceProviderService'
@@ -55,6 +56,11 @@ export function ServiceProvidersPage() {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedCity, setSelectedCity] = useState('')
   const [showFilters, setShowFilters] = useState(false)
+
+  // SEO
+  useEffect(() => {
+    updatePageMeta(pageSEO.services)
+  }, [])
 
   // Fetch categories and cities on mount
   useEffect(() => {

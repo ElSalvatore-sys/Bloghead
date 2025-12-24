@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EventCard } from '../components/events'
 import { getEvents, getEventTypes, getPopularCities, type Event, type EventFilters } from '../services/eventService'
+import { updatePageMeta, pageSEO } from '../lib/seo'
 
 export function EventsPage() {
   const [events, setEvents] = useState<Event[]>([])
@@ -21,6 +22,11 @@ export function EventsPage() {
 
   const eventTypes = getEventTypes()
   const popularCities = getPopularCities()
+
+  // SEO
+  useEffect(() => {
+    updatePageMeta(pageSEO.events)
+  }, [])
 
   // Fetch events
   useEffect(() => {

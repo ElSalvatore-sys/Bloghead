@@ -12,7 +12,7 @@ interface SEOProps {
 }
 
 const BASE_URL = 'https://blogyydev.xyz'
-const DEFAULT_IMAGE = `${BASE_URL}/og-image.jpg`
+const DEFAULT_IMAGE = `${BASE_URL}/images/alexandre-st-louis-IlfpKwRMln0-unsplash.webp`
 const SITE_NAME = 'Bloghead'
 
 /**
