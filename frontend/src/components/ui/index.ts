@@ -12,3 +12,19 @@ export { SocialLinksDisplay } from './SocialLinksDisplay'
 export { AnimatedModal } from './AnimatedModal'
 export { AnimatedCard } from './AnimatedCard'
 export { ScrollReveal, StaggerContainer, StaggerItem } from './ScrollReveal'
+
+// Reusable animation utilities
+export {
+  FadeIn,
+  StaggerContainer as StaggerContainerNew,
+  StaggerItem as StaggerItemNew,
+  ScaleOnHover,
+  SlideIn,
+  Shimmer,
+  GlowWrapper,
+  fadeInVariants,
+  fadeInUpVariants,
+  scaleInVariants,
+  slideInLeftVariants,
+  slideInRightVariants,
+} from './animations'

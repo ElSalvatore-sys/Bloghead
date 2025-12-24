@@ -79,10 +79,14 @@ export function ServiceProviderCard({ provider }: ServiceProviderCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.4 }}
-      whileHover={{ y: -8, transition: { duration: 0.3 } }}
+      whileHover={{
+        y: -4,
+        scale: 1.01,
+        transition: { type: 'spring', stiffness: 300, damping: 20 }
+      }}
     >
       {/* Image Container */}
-      <div className="relative aspect-square mb-4 overflow-hidden rounded-lg">
+      <div className="relative aspect-square mb-4 overflow-hidden rounded-lg shadow-lg group-hover:shadow-2xl group-hover:shadow-accent-purple/20 transition-shadow duration-300">
         <img
           src={imageUrl}
           alt={provider.business_name}

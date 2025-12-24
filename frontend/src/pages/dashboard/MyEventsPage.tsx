@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 // My Events page for event organizers
 const mockEvents = [
@@ -95,7 +96,11 @@ export function MyEventsPage() {
   const pastEvents = mockEvents.filter(e => e.status === 'completed')
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-white">Meine Events</h1>
         <button
@@ -109,26 +114,46 @@ export function MyEventsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-bg-card rounded-xl border border-white/10 p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-4"
+        >
           <p className="text-text-muted text-sm">Kommende Events</p>
           <p className="text-2xl font-bold text-green-400">{upcomingEvents.length}</p>
-        </div>
-        <div className="bg-bg-card rounded-xl border border-white/10 p-4">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-4"
+        >
           <p className="text-text-muted text-sm">Vergangene Events</p>
           <p className="text-2xl font-bold text-white">{pastEvents.length}</p>
-        </div>
-        <div className="bg-bg-card rounded-xl border border-white/10 p-4">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-4"
+        >
           <p className="text-text-muted text-sm">Tickets verkauft</p>
           <p className="text-2xl font-bold text-accent-salmon">
             {mockEvents.reduce((sum, e) => sum + e.ticketsSold, 0)}
           </p>
-        </div>
-        <div className="bg-bg-card rounded-xl border border-white/10 p-4">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-4"
+        >
           <p className="text-text-muted text-sm">Gesamtumsatz</p>
           <p className="text-2xl font-bold text-accent-purple">
             {mockEvents.reduce((sum, e) => sum + e.revenue, 0).toLocaleString('de-DE')} €
           </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Upcoming Events */}
@@ -136,8 +161,11 @@ export function MyEventsPage() {
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-white mb-4">Kommende Events</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {upcomingEvents.map((event) => (
-              <div
+            {upcomingEvents.map((event, i) => (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.05 }}
                 key={event.id}
                 className="bg-bg-card rounded-xl border border-white/10 overflow-hidden"
               >
@@ -195,7 +223,7 @@ export function MyEventsPage() {
                     </button>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -210,8 +238,11 @@ export function MyEventsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {pastEvents.map((event) => (
-              <div
+            {pastEvents.map((event, i) => (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 + i * 0.05 }}
                 key={event.id}
                 className="bg-bg-card rounded-xl border border-white/10 p-4 flex gap-4"
               >
@@ -243,11 +274,11 @@ export function MyEventsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }

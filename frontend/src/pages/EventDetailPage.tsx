@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Button } from '../components/ui'
 import { getEventById, type Event } from '../services/eventService'
 
@@ -288,7 +289,12 @@ export function EventDetailPage() {
           )}
 
           {/* CTA Section */}
-          <div className="p-6 md:p-8 bg-gradient-to-r from-purple-600/20 to-pink-600/20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 1.0 }}
+            className="p-6 md:p-8 bg-gradient-to-r from-purple-600/20 to-pink-600/20"
+          >
             <div className="text-center">
               <h3 className="text-xl font-bold text-white mb-2">Künstler für dieses Event buchen?</h3>
               <p className="text-white/70 mb-6">Finde den perfekten Künstler für diese Veranstaltung.</p>
@@ -298,7 +304,7 @@ export function EventDetailPage() {
                 </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

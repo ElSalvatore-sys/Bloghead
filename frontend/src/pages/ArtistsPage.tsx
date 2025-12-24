@@ -218,14 +218,24 @@ export function ArtistsPage() {
 
         {/* Title */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <h1 className="font-display text-6xl md:text-7xl lg:text-8xl text-white tracking-wide">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="font-display text-6xl md:text-7xl lg:text-8xl text-white tracking-wide"
+          >
             ARTISTS
-          </h1>
+          </motion.h1>
         </div>
       </section>
 
       {/* Filter Bar Section */}
-      <section className="py-8 px-4 md:px-6 border-b border-white/10">
+      <motion.section
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        className="py-8 px-4 md:px-6 border-b border-white/10"
+      >
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             {/* View Toggle */}
@@ -235,21 +245,35 @@ export function ArtistsPage() {
             />
 
             {/* Results Count */}
-            <p className="text-white/60 text-sm">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="text-white/60 text-sm"
+            >
               {loading ? 'Laden...' : `${artists.length} Künstler gefunden`}
-            </p>
+            </motion.p>
           </div>
 
           {/* Filter Bar - only show in grid view */}
-          {viewMode === 'grid' && (
-            <FilterBar
-              filters={filterBarFilters}
-              onFiltersChange={setFilterBarFilters}
-              onApply={handleApplyFilters}
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {viewMode === 'grid' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <FilterBar
+                  filters={filterBarFilters}
+                  onFiltersChange={setFilterBarFilters}
+                  onApply={handleApplyFilters}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </section>
+      </motion.section>
 
       {/* Content Section */}
       <section className="py-12 md:py-16 px-4 md:px-6">

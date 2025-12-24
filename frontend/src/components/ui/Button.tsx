@@ -1,4 +1,5 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react'
+import { motion } from 'framer-motion'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost'
 type ButtonSize = 'sm' | 'md' | 'lg'
@@ -23,9 +24,11 @@ const sizeStyles: Record<ButtonSize, string> = {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant = 'primary', size = 'md', fullWidth = false, className = '', children, ...props }, ref) => {
+  ({ variant = 'primary', size = 'md', fullWidth = false, className = '', children, disabled, ...props }, ref) => {
+    const MotionButton = motion.button as typeof motion.button
+
     return (
-      <button
+      <MotionButton
         ref={ref}
         className={`
           inline-flex items-center justify-center font-medium rounded-lg
@@ -37,10 +40,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           ${fullWidth ? 'w-full' : ''}
           ${className}
         `}
-        {...props}
+        whileTap={!disabled ? { scale: 0.98 } : undefined}
+        disabled={disabled}
+        {...(props as any)}
       >
         {children}
-      </button>
+      </MotionButton>
     )
   }
 )

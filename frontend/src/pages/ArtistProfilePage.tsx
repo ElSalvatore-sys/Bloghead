@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useMemo, useLayoutEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button, SocialLinksDisplay } from '../components/ui'
 import { ArtistCalendar, AudioPlayer } from '../components/artist'
 import { BookingRequestModal } from '../components/booking'
@@ -261,9 +262,19 @@ export function ArtistProfilePage() {
     'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=300&h=300&fit=crop'
 
   return (
-    <div className="min-h-screen bg-bg-primary pb-24">
+    <motion.div
+      className="min-h-screen bg-bg-primary pb-24"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* Profile Header / Hero */}
-      <section className="relative">
+      <motion.section
+        className="relative"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
         {/* Cover Photo */}
         <div className="relative h-64 md:h-80 overflow-hidden">
           <img
@@ -330,7 +341,7 @@ export function ArtistProfilePage() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 md:px-6 mt-8">
@@ -338,7 +349,12 @@ export function ArtistProfilePage() {
           {/* Left Column - Info Grid & Video */}
           <div className="lg:col-span-2 space-y-8">
             {/* Info Grid Section */}
-            <section className="bg-bg-card/30 rounded-lg p-6">
+            <motion.section
+              className="bg-bg-card/30 rounded-lg p-6"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
                 <div>
                   <InfoRow label="Künstlername" value={artist.kuenstlername || '-'} />
@@ -361,11 +377,15 @@ export function ArtistProfilePage() {
                   )}
                 </div>
               </div>
-            </section>
+            </motion.section>
 
             {/* Video Preview Section */}
             {artist.intro_video_url && (
-              <section>
+              <motion.section
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+              >
                 <div className="relative aspect-video rounded-lg overflow-hidden bg-bg-card group cursor-pointer">
                   <video
                     src={artist.intro_video_url}
@@ -382,21 +402,29 @@ export function ArtistProfilePage() {
                     </button>
                   </div>
                 </div>
-              </section>
+              </motion.section>
             )}
 
             {/* Audio Section */}
             {(artist.soundcloud_url || (artist.audio_urls && artist.audio_urls.length > 0)) && (
-              <section>
+              <motion.section
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
                 <AudioPlayer
                   title="LISTEN TO ME ON SOUNDCLOUD"
                 />
-              </section>
+              </motion.section>
             )}
 
             {/* Bio Section */}
             {(artist.bio || artist.something_about_me) && (
-              <section>
+              <motion.section
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
                 <div className="flex items-center gap-3 mb-4">
                   <SparkleIcon className="text-white/60 w-6 h-6" />
                   <h3 className="text-lg font-bold text-white uppercase tracking-wide">
@@ -408,12 +436,16 @@ export function ArtistProfilePage() {
                     {artist.something_about_me || artist.bio}
                   </p>
                 </div>
-              </section>
+              </motion.section>
             )}
 
             {/* Social Media Section */}
             {(artist.social_media || artist.instagram_profile || artist.soundcloud_url || artist.website_url) && (
-              <section>
+              <motion.section
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
                 <div className="flex items-center gap-3 mb-4">
                   <svg className="w-6 h-6 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -432,20 +464,31 @@ export function ArtistProfilePage() {
                     className="gap-6"
                   />
                 </div>
-              </section>
+              </motion.section>
             )}
 
             {/* Reviews Section */}
-            <ReviewsSection
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+            >
+              <ReviewsSection
               entityType="artist"
               entityId={artist.id}
               entityName={artist.kuenstlername || 'Künstler'}
               entityImage={artist.profile_image_url}
             />
+            </motion.div>
           </div>
 
           {/* Right Column - Calendar */}
-          <div className="lg:col-span-1">
+          <motion.div
+            className="lg:col-span-1"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
             <div className="sticky top-24">
               <ArtistCalendar
                 artistId={artist.id}
@@ -472,7 +515,7 @@ export function ArtistProfilePage() {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
@@ -497,8 +540,9 @@ export function ArtistProfilePage() {
       )}
 
       {/* Booking Request Modal */}
-      {artist && (
-        <BookingRequestModal
+      <AnimatePresence>
+        {artist && showBookingModal && (
+          <BookingRequestModal
           isOpen={showBookingModal}
           onClose={() => {
             setShowBookingModal(false)
@@ -514,7 +558,8 @@ export function ArtistProfilePage() {
           }}
           preSelectedDate={selectedDate}
         />
-      )}
-    </div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }

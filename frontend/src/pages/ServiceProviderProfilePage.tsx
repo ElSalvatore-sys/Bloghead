@@ -1,5 +1,6 @@
 import { useState, useEffect, useLayoutEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { Button } from '../components/ui/Button'
 import { StarRating } from '../components/ui/StarRating'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
@@ -161,9 +162,19 @@ export function ServiceProviderProfilePage() {
     'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800&h=400&fit=crop'
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <motion.div
+      className="min-h-screen bg-bg-primary"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* Header with background */}
-      <div className="relative h-[300px] md:h-[400px]">
+      <motion.div
+        className="relative h-[300px] md:h-[400px]"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
         <img
           src={imageUrl}
           alt={provider.business_name}
@@ -188,7 +199,7 @@ export function ServiceProviderProfilePage() {
             size="md"
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Content */}
       <div className="max-w-6xl mx-auto px-4 -mt-32 relative z-10 pb-16">
@@ -196,7 +207,12 @@ export function ServiceProviderProfilePage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Header Card */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
+            <motion.div
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               {/* Category & Badges */}
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-purple/20 rounded-full text-sm font-medium text-accent-purple">
@@ -246,21 +262,31 @@ export function ServiceProviderProfilePage() {
                   ({provider.total_reviews || 0} Bewertungen)
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Description */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
+            <motion.div
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <h2 className="text-xl font-bold text-white mb-4 uppercase tracking-wide">
                 Über uns
               </h2>
               <p className="text-white/70 leading-relaxed whitespace-pre-line">
                 {provider.description || 'Keine Beschreibung verfügbar.'}
               </p>
-            </div>
+            </motion.div>
 
             {/* Gallery */}
             {provider.gallery_urls && provider.gallery_urls.length > 0 && (
-              <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
+              <motion.div
+                className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
                 <h2 className="text-xl font-bold text-white mb-4 uppercase tracking-wide">
                   Galerie
                 </h2>
@@ -275,20 +301,31 @@ export function ServiceProviderProfilePage() {
                     </div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* Reviews Section */}
-            <ReviewsSection
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <ReviewsSection
               entityType="veranstalter"
               entityId={provider.id}
               entityName={provider.business_name}
               entityImage={provider.profile_image_url || undefined}
             />
+            </motion.div>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <motion.div
+            className="space-y-6"
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
             {/* Pricing Card */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
               <h3 className="text-lg font-bold text-white mb-4">Preise</h3>
@@ -373,9 +410,9 @@ export function ServiceProviderProfilePage() {
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

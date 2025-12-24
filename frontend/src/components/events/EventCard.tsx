@@ -44,7 +44,12 @@ export function EventCard({ event }: EventCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
       transition={{ duration: 0.4 }}
-      whileHover={{ y: -8, transition: { duration: 0.3 } }}
+      whileHover={{
+        y: -4,
+        scale: 1.01,
+        transition: { type: 'spring', stiffness: 300, damping: 20 }
+      }}
+      className="shadow-lg hover:shadow-2xl hover:shadow-purple-500/30 transition-shadow duration-300"
     >
       <Link
         to={`/events/${event.id}`}

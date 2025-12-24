@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { EventCard } from '../components/events'
 import { getEvents, getEventTypes, getPopularCities, type Event, type EventFilters } from '../services/eventService'
 
@@ -76,18 +77,33 @@ export function EventsPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-bg-primary" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="font-display text-5xl md:text-7xl text-white mb-4">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="font-display text-5xl md:text-7xl text-white mb-4"
+            >
               VERANSTALTUNGEN
-            </h1>
-            <p className="text-white/70 text-lg max-w-2xl mx-auto px-4">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="text-white/70 text-lg max-w-2xl mx-auto px-4"
+            >
               Entdecke kommende Events und finde den perfekten Künstler für deine Veranstaltung
-            </p>
+            </motion.p>
           </div>
         </div>
       </div>
 
       {/* Filter Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5 }}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10"
+      >
         <div className="bg-white/5 backdrop-blur-lg rounded-xl p-4 md:p-6 border border-white/10">
           {/* Mobile Filter Toggle */}
           <button
@@ -191,7 +207,7 @@ export function EventsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Events Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
@@ -258,13 +274,28 @@ export function EventsPage() {
         )}
 
         {/* Events Grid */}
-        {!loading && !error && events.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {!loading && !error && events.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {events.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                >
+                  <EventCard event={event} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

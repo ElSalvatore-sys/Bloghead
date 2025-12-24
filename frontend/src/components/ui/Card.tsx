@@ -1,4 +1,5 @@
 import { forwardRef, type HTMLAttributes } from 'react'
+import { motion } from 'framer-motion'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'elevated' | 'outlined'
@@ -15,17 +16,36 @@ const paddingStyles = {
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ variant = 'default', hoverable = false, padding = 'md', className = '', children, ...props }, ref) => {
+    const baseClassName = `
+      bg-bg-card rounded-xl
+      ${variant === 'elevated' ? 'shadow-lg' : ''}
+      ${variant === 'outlined' ? 'border border-white/10' : ''}
+      ${hoverable ? 'transition-all duration-200 hover:bg-bg-card-hover hover:shadow-xl shadow-md hover:shadow-accent-purple/20' : ''}
+      ${paddingStyles[padding]}
+      ${className}
+    `
+
+    if (hoverable) {
+      return (
+        <motion.div
+          ref={ref}
+          className={baseClassName}
+          whileHover={{
+            y: -4,
+            scale: 1.01,
+            transition: { type: 'spring' as const, stiffness: 300, damping: 20 }
+          }}
+          {...(props as any)}
+        >
+          {children}
+        </motion.div>
+      )
+    }
+
     return (
       <div
         ref={ref}
-        className={`
-          bg-bg-card rounded-xl
-          ${variant === 'elevated' ? 'shadow-lg' : ''}
-          ${variant === 'outlined' ? 'border border-white/10' : ''}
-          ${hoverable ? 'transition-all duration-200 hover:bg-bg-card-hover hover:shadow-xl hover:-translate-y-1' : ''}
-          ${paddingStyles[padding]}
-          ${className}
-        `}
+        className={baseClassName}
         {...props}
       >
         {children}
@@ -61,11 +81,11 @@ export function ArtistCard({
   isFavorite = false,
 }: ArtistCardProps) {
   return (
-    <Card hoverable padding="none" className="overflow-hidden">
+    <Card hoverable padding="none" className="overflow-hidden group">
       {/* Image Container */}
-      <div className="relative aspect-square bg-bg-card-hover">
+      <div className="relative aspect-square bg-bg-card-hover overflow-hidden">
         {image ? (
-          <img src={image} alt={name} className="w-full h-full object-cover" />
+          <img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-text-muted">
             <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,12 +134,14 @@ export function ArtistCard({
         </div>
 
         {/* Action Button */}
-        <button
+        <motion.button
           onClick={onViewProfile}
           className="w-full py-2.5 bg-gradient-to-r from-accent-purple to-accent-red text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
           PROFIL ANSEHEN
-        </button>
+        </motion.button>
       </div>
     </Card>
   )

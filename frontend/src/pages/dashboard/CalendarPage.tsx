@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // Simple calendar component
 const DAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
@@ -74,12 +75,21 @@ export function CalendarPage() {
     : []
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <h1 className="text-3xl font-bold text-white mb-8">Mein Kalender</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
-        <div className="lg:col-span-2 bg-bg-card rounded-xl border border-white/10 p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="lg:col-span-2 bg-bg-card rounded-xl border border-white/10 p-6"
+        >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-white">
@@ -152,10 +162,15 @@ export function CalendarPage() {
               )
             })}
           </div>
-        </div>
+        </motion.div>
 
         {/* Events Sidebar */}
-        <div className="bg-bg-card rounded-xl border border-white/10 p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-6"
+        >
           <h3 className="text-lg font-semibold text-white mb-4">
             {selectedDate
               ? selectedDate.toLocaleDateString('de-DE', {
@@ -166,12 +181,22 @@ export function CalendarPage() {
               : 'Events auswählen'}
           </h3>
 
+          <AnimatePresence mode="wait">
           {selectedDate ? (
             selectedEvents.length > 0 ? (
-              <div className="space-y-3">
-                {selectedEvents.map(event => (
-                  <div
+              <motion.div
+                key="events"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="space-y-3"
+              >
+                {selectedEvents.map((event, i) => (
+                  <motion.div
                     key={event.id}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
                     className={`p-3 rounded-lg border-l-4 ${
                       event.type === 'booking'
                         ? 'bg-accent-purple/10 border-accent-purple'
@@ -182,23 +207,38 @@ export function CalendarPage() {
                     <p className="text-text-muted text-xs mt-1">
                       {event.type === 'booking' ? 'Buchung' : 'Persönlich'}
                     </p>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             ) : (
-              <p className="text-text-muted text-sm">Keine Events an diesem Tag</p>
+              <motion.p
+                key="no-events"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-text-muted text-sm"
+              >
+                Keine Events an diesem Tag
+              </motion.p>
             )
           ) : (
-            <p className="text-text-muted text-sm">
+            <motion.p
+              key="select-day"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="text-text-muted text-sm"
+            >
               Wähle einen Tag aus, um die Events zu sehen
-            </p>
+            </motion.p>
           )}
+          </AnimatePresence>
 
           {/* Add Event Button */}
           <button className="w-full mt-6 px-4 py-3 bg-accent-purple text-white font-medium rounded-lg hover:bg-accent-purple/90 transition-colors">
             + Event hinzufügen
           </button>
-        </div>
+        </motion.div>
       </div>
 
       {/* Legend */}
@@ -212,6 +252,6 @@ export function CalendarPage() {
           <span className="text-text-muted text-sm">Persönlich</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

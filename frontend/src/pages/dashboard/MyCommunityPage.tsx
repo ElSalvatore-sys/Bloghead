@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   getFollowers,
@@ -26,15 +27,22 @@ function StatCard({
   label,
   value,
   icon,
-  color
+  color,
+  index
 }: {
   label: string
   value: number
   icon: string
   color: string
+  index: number
 }) {
   return (
-    <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      className="bg-white/5 rounded-xl p-4 border border-white/10"
+    >
       <div className="flex items-center gap-3">
         <div className={`w-10 h-10 rounded-lg ${color} flex items-center justify-center`}>
           <span className="text-lg">{icon}</span>
@@ -44,7 +52,7 @@ function StatCard({
           <p className="text-xs text-gray-400">{label}</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -52,11 +60,13 @@ function StatCard({
 function FollowerCard({
   follower,
   onUpdateSettings,
-  isArtistView
+  isArtistView,
+  index
 }: {
   follower: Follower
   onUpdateSettings: (settings: { notifyNewEvents?: boolean; notifyAvailability?: boolean }) => void
   isArtistView: boolean
+  index: number
 }) {
   const [showSettings, setShowSettings] = useState(false)
   const user = follower.follower
@@ -68,7 +78,12 @@ function FollowerCard({
   const initials = displayName.charAt(0).toUpperCase()
 
   return (
-    <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-purple-500/30 transition-all">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-purple-500/30 transition-all"
+    >
       <div className="flex items-start gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
@@ -154,7 +169,7 @@ function FollowerCard({
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 
@@ -163,7 +178,8 @@ function ArtistCard({
   artist,
   onRemove,
   notes,
-  isFavorite
+  isFavorite,
+  index
 }: {
   artist: {
     id: string
@@ -175,12 +191,18 @@ function ArtistCard({
   onRemove: () => void
   notes?: string | null
   isFavorite?: boolean
+  index: number
 }) {
   const displayName = artist.künstlername || 'Unbekannter Künstler'
   const initials = displayName.charAt(0).toUpperCase()
 
   return (
-    <div className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-purple-500/30 transition-all group">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className="bg-white/5 rounded-xl p-4 border border-white/10 hover:border-purple-500/30 transition-all group"
+    >
       <div className="flex items-start gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0 relative">
@@ -255,7 +277,7 @@ function ArtistCard({
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -643,7 +665,12 @@ export default function MyCommunityPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#171717] pt-24 pb-16">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-[#171717] pt-24 pb-16"
+    >
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
@@ -669,18 +696,21 @@ export default function MyCommunityPage() {
             value={stats.followers}
             icon="👥"
             color="bg-purple-500/20"
+            index={0}
           />
           <StatCard
             label="Folge ich"
             value={stats.following}
             icon="🎵"
             color="bg-orange-500/20"
+            index={1}
           />
           <StatCard
             label="Favoriten"
             value={stats.favorites}
             icon="⭐"
             color="bg-yellow-500/20"
+            index={2}
           />
         </div>
 
@@ -755,68 +785,95 @@ export default function MyCommunityPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
           </div>
         ) : (
-          <>
+          <AnimatePresence mode="wait">
             {/* Followers Tab */}
             {activeTab === 'followers' && (
-              sortedFollowers.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {sortedFollowers.map(follower => (
-                    <FollowerCard
-                      key={follower.id}
-                      follower={follower}
-                      onUpdateSettings={(settings) =>
-                        handleUpdateFollowerSettings(follower.follower_id, follower.artist_id, settings)
-                      }
-                      isArtistView={true}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <EmptyState type="followers" />
-              )
+              <motion.div
+                key="followers"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {sortedFollowers.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {sortedFollowers.map((follower, index) => (
+                      <FollowerCard
+                        key={follower.id}
+                        follower={follower}
+                        onUpdateSettings={(settings) =>
+                          handleUpdateFollowerSettings(follower.follower_id, follower.artist_id, settings)
+                        }
+                        isArtistView={true}
+                        index={index}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState type="followers" />
+                )}
+              </motion.div>
             )}
 
             {/* Following Tab */}
             {activeTab === 'following' && (
-              sortedFollowing.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {sortedFollowing.map(follow => (
-                    follow.artist && (
-                      <ArtistCard
-                        key={follow.id}
-                        artist={follow.artist}
-                        onRemove={() => handleUnfollow(follow.artist_id)}
-                        isFavorite={false}
-                      />
-                    )
-                  ))}
-                </div>
-              ) : (
-                <EmptyState type="following" />
-              )
+              <motion.div
+                key="following"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {sortedFollowing.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {sortedFollowing.map((follow, index) => (
+                      follow.artist && (
+                        <ArtistCard
+                          key={follow.id}
+                          artist={follow.artist}
+                          onRemove={() => handleUnfollow(follow.artist_id)}
+                          isFavorite={false}
+                          index={index}
+                        />
+                      )
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState type="following" />
+                )}
+              </motion.div>
             )}
 
             {/* Favorites Tab */}
             {activeTab === 'favorites' && (
-              sortedFavorites.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {sortedFavorites.map(favorite => (
-                    favorite.artist && (
-                      <ArtistCard
-                        key={favorite.id}
-                        artist={favorite.artist}
-                        onRemove={() => handleRemoveFavorite(favorite.artist_id)}
-                        notes={favorite.notes}
-                        isFavorite={true}
-                      />
-                    )
-                  ))}
-                </div>
-              ) : (
-                <EmptyState type="favorites" />
-              )
+              <motion.div
+                key="favorites"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {sortedFavorites.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {sortedFavorites.map((favorite, index) => (
+                      favorite.artist && (
+                        <ArtistCard
+                          key={favorite.id}
+                          artist={favorite.artist}
+                          onRemove={() => handleRemoveFavorite(favorite.artist_id)}
+                          notes={favorite.notes}
+                          isFavorite={true}
+                          index={index}
+                        />
+                      )
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState type="favorites" />
+                )}
+              </motion.div>
             )}
-          </>
+          </AnimatePresence>
         )}
 
         {/* Quick Actions */}
@@ -851,6 +908,6 @@ export default function MyCommunityPage() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

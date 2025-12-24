@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // Placeholder data
 const mockFavorites = [
@@ -46,11 +47,21 @@ function StarIcon({ className = '' }: { className?: string }) {
 
 export function FavoritesPage() {
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <h1 className="text-3xl font-bold text-white mb-8">Meine Favoriten</h1>
 
-      {mockFavorites.length === 0 ? (
-        <div className="bg-bg-card rounded-xl border border-white/10 p-12 text-center">
+      <AnimatePresence mode="wait">
+        {mockFavorites.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-12 text-center"
+        >
           <HeartFilledIcon className="w-16 h-16 text-text-muted mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-white mb-2">Keine Favoriten</h2>
           <p className="text-text-muted mb-6">
@@ -62,12 +73,21 @@ export function FavoritesPage() {
           >
             Künstler entdecken
           </Link>
-        </div>
+        </motion.div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mockFavorites.map((item) => (
-            <Link
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {mockFavorites.map((item, i) => (
+            <motion.div
               key={item.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <Link
               to={item.type === 'artist' ? `/artists/${item.id}` : `/services/${item.id}`}
               className="group bg-bg-card rounded-xl border border-white/10 overflow-hidden hover:border-accent-purple/50 transition-colors"
             >
@@ -106,9 +126,11 @@ export function FavoritesPage() {
                 </div>
               </div>
             </Link>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
-    </div>
+      </AnimatePresence>
+    </motion.div>
   )
 }

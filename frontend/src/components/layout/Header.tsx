@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { HeartIcon, UserIcon, InstagramIcon, FacebookIcon, MenuIcon, CloseIcon } from '../icons'
 import { LoginModal, RegisterModal } from '../auth'
 import { NotificationBell } from '../notifications'
@@ -112,24 +113,36 @@ function NavDropdown({
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
-
   return (
-    <div
-      ref={dropdownRef}
-      className="absolute top-full left-0 mt-2 min-w-[200px] bg-[#1a1a1a] border border-white/20 rounded-lg shadow-xl py-2 z-50"
-    >
-      {items.map((item) => (
-        <Link
-          key={item.href}
-          to={item.href}
-          className="block px-4 py-2.5 text-sm text-white/90 hover:text-white hover:bg-white/10 transition-colors"
-          onClick={onClose}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          ref={dropdownRef}
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+          transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+          className="absolute top-full left-0 mt-2 min-w-[200px] bg-[#1a1a1a] border border-white/20 rounded-lg shadow-xl py-2 z-50"
         >
-          {item.label}
-        </Link>
-      ))}
-    </div>
+          {items.map((item, index) => (
+            <motion.div
+              key={item.href}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.15 }}
+            >
+              <Link
+                to={item.href}
+                className="block px-4 py-2.5 text-sm text-white/90 hover:text-white hover:bg-white/10 transition-colors"
+                onClick={onClose}
+              >
+                {item.label}
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 
@@ -166,51 +179,75 @@ function UserDropdown({
     }
   }, [isOpen, onClose])
 
-  if (!isOpen) return null
-
   return (
-    <div
-      ref={dropdownRef}
-      className="absolute top-full right-0 mt-2 min-w-[200px] bg-bg-card border border-white/10 rounded-lg shadow-lg py-2 z-50"
-    >
-      {/* Admin Panel Link */}
-      {isAdmin && (
-        <>
-          <Link
-            to="/admin"
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors"
-            onClick={onClose}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            Admin Panel
-          </Link>
-          <div className="border-t border-white/10 my-1"></div>
-        </>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          ref={dropdownRef}
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+          transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+          className="absolute top-full right-0 mt-2 min-w-[200px] bg-bg-card border border-white/10 rounded-lg shadow-lg py-2 z-50"
+        >
+          {/* Admin Panel Link */}
+          {isAdmin && (
+            <>
+              <motion.div
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05, duration: 0.15 }}
+              >
+                <Link
+                  to="/admin"
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-colors"
+                  onClick={onClose}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  Admin Panel
+                </Link>
+              </motion.div>
+              <div className="border-t border-white/10 my-1"></div>
+            </>
+          )}
+          {menuItems.map((item, index) => (
+            <motion.div
+              key={item.href}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: (isAdmin ? index + 1 : index) * 0.05, duration: 0.15 }}
+            >
+              <Link
+                to={item.href}
+                className="block px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+                onClick={onClose}
+              >
+                {item.label}
+              </Link>
+            </motion.div>
+          ))}
+          <div className="border-t border-white/10 mt-2 pt-2">
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: (menuItems.length + (isAdmin ? 1 : 0)) * 0.05, duration: 0.15 }}
+            >
+              <button
+                onClick={() => {
+                  onLogout()
+                  onClose()
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm text-accent-red hover:bg-white/5 transition-colors"
+              >
+                Logout
+              </button>
+            </motion.div>
+          </div>
+        </motion.div>
       )}
-      {menuItems.map((item) => (
-        <Link
-          key={item.href}
-          to={item.href}
-          className="block px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
-          onClick={onClose}
-        >
-          {item.label}
-        </Link>
-      ))}
-      <div className="border-t border-white/10 mt-2 pt-2">
-        <button
-          onClick={() => {
-            onLogout()
-            onClose()
-          }}
-          className="w-full text-left px-4 py-2.5 text-sm text-accent-red hover:bg-white/5 transition-colors"
-        >
-          Logout
-        </button>
-      </div>
-    </div>
+    </AnimatePresence>
   )
 }
 
@@ -249,28 +286,57 @@ function MobileMenu({
     }
   }, [isOpen])
 
-  if (!isOpen) return null
-
   return (
-    <div className="fixed inset-0 z-50 bg-bg-primary">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
-        <Link to="/" className="font-display text-2xl text-text-primary" onClick={onClose}>
-          BLOGHEAD
-        </Link>
-        <button
-          onClick={onClose}
-          className="p-2 text-text-secondary hover:text-text-primary transition-colors"
-          aria-label="Close menu"
-        >
-          <CloseIcon size={24} />
-        </button>
-      </div>
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            onClick={onClose}
+          />
+
+          {/* Mobile Menu */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed inset-y-0 right-0 z-50 w-full bg-bg-primary sm:w-96 shadow-2xl"
+          >
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
+              className="flex items-center justify-between p-4 border-b border-white/10"
+            >
+              <Link to="/" className="font-display text-2xl text-text-primary" onClick={onClose}>
+                BLOGHEAD
+              </Link>
+              <button
+                onClick={onClose}
+                className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+                aria-label="Close menu"
+              >
+                <CloseIcon size={24} />
+              </button>
+            </motion.div>
 
       {/* Navigation */}
       <nav className="flex flex-col p-4 overflow-y-auto h-[calc(100vh-80px)]">
-        {getNavItems(userRole).map((item) => (
-          <div key={item.href} className="border-b border-white/5">
+        {getNavItems(userRole).map((item, index) => (
+          <motion.div
+            key={item.href}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15 + index * 0.05, duration: 0.3 }}
+            className="border-b border-white/5"
+          >
             {item.dropdown ? (
               <>
                 <button
@@ -278,24 +344,43 @@ function MobileMenu({
                   className="flex items-center justify-between w-full py-4 text-lg font-medium text-text-primary"
                 >
                   {item.label}
-                  <ChevronDownIcon
-                    className={`transition-transform ${expandedItem === item.label ? 'rotate-180' : ''}`}
-                  />
+                  <motion.div
+                    animate={{ rotate: expandedItem === item.label ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChevronDownIcon />
+                  </motion.div>
                 </button>
-                {expandedItem === item.label && (
-                  <div className="pl-4 pb-4 space-y-3">
-                    {item.dropdown.map((subItem) => (
-                      <Link
-                        key={subItem.href}
-                        to={subItem.href}
-                        className="block py-2 text-text-secondary hover:text-text-primary transition-colors"
-                        onClick={onClose}
-                      >
-                        {subItem.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                <AnimatePresence>
+                  {expandedItem === item.label && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="pl-4 pb-4 space-y-3">
+                        {item.dropdown.map((subItem, subIndex) => (
+                          <motion.div
+                            key={subItem.href}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: subIndex * 0.05, duration: 0.2 }}
+                          >
+                            <Link
+                              to={subItem.href}
+                              className="block py-2 text-text-secondary hover:text-text-primary transition-colors"
+                              onClick={onClose}
+                            >
+                              {subItem.label}
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </>
             ) : (
               <Link
@@ -306,7 +391,7 @@ function MobileMenu({
                 {item.label}
               </Link>
             )}
-          </div>
+          </motion.div>
         ))}
 
         {/* Favorites Link */}
@@ -399,7 +484,12 @@ function MobileMenu({
         )}
 
         {/* Social Links */}
-        <div className="flex items-center justify-center gap-6 pt-8 mt-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.3 }}
+          className="flex items-center justify-center gap-6 pt-8 mt-auto"
+        >
           <a
             href="https://instagram.com/bloghead"
             target="_blank"
@@ -418,9 +508,12 @@ function MobileMenu({
           >
             <FacebookIcon size={28} />
           </a>
-        </div>
+        </motion.div>
       </nav>
-    </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   )
 }
 
@@ -476,15 +569,21 @@ export function Header() {
 
   return (
     <>
-      <header
-        className={`sticky top-0 z-40 transition-all duration-200 ${
+      <motion.header
+        initial={false}
+        animate={{
+          height: isScrolled ? '64px' : '80px',
+          backgroundColor: isScrolled ? 'rgba(23, 23, 23, 0.95)' : 'rgba(23, 23, 23, 1)',
+        }}
+        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+        className={`sticky top-0 z-40 ${
           isScrolled
-            ? 'bg-bg-primary/95 backdrop-blur-md border-b border-white/10 shadow-lg'
-            : 'bg-bg-primary border-b border-white/5'
+            ? 'backdrop-blur-md border-b border-white/10 shadow-lg'
+            : 'border-b border-white/5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+          <div className="flex items-center justify-between h-full">
             {/* Logo - scroll to top on homepage, navigate home on other pages */}
             {location.pathname === '/' ? (
               <button
@@ -640,7 +739,7 @@ export function Header() {
             </button>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile Menu */}
       <MobileMenu

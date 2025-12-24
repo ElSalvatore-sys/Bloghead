@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion'
+
 // Placeholder data for artists/service providers
 const mockBookings = [
   {
@@ -68,7 +70,11 @@ export function BookingsPage() {
   const completedBookings = mockBookings.filter(b => b.status === 'completed')
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-white">Meine Buchungen</h1>
         <div className="flex gap-2">
@@ -83,24 +89,44 @@ export function BookingsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-bg-card rounded-xl border border-white/10 p-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-4"
+        >
           <p className="text-text-muted text-sm">Ausstehend</p>
           <p className="text-2xl font-bold text-yellow-400">{pendingBookings.length}</p>
-        </div>
-        <div className="bg-bg-card rounded-xl border border-white/10 p-4">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-4"
+        >
           <p className="text-text-muted text-sm">Bestätigt</p>
           <p className="text-2xl font-bold text-green-400">{confirmedBookings.length}</p>
-        </div>
-        <div className="bg-bg-card rounded-xl border border-white/10 p-4">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-4"
+        >
           <p className="text-text-muted text-sm">Abgeschlossen</p>
           <p className="text-2xl font-bold text-white">{completedBookings.length}</p>
-        </div>
-        <div className="bg-bg-card rounded-xl border border-white/10 p-4">
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="bg-bg-card rounded-xl border border-white/10 p-4"
+        >
           <p className="text-text-muted text-sm">Gesamt Einnahmen</p>
           <p className="text-2xl font-bold text-accent-purple">
             {mockBookings.reduce((sum, b) => sum + b.price, 0).toLocaleString('de-DE')} €
           </p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Bookings List */}
@@ -114,8 +140,11 @@ export function BookingsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {mockBookings.map((booking) => (
-            <div
+          {mockBookings.map((booking, i) => (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + i * 0.05 }}
               key={booking.id}
               className="bg-bg-card rounded-xl border border-white/10 p-6"
             >
@@ -169,10 +198,10 @@ export function BookingsPage() {
                   </button>
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }

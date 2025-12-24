@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import {
   DollarSign,
   Calendar,
@@ -154,130 +155,179 @@ export function ArtistAnalyticsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <motion.div
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div>
           <h1 className="text-3xl font-bold text-white">Statistiken</h1>
           <p className="text-white/60 mt-1">{getPeriodLabel(period)}</p>
         </div>
         <DateRangePicker value={period} onChange={setPeriod} />
-      </div>
+      </motion.div>
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">
+        <motion.div
+          className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
       {/* Key Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <StatCard
-          title="Einnahmen"
-          value={formatCurrency(displayStats.total_earnings.value)}
-          icon={<DollarSign className="w-5 h-5" />}
-          trend={{
-            value: displayStats.total_earnings.change_percent,
-            direction: displayStats.total_earnings.trend,
-          }}
-          variant="gradient"
-        />
-        <StatCard
-          title="Buchungen"
-          value={displayStats.total_bookings.value}
-          icon={<Calendar className="w-5 h-5" />}
-          trend={{
-            value: displayStats.total_bookings.change_percent,
-            direction: displayStats.total_bookings.trend,
-          }}
-        />
-        <StatCard
-          title="Profilaufrufe"
-          value={displayStats.profile_views.value.toLocaleString('de-DE')}
-          icon={<Eye className="w-5 h-5" />}
-          trend={{
-            value: displayStats.profile_views.change_percent,
-            direction: displayStats.profile_views.trend,
-          }}
-        />
-        <StatCard
-          title="Bewertung"
-          value={displayStats.avg_rating.value.toFixed(1)}
-          subtitle="von 5.0"
-          icon={<Star className="w-5 h-5" />}
-          trend={{
-            value: displayStats.avg_rating.change_percent,
-            direction: displayStats.avg_rating.trend,
-          }}
-        />
-        <StatCard
-          title="Antwortrate"
-          value={`${displayStats.response_rate.value}%`}
-          icon={<MessageCircle className="w-5 h-5" />}
-          trend={{
-            value: displayStats.response_rate.change_percent,
-            direction: displayStats.response_rate.trend,
-          }}
-        />
-        <StatCard
-          title="Stammkunden"
-          value={displayStats.repeat_clients.value}
-          icon={<Users className="w-5 h-5" />}
-          trend={{
-            value: displayStats.repeat_clients.change_percent,
-            direction: displayStats.repeat_clients.trend,
-          }}
-        />
+        {[
+          {
+            title: "Einnahmen",
+            value: formatCurrency(displayStats.total_earnings.value),
+            icon: <DollarSign className="w-5 h-5" />,
+            trend: {
+              value: displayStats.total_earnings.change_percent,
+              direction: displayStats.total_earnings.trend,
+            },
+            variant: "gradient" as const,
+          },
+          {
+            title: "Buchungen",
+            value: displayStats.total_bookings.value,
+            icon: <Calendar className="w-5 h-5" />,
+            trend: {
+              value: displayStats.total_bookings.change_percent,
+              direction: displayStats.total_bookings.trend,
+            },
+          },
+          {
+            title: "Profilaufrufe",
+            value: displayStats.profile_views.value.toLocaleString('de-DE'),
+            icon: <Eye className="w-5 h-5" />,
+            trend: {
+              value: displayStats.profile_views.change_percent,
+              direction: displayStats.profile_views.trend,
+            },
+          },
+          {
+            title: "Bewertung",
+            value: displayStats.avg_rating.value.toFixed(1),
+            subtitle: "von 5.0",
+            icon: <Star className="w-5 h-5" />,
+            trend: {
+              value: displayStats.avg_rating.change_percent,
+              direction: displayStats.avg_rating.trend,
+            },
+          },
+          {
+            title: "Antwortrate",
+            value: `${displayStats.response_rate.value}%`,
+            icon: <MessageCircle className="w-5 h-5" />,
+            trend: {
+              value: displayStats.response_rate.change_percent,
+              direction: displayStats.response_rate.trend,
+            },
+          },
+          {
+            title: "Stammkunden",
+            value: displayStats.repeat_clients.value,
+            icon: <Users className="w-5 h-5" />,
+            trend: {
+              value: displayStats.repeat_clients.change_percent,
+              direction: displayStats.repeat_clients.trend,
+            },
+          },
+        ].map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1, duration: 0.4 }}
+          >
+            <StatCard {...stat} />
+          </motion.div>
+        ))}
       </div>
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Earnings Chart */}
-        <ChartContainer
-          title="Einnahmen"
-          subtitle={`Gesamt: ${formatCurrency(displayEarnings.total)}`}
-          isEmpty={!displayEarnings.data.length}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
         >
-          <AnalyticsLineChart
-            data={displayEarnings.data as { date: string; value: number }[]}
-            formatYAxis="currency"
-            height={280}
-          />
-        </ChartContainer>
+          <ChartContainer
+            title="Einnahmen"
+            subtitle={`Gesamt: ${formatCurrency(displayEarnings.total)}`}
+            isEmpty={!displayEarnings.data.length}
+          >
+            <AnalyticsLineChart
+              data={displayEarnings.data as { date: string; value: number }[]}
+              formatYAxis="currency"
+              height={280}
+            />
+          </ChartContainer>
+        </motion.div>
 
         {/* Bookings Chart */}
-        <ChartContainer
-          title="Buchungen nach Tag"
-          subtitle={`Gesamt: ${displayBookings.total} Buchungen`}
-          isEmpty={!displayBookings.data.length}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85, duration: 0.5 }}
         >
-          <AnalyticsBarChart
-            data={displayBookings.data.map((d) => ({ name: d.date || '', value: d.value }))}
-            height={280}
-          />
-        </ChartContainer>
+          <ChartContainer
+            title="Buchungen nach Tag"
+            subtitle={`Gesamt: ${displayBookings.total} Buchungen`}
+            isEmpty={!displayBookings.data.length}
+          >
+            <AnalyticsBarChart
+              data={displayBookings.data.map((d) => ({ name: d.date || '', value: d.value }))}
+              height={280}
+            />
+          </ChartContainer>
+        </motion.div>
       </div>
 
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Booking Status Pie Chart */}
-        <ChartContainer
-          title="Buchungsstatus"
-          isEmpty={!bookingStatusData.some((d) => d.value > 0)}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.0, duration: 0.5 }}
         >
-          <AnalyticsPieChart
-            data={bookingStatusData}
-            height={260}
-            innerRadius={50}
-            outerRadius={80}
-            centerValue={displayBookings.total}
-            centerLabel="Gesamt"
-          />
-        </ChartContainer>
+          <ChartContainer
+            title="Buchungsstatus"
+            isEmpty={!bookingStatusData.some((d) => d.value > 0)}
+          >
+            <AnalyticsPieChart
+              data={bookingStatusData}
+              height={260}
+              innerRadius={50}
+              outerRadius={80}
+              centerValue={displayBookings.total}
+              centerLabel="Gesamt"
+            />
+          </ChartContainer>
+        </motion.div>
 
         {/* Monthly Comparison */}
-        <div className="lg:col-span-2">
+        <motion.div
+          className="lg:col-span-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.15, duration: 0.5 }}
+        >
           <ChartContainer
             title="Monatsvergleich"
             subtitle="Aktueller vs. vorheriger Monat"
@@ -353,31 +403,47 @@ export function ArtistAnalyticsPage() {
               </div>
             </div>
           </ChartContainer>
-        </div>
+        </motion.div>
       </div>
 
       {/* Tips Section */}
-      <div className="bg-gradient-to-br from-accent-purple/20 to-accent-red/20 rounded-xl border border-accent-purple/30 p-6">
+      <motion.div
+        className="bg-gradient-to-br from-accent-purple/20 to-accent-red/20 rounded-xl border border-accent-purple/30 p-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.3, duration: 0.5 }}
+      >
         <h3 className="text-lg font-semibold text-white mb-3">💡 Tipps zur Verbesserung</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white/5 rounded-lg p-4">
-            <p className="text-white/80 text-sm">
-              <strong className="text-white">Antwortrate verbessern:</strong> Beantworte Anfragen innerhalb von 2 Stunden für eine höhere Buchungsrate.
-            </p>
-          </div>
-          <div className="bg-white/5 rounded-lg p-4">
-            <p className="text-white/80 text-sm">
-              <strong className="text-white">Mehr Profilaufrufe:</strong> Füge mehr Fotos und Audio-Samples hinzu.
-            </p>
-          </div>
-          <div className="bg-white/5 rounded-lg p-4">
-            <p className="text-white/80 text-sm">
-              <strong className="text-white">Stammkunden gewinnen:</strong> Biete Rabatte für wiederkehrende Buchungen an.
-            </p>
-          </div>
+          {[
+            {
+              title: "Antwortrate verbessern:",
+              text: "Beantworte Anfragen innerhalb von 2 Stunden für eine höhere Buchungsrate."
+            },
+            {
+              title: "Mehr Profilaufrufe:",
+              text: "Füge mehr Fotos und Audio-Samples hinzu."
+            },
+            {
+              title: "Stammkunden gewinnen:",
+              text: "Biete Rabatte für wiederkehrende Buchungen an."
+            }
+          ].map((tip, index) => (
+            <motion.div
+              key={tip.title}
+              className="bg-white/5 rounded-lg p-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.4 + (index * 0.1), duration: 0.4 }}
+            >
+              <p className="text-white/80 text-sm">
+                <strong className="text-white">{tip.title}</strong> {tip.text}
+              </p>
+            </motion.div>
+          ))}
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

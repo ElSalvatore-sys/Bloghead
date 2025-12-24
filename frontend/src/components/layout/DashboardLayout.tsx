@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import { getFullNavigationForRole, type UserRole } from '../../config/navigationConfig'
 import { CreateEventButton } from '../event'
@@ -252,21 +253,31 @@ export function DashboardLayout() {
   return (
     <div className="min-h-screen bg-bg-primary flex">
       {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
-      <aside
-        className={`
-          fixed md:sticky top-0 left-0 z-50 h-screen w-64 bg-bg-card border-r border-white/10 flex flex-col
-          transform transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0
-        `}
+      <motion.aside
+        initial={false}
+        animate={{
+          x: sidebarOpen ? 0 : '-100%',
+        }}
+        transition={{
+          type: 'spring',
+          damping: 30,
+          stiffness: 300,
+        }}
+        className="fixed md:static top-0 left-0 z-50 h-screen w-64 bg-bg-card border-r border-white/10 flex flex-col md:translate-x-0"
       >
         {/* Close button - mobile only */}
         <button
@@ -343,7 +354,7 @@ export function DashboardLayout() {
             <span>Logout</span>
           </button>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto min-h-screen">

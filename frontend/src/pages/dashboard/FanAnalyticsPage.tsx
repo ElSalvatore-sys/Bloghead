@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import {
   Wallet,
   Calendar,
@@ -157,79 +158,110 @@ export function FanAnalyticsPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <motion.div
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div>
           <h1 className="text-3xl font-bold text-white">Meine Statistiken</h1>
           <p className="text-white/60 mt-1">{getPeriodLabel(period)}</p>
         </div>
         <DateRangePicker value={period} onChange={setPeriod} />
-      </div>
+      </motion.div>
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">
+        <motion.div
+          className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+        >
           {error}
-        </div>
+        </motion.div>
       )}
 
       {/* Key Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <StatCard
-          title="Ausgegeben"
-          value={formatCurrency(displayStats.total_spent.value)}
-          icon={<Wallet className="w-5 h-5" />}
-          trend={{
-            value: displayStats.total_spent.change_percent,
-            direction: displayStats.total_spent.trend,
-          }}
-          variant="gradient"
-        />
-        <StatCard
-          title="Events besucht"
-          value={displayStats.events_attended.value}
-          icon={<Calendar className="w-5 h-5" />}
-          trend={{
-            value: displayStats.events_attended.change_percent,
-            direction: displayStats.events_attended.trend,
-          }}
-        />
-        <StatCard
-          title="Künstler gebucht"
-          value={displayStats.artists_booked.value}
-          icon={<Heart className="w-5 h-5" />}
-          trend={{
-            value: displayStats.artists_booked.change_percent,
-            direction: displayStats.artists_booked.trend,
-          }}
-        />
-        <StatCard
-          title="Ø Buchungswert"
-          value={formatCurrency(displayStats.avg_booking_value.value)}
-          icon={<TrendingUp className="w-5 h-5" />}
-          trend={{
-            value: displayStats.avg_booking_value.change_percent,
-            direction: displayStats.avg_booking_value.trend,
-            inverted: true, // Lower is sometimes better
-          }}
-        />
-        <StatCard
-          title="Kommende Events"
-          value={displayStats.upcoming_events}
-          icon={<Ticket className="w-5 h-5" />}
-        />
-        <StatCard
-          title="Coins Guthaben"
-          value={displayStats.coins_balance}
-          icon={<Coins className="w-5 h-5" />}
-        />
+        {[
+          {
+            title: "Ausgegeben",
+            value: formatCurrency(displayStats.total_spent.value),
+            icon: <Wallet className="w-5 h-5" />,
+            trend: {
+              value: displayStats.total_spent.change_percent,
+              direction: displayStats.total_spent.trend,
+            },
+            variant: "gradient" as const,
+          },
+          {
+            title: "Events besucht",
+            value: displayStats.events_attended.value,
+            icon: <Calendar className="w-5 h-5" />,
+            trend: {
+              value: displayStats.events_attended.change_percent,
+              direction: displayStats.events_attended.trend,
+            },
+          },
+          {
+            title: "Künstler gebucht",
+            value: displayStats.artists_booked.value,
+            icon: <Heart className="w-5 h-5" />,
+            trend: {
+              value: displayStats.artists_booked.change_percent,
+              direction: displayStats.artists_booked.trend,
+            },
+          },
+          {
+            title: "Ø Buchungswert",
+            value: formatCurrency(displayStats.avg_booking_value.value),
+            icon: <TrendingUp className="w-5 h-5" />,
+            trend: {
+              value: displayStats.avg_booking_value.change_percent,
+              direction: displayStats.avg_booking_value.trend,
+              inverted: true,
+            },
+          },
+          {
+            title: "Kommende Events",
+            value: displayStats.upcoming_events,
+            icon: <Ticket className="w-5 h-5" />,
+          },
+          {
+            title: "Coins Guthaben",
+            value: displayStats.coins_balance,
+            icon: <Coins className="w-5 h-5" />,
+          },
+        ].map((stat, index) => (
+          <motion.div
+            key={stat.title}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: index * 0.1, duration: 0.4 }}
+          >
+            <StatCard {...stat} />
+          </motion.div>
+        ))}
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Spending Over Time */}
-        <div className="lg:col-span-2">
+        <motion.div
+          className="lg:col-span-2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+        >
           <ChartContainer
             title="Ausgaben über Zeit"
             subtitle={`Gesamt: ${formatCurrency(displaySpending.total)}`}
@@ -241,38 +273,54 @@ export function FanAnalyticsPage() {
               height={280}
             />
           </ChartContainer>
-        </div>
+        </motion.div>
 
         {/* Spending Breakdown */}
-        <ChartContainer
-          title="Ausgaben nach Kategorie"
-          isEmpty={!spendingBreakdownData.some((d) => d.value > 0)}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.85, duration: 0.5 }}
         >
-          <AnalyticsPieChart
-            data={spendingBreakdownData}
-            height={260}
-            innerRadius={50}
-            outerRadius={80}
-            centerValue={formatCurrency(displaySpending.total)}
-            centerLabel="Gesamt"
-          />
-        </ChartContainer>
+          <ChartContainer
+            title="Ausgaben nach Kategorie"
+            isEmpty={!spendingBreakdownData.some((d) => d.value > 0)}
+          >
+            <AnalyticsPieChart
+              data={spendingBreakdownData}
+              height={260}
+              innerRadius={50}
+              outerRadius={80}
+              centerValue={formatCurrency(displaySpending.total)}
+              centerLabel="Gesamt"
+            />
+          </ChartContainer>
+        </motion.div>
       </div>
 
       {/* Favorite Artists */}
-      <ChartContainer
-        title="Deine Lieblingskünstler"
-        subtitle="Basierend auf Buchungshäufigkeit"
-        isEmpty={displayFavorites.length === 0}
-        emptyMessage="Du hast noch keine Künstler gebucht"
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.0, duration: 0.5 }}
       >
-        <div className="space-y-3">
-          {displayFavorites.map((artist, index) => (
-            <Link
-              key={artist.artist_id}
-              to={`/artists/${artist.artist_id}`}
-              className="flex items-center gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group"
-            >
+        <ChartContainer
+          title="Deine Lieblingskünstler"
+          subtitle="Basierend auf Buchungshäufigkeit"
+          isEmpty={displayFavorites.length === 0}
+          emptyMessage="Du hast noch keine Künstler gebucht"
+        >
+          <div className="space-y-3">
+            {displayFavorites.map((artist, index) => (
+              <motion.div
+                key={artist.artist_id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.1 + (index * 0.1), duration: 0.4 }}
+              >
+                <Link
+                  to={`/artists/${artist.artist_id}`}
+                  className="flex items-center gap-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors group"
+                >
               {/* Rank */}
               <div className="w-8 h-8 rounded-full bg-accent-purple/20 flex items-center justify-center text-accent-purple font-bold">
                 {index + 1}
@@ -311,53 +359,57 @@ export function FanAnalyticsPage() {
                   {new Date(artist.last_booking_date).toLocaleDateString('de-DE')}
                 </p>
               </div>
-            </Link>
-          ))}
-        </div>
-      </ChartContainer>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </ChartContainer>
+      </motion.div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link
-          to="/artists"
-          className="bg-bg-card border border-white/10 rounded-xl p-6 hover:border-accent-purple/50 transition-colors group"
-        >
-          <Heart className="w-8 h-8 text-accent-purple mb-3" />
-          <h3 className="text-white font-semibold mb-1 group-hover:text-accent-purple transition-colors">
-            Neue Künstler entdecken
-          </h3>
-          <p className="text-white/60 text-sm">
-            Finde neue Künstler für deine nächste Veranstaltung
-          </p>
-        </Link>
-
-        <Link
-          to="/dashboard/bookings"
-          className="bg-bg-card border border-white/10 rounded-xl p-6 hover:border-accent-purple/50 transition-colors group"
-        >
-          <Calendar className="w-8 h-8 text-accent-purple mb-3" />
-          <h3 className="text-white font-semibold mb-1 group-hover:text-accent-purple transition-colors">
-            Buchungen verwalten
-          </h3>
-          <p className="text-white/60 text-sm">
-            Verwalte deine kommenden und vergangenen Buchungen
-          </p>
-        </Link>
-
-        <Link
-          to="/dashboard/coins"
-          className="bg-bg-card border border-white/10 rounded-xl p-6 hover:border-accent-purple/50 transition-colors group"
-        >
-          <Coins className="w-8 h-8 text-accent-purple mb-3" />
-          <h3 className="text-white font-semibold mb-1 group-hover:text-accent-purple transition-colors">
-            Coins kaufen
-          </h3>
-          <p className="text-white/60 text-sm">
-            Spare bei Buchungen mit Coins
-          </p>
-        </Link>
+        {[
+          {
+            to: "/artists",
+            icon: Heart,
+            title: "Neue Künstler entdecken",
+            description: "Finde neue Künstler für deine nächste Veranstaltung"
+          },
+          {
+            to: "/dashboard/bookings",
+            icon: Calendar,
+            title: "Buchungen verwalten",
+            description: "Verwalte deine kommenden und vergangenen Buchungen"
+          },
+          {
+            to: "/dashboard/coins",
+            icon: Coins,
+            title: "Coins kaufen",
+            description: "Spare bei Buchungen mit Coins"
+          }
+        ].map((action, index) => (
+          <motion.div
+            key={action.to}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.4 + (index * 0.1), duration: 0.4 }}
+          >
+            <Link
+              to={action.to}
+              className="bg-bg-card border border-white/10 rounded-xl p-6 hover:border-accent-purple/50 transition-colors group block"
+            >
+              <action.icon className="w-8 h-8 text-accent-purple mb-3" />
+              <h3 className="text-white font-semibold mb-1 group-hover:text-accent-purple transition-colors">
+                {action.title}
+              </h3>
+              <p className="text-white/60 text-sm">
+                {action.description}
+              </p>
+            </Link>
+          </motion.div>
+        ))}
       </div>
-    </div>
+    </motion.div>
   )
 }
 

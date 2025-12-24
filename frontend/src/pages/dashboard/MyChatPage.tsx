@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 import { ChatLayout } from '../../components/chat/ChatLayout'
 
@@ -10,7 +11,12 @@ export default function MyChatPage() {
   // Not logged in state
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#171717] pt-24 pb-16">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        className="min-h-screen bg-[#171717] pt-24 pb-16"
+      >
         <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
           <div className="mb-6">
@@ -39,12 +45,17 @@ export default function MyChatPage() {
             </a>
           </div>
         </div>
-      </div>
+      </motion.div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#171717] pt-24 pb-16">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="min-h-screen bg-[#171717] pt-24 pb-16"
+    >
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="mb-6">
@@ -80,6 +91,6 @@ export default function MyChatPage() {
           </a>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 // Placeholder data
 const mockEvents = [
@@ -53,7 +54,11 @@ export function EventsAttendedPage() {
   const pastEvents = mockEvents.filter(e => e.status === 'attended')
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
       <h1 className="text-3xl font-bold text-white mb-8">Besuchte Events</h1>
 
       {/* Upcoming Events */}
@@ -61,9 +66,14 @@ export function EventsAttendedPage() {
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-white mb-4">Kommende Events</h2>
           <div className="space-y-4">
-            {upcomingEvents.map((event) => (
-              <Link
+            {upcomingEvents.map((event, i) => (
+              <motion.div
                 key={event.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <Link
                 to={`/events/${event.id}`}
                 className="flex gap-4 bg-bg-card rounded-xl border border-white/10 p-4 hover:border-accent-purple/50 transition-colors"
               >
@@ -97,6 +107,7 @@ export function EventsAttendedPage() {
                   </div>
                 </div>
               </Link>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -121,9 +132,14 @@ export function EventsAttendedPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {pastEvents.map((event) => (
-              <Link
+            {pastEvents.map((event, i) => (
+              <motion.div
                 key={event.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + i * 0.05 }}
+              >
+                <Link
                 to={`/events/${event.id}`}
                 className="flex gap-4 bg-bg-card rounded-xl border border-white/10 p-4 hover:border-accent-purple/50 transition-colors"
               >
@@ -157,10 +173,11 @@ export function EventsAttendedPage() {
                   </div>
                 </div>
               </Link>
+              </motion.div>
             ))}
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }

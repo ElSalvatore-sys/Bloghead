@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   ImageUpload,
   FormSection,
@@ -269,21 +270,45 @@ export function ProfileEditPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <motion.div
+      className="min-h-screen bg-bg-primary"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
       {/* Error/Success Messages */}
-      {(error || saveError) && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-500/90 text-white px-6 py-3 rounded-lg shadow-lg">
-          {error || saveError}
-        </div>
-      )}
-      {saveSuccess && (
-        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500/90 text-white px-6 py-3 rounded-lg shadow-lg">
-          Profil erfolgreich gespeichert!
-        </div>
-      )}
+      <AnimatePresence>
+        {(error || saveError) && (
+          <motion.div
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-red-500/90 text-white px-6 py-3 rounded-lg shadow-lg"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {error || saveError}
+          </motion.div>
+        )}
+        {saveSuccess && (
+          <motion.div
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-green-500/90 text-white px-6 py-3 rounded-lg shadow-lg"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            Profil erfolgreich gespeichert!
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Cover Photo Section */}
-      <div className="relative">
+      <motion.div
+        className="relative"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+      >
         <ImageUpload
           type="cover"
           currentImage={coverImage}
@@ -291,17 +316,27 @@ export function ProfileEditPage() {
         />
 
         {/* Avatar - positioned at bottom of cover */}
-        <div className="absolute left-1/2 -translate-x-1/2 -bottom-16 md:-bottom-20">
+        <motion.div
+          className="absolute left-1/2 -translate-x-1/2 -bottom-16 md:-bottom-20"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
           <ImageUpload
             type="avatar"
             currentImage={avatarImage}
             onImageSelect={handleAvatarImageSelect}
           />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Page Title */}
-      <div className="pt-24 md:pt-28 pb-8 text-center">
+      <motion.div
+        className="pt-24 md:pt-28 pb-8 text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+      >
         <h1 className="font-display text-4xl md:text-5xl text-white">
           PROFIL BEARBEITEN
         </h1>
@@ -314,13 +349,18 @@ export function ProfileEditPage() {
             {userType === 'event_organizer' && 'Event Organizer'}
           </p>
         )}
-      </div>
+      </motion.div>
 
       {/* Form Container */}
       <div className="max-w-4xl mx-auto px-4 pb-32">
         <form onSubmit={(e) => e.preventDefault()} className="space-y-12">
           {/* Personal Data Section */}
-          <FormSection title="PERSÖNLICHE DATEN">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
+          >
+            <FormSection title="PERSÖNLICHE DATEN">
             <FormRow>
               <FormInput
                 label="Vorname"
@@ -367,11 +407,17 @@ export function ProfileEditPage() {
               />
             </FormRow>
           </FormSection>
+          </motion.div>
 
           {/* Artist Data Section - Only show for artists */}
           {userType === 'artist' && (
             <>
-              <FormSection title="KÜNSTLER DATEN">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.6 }}
+              >
+                <FormSection title="KÜNSTLER DATEN">
                 <FormRow>
                   <FormInput
                     label="Künstlername"
@@ -441,9 +487,15 @@ export function ProfileEditPage() {
                   />
                 </FormRow>
               </FormSection>
+              </motion.div>
 
               {/* Business Data Section */}
-              <FormSection title="GESCHÄFTSDATEN">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                <FormSection title="GESCHÄFTSDATEN">
                 <FormRow>
                   <FormInput
                     label="Firmenname"
@@ -502,9 +554,15 @@ export function ProfileEditPage() {
                   />
                 </FormRow>
               </FormSection>
+              </motion.div>
 
               {/* Media Section */}
-              <FormSection title="ÜBER MICH">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
+              >
+                <FormSection title="ÜBER MICH">
                 <FormRow columns={1}>
                   <FormTextarea
                     label="Something About Me"
@@ -563,9 +621,15 @@ export function ProfileEditPage() {
                   )}
                 </div>
               </FormSection>
+              </motion.div>
 
               {/* Calendar Section */}
-              <FormSection title="VERFÜGBARKEIT">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+              >
+                <FormSection title="VERFÜGBARKEIT">
                 <p className="text-sm text-white/60 mb-4">
                   Klicke auf Tage, um deine Verfügbarkeit anzusehen. Bearbeitungsfunktion kommt bald.
                 </p>
@@ -578,13 +642,19 @@ export function ProfileEditPage() {
                   <p className="text-white/40 text-sm">Lade Kalender...</p>
                 )}
               </FormSection>
+              </motion.div>
             </>
           )}
         </form>
       </div>
 
       {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-bg-primary border-t border-white/10 py-4 px-4 z-30">
+      <motion.div
+        className="fixed bottom-0 left-0 right-0 bg-bg-primary border-t border-white/10 py-4 px-4 z-30"
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+      >
         <div className="max-w-4xl mx-auto flex justify-end gap-4">
           <Button
             variant="outline"
@@ -611,7 +681,7 @@ export function ProfileEditPage() {
             )}
           </Button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
