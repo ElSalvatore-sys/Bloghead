@@ -48,25 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const RETRY_DELAY = 300 // ms - reduced for faster retries
 
     try {
-      console.log('[AuthContext] fetchUserProfile: Starting query for', userId, retryCount > 0 ? `(retry ${retryCount})` : '')
-
       const { data, error } = await supabase
         .from('users')
         .select('id, email, membername, vorname, nachname, user_type, profile_image_url, cover_image_url, is_verified, membership_tier, role')
         .eq('id', userId)
         .maybeSingle() // Use maybeSingle to avoid error when no row exists yet
 
-      console.log('[AuthContext] fetchUserProfile: Query returned', { data: data ? 'exists' : 'null', error: error?.message || 'none', code: error?.code })
-
       if (error) {
         // Retry on temporary errors or network issues
         if (retryCount < MAX_RETRIES) {
-          console.log(`[AuthContext] Query error, retrying in ${RETRY_DELAY}ms...`)
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
           return fetchUserProfile(userId, retryCount + 1)
         }
 
-        console.error('Error fetching user profile:', error)
         setUserProfile(null)
         return null
       }
@@ -74,19 +68,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // No error but no data - user might not exist in public.users yet
       if (!data) {
         if (retryCount < MAX_RETRIES) {
-          console.log(`[AuthContext] No profile data yet, retrying in ${RETRY_DELAY}ms...`)
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
           return fetchUserProfile(userId, retryCount + 1)
         }
-        console.log('[AuthContext] No profile found after retries')
         setUserProfile(null)
         return null
       }
 
       setUserProfile(data as UserProfile)
       return data as UserProfile
-    } catch (err) {
-      console.error('Error in fetchUserProfile:', err)
+    } catch {
       if (retryCount < MAX_RETRIES) {
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
         return fetchUserProfile(userId, retryCount + 1)
@@ -114,7 +105,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // - user_type is 'community' (default from OAuth trigger, hasn't explicitly chosen)
     // Note: Once user completes onboarding, they'll have 'fan', 'artist', 'service_provider', or 'event_organizer'
     const needsIt = !profile.user_type || profile.user_type === 'community'
-    console.log('[AuthContext] checkOnboardingNeeded:', { user_type: profile.user_type, needsOnboarding: needsIt })
     setNeedsOnboarding(needsIt)
   }, [])
 
@@ -128,7 +118,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const fetchProfileWithTimeout = async (userId: string, timeoutMs = 10000): Promise<UserProfile | null> => {
       const timeoutPromise = new Promise<null>((resolve) => {
         setTimeout(() => {
-          console.warn('[AuthContext] Profile fetch timed out after', timeoutMs, 'ms')
           resolve(null)
         }, timeoutMs)
       })
@@ -137,47 +126,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Get initial session
-    console.log('[AuthContext] Getting initial session...')
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('[AuthContext] Session retrieved:', session ? 'exists' : 'null')
       setSession(session)
       setUser(session?.user ?? null)
 
       // Fetch user profile from database if logged in
       if (session?.user?.id) {
-        console.log('[AuthContext] Fetching user profile for:', session.user.id)
         const profile = await fetchProfileWithTimeout(session.user.id)
-        console.log('[AuthContext] Profile fetched:', profile ? 'exists' : 'null')
         checkOnboardingNeeded(profile)
       } else {
         setUserProfile(null)
         checkOnboardingNeeded(null)
       }
-      console.log('[AuthContext] Setting loading to false')
       setLoading(false)
-    }).catch(err => {
-      console.error('[AuthContext] getSession error:', err)
+    }).catch(() => {
       setLoading(false)
     })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event: AuthChangeEvent, session: Session | null) => {
-        console.log('[AuthContext] onAuthStateChange:', _event, session ? 'session exists' : 'no session')
         setSession(session)
         setUser(session?.user ?? null)
 
         // Fetch user profile from database if logged in
         if (session?.user?.id) {
-          console.log('[AuthContext] onAuthStateChange: Fetching profile for', session.user.id)
           const profile = await fetchProfileWithTimeout(session.user.id)
-          console.log('[AuthContext] onAuthStateChange: Profile result', profile ? 'exists' : 'null')
           checkOnboardingNeeded(profile)
         } else {
           setUserProfile(null)
           checkOnboardingNeeded(null)
         }
-        console.log('[AuthContext] onAuthStateChange: Setting loading to false')
         setLoading(false)
       }
     )
@@ -207,7 +186,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     const redirectUrl = getOAuthRedirectUrl()
-    console.log('[AuthContext] signInWithGoogle: Starting OAuth with redirect:', redirectUrl)
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -220,15 +198,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    if (error) {
-      console.error('[AuthContext] signInWithGoogle: Error:', error)
-    }
     return { error }
   }
 
   const signInWithFacebook = async () => {
     const redirectUrl = getOAuthRedirectUrl()
-    console.log('[AuthContext] signInWithFacebook: Starting OAuth with redirect:', redirectUrl)
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'facebook',
@@ -237,9 +211,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    if (error) {
-      console.error('[AuthContext] signInWithFacebook: Error:', error)
-    }
     return { error }
   }
 
@@ -255,13 +226,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut()
 
       if (error) {
-        console.error('Sign out error:', error)
         // Force clear localStorage if Supabase signOut fails
         const keys = Object.keys(localStorage).filter(k => k.includes('sb-') || k.includes('supabase'))
         keys.forEach(k => localStorage.removeItem(k))
       }
-    } catch (err) {
-      console.error('Sign out exception:', err)
+    } catch {
       // Force clear on any error
       const keys = Object.keys(localStorage).filter(k => k.includes('sb-') || k.includes('supabase'))
       keys.forEach(k => localStorage.removeItem(k))

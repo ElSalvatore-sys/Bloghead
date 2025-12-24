@@ -41,10 +41,8 @@ export function ArtistMapView({
       try {
         setLoading(true);
         const data = await getArtistsWithLocations(userType, 200);
-        console.log('[ArtistMapView] Loaded artists:', data.length);
         setArtists(data);
-      } catch (err) {
-        console.error('[ArtistMapView] Error loading artists:', err);
+      } catch {
         setError('Fehler beim Laden der Künstler');
       } finally {
         setLoading(false);
@@ -214,8 +212,6 @@ export function ArtistMapView({
         markersRef.current.push(marker);
       });
 
-      console.log('[ArtistMapView] Added', markersRef.current.length, 'markers');
-
       // Fit bounds to show all markers
       if (artists.length > 1) {
         const bounds = new mapboxgl.LngLatBounds();
@@ -251,8 +247,7 @@ export function ArtistMapView({
         .setLngLat([longitude, latitude])
         .addTo(map.current);
 
-    } catch (err) {
-      console.error('[ArtistMapView] Geolocation error:', err);
+    } catch {
       setError('Standort konnte nicht ermittelt werden');
     } finally {
       setLocating(false);

@@ -22,13 +22,9 @@ export default function AuthCallbackPage() {
     processedRef.current = true
 
     const handleCallback = async () => {
-      console.log('[AuthCallback] Starting... (v2 - no manual exchange)')
-      console.log('[AuthCallback] URL:', window.location.href)
-
       // CRITICAL: Redirect www to non-www IMMEDIATELY
       if (window.location.hostname === 'www.blogyydev.xyz') {
         const newUrl = window.location.href.replace('www.blogyydev.xyz', 'blogyydev.xyz')
-        console.log('[AuthCallback] Redirecting www to non-www:', newUrl)
         window.location.replace(newUrl)
         return
       }
@@ -39,7 +35,6 @@ export default function AuthCallbackPage() {
       const errorDesc = params.get('error_description')
 
       if (error) {
-        console.error('[AuthCallback] OAuth error:', error, errorDesc)
         setErrorMessage(errorDesc || error)
         setStatus('error')
         return
@@ -48,7 +43,6 @@ export default function AuthCallbackPage() {
       // IMPORTANT: We do NOT manually exchange the code!
       // Supabase's detectSessionInUrl: true auto-handles the PKCE exchange
       // We just need to wait for the session to appear
-      console.log('[AuthCallback] Waiting for Supabase to process session (detectSessionInUrl: true)...')
 
       // Poll for session (Supabase auto-exchanges the code)
       let attempts = 0
@@ -56,16 +50,10 @@ export default function AuthCallbackPage() {
 
       const checkSession = async (): Promise<void> => {
         attempts++
-        console.log(`[AuthCallback] Checking for session (attempt ${attempts})...`)
 
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-        if (sessionError) {
-          console.error('[AuthCallback] Session error:', sessionError)
-        }
+        const { data: { session } } = await supabase.auth.getSession()
 
         if (session) {
-          console.log('[AuthCallback] Session found:', session.user?.email)
           await handleSuccess(session)
           return
         }
@@ -77,15 +65,12 @@ export default function AuthCallbackPage() {
         }
 
         // Max attempts reached
-        console.error('[AuthCallback] No session after max attempts')
         setErrorMessage('Anmeldung fehlgeschlagen. Bitte versuche es erneut.')
         setStatus('error')
       }
 
       // Also listen for auth state changes as backup
       const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('[AuthCallback] Auth state change:', event)
-
         if (event === 'SIGNED_IN' && session) {
           subscription.unsubscribe()
           await handleSuccess(session)
@@ -108,7 +93,6 @@ export default function AuthCallbackPage() {
       }
 
       setStatus('success')
-      console.log('[AuthCallback] Processing user:', session.user.email)
 
       // Check user profile for user_type
       const { data: profile } = await supabase
@@ -120,17 +104,13 @@ export default function AuthCallbackPage() {
       const userType = profile?.user_type
       const needsOnboarding = !userType || userType === '' || userType === 'community'
 
-      console.log('[AuthCallback] user_type:', userType, '| needsOnboarding:', needsOnboarding)
-
       // Clear code from URL
       window.history.replaceState({}, '', '/auth/callback')
 
       setTimeout(() => {
         if (needsOnboarding) {
-          console.log('[AuthCallback] → Redirecting to onboarding')
           navigate('/?onboarding=true', { replace: true })
         } else {
-          console.log('[AuthCallback] → Redirecting to dashboard')
           navigate('/dashboard', { replace: true })
         }
       }, 300)

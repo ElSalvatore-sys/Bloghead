@@ -137,8 +137,6 @@ export async function getBookingRequests(
   direction: 'incoming' | 'outgoing',
   status?: string
 ) {
-  console.log('[bookingService] Fetching requests:', { userId, direction, status })
-
   let query = supabase
     .from('booking_requests')
     .select(`
@@ -173,8 +171,6 @@ export async function getBookingRequests(
   query = query.order('created_at', { ascending: false })
 
   const { data, error } = await query
-
-  console.log('[bookingService] Query result:', { data, error, count: data?.length })
 
   return { data, error }
 }

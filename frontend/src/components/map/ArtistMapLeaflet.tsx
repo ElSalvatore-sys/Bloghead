@@ -117,10 +117,8 @@ export function ArtistMapLeaflet({
       try {
         setLoading(true);
         const data = await getArtistsWithLocations(userType, 200);
-        console.log('[ArtistMapLeaflet] Loaded artists:', data.length);
         setArtists(data);
-      } catch (err) {
-        console.error('[ArtistMapLeaflet] Error loading artists:', err);
+      } catch {
         setError('Fehler beim Laden der Künstler');
       } finally {
         setLoading(false);
@@ -136,8 +134,7 @@ export function ArtistMapLeaflet({
       const position = await getCurrentPosition();
       const { latitude, longitude } = position.coords;
       setUserPosition([latitude, longitude]);
-    } catch (err) {
-      console.error('[ArtistMapLeaflet] Geolocation error:', err);
+    } catch {
       setError('Standort konnte nicht ermittelt werden');
       setTimeout(() => setError(null), 3000);
     } finally {

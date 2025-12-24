@@ -18,19 +18,10 @@ const getCanonicalSiteUrl = (): string => {
 // This runs BEFORE Supabase client is created
 if (typeof window !== 'undefined' && window.location.hostname === 'www.blogyydev.xyz') {
   const newUrl = window.location.href.replace('www.blogyydev.xyz', 'blogyydev.xyz')
-  console.log('[Supabase] Redirecting www to non-www:', newUrl)
   window.location.replace(newUrl)
 }
 
-// Debug logging
-console.log('[Supabase] Initializing...')
-console.log('[Supabase] URL:', supabaseUrl ? `${supabaseUrl.substring(0, 35)}...` : 'MISSING')
-console.log('[Supabase] Environment:', import.meta.env.PROD ? 'production' : 'development')
-console.log('[Supabase] Canonical Site URL:', getCanonicalSiteUrl())
-console.log('[Supabase] Current hostname:', typeof window !== 'undefined' ? window.location.hostname : 'SSR')
-
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('[Supabase] Missing environment variables!')
   throw new Error('Missing Supabase environment variables. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
 }
 
@@ -48,11 +39,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // Export helper for OAuth redirects - ALWAYS uses canonical non-www URL
 export const getOAuthRedirectUrl = (): string => {
-  const url = `${getCanonicalSiteUrl()}/auth/callback`
-  console.log('[Supabase] OAuth redirect URL:', url)
-  return url
+  return `${getCanonicalSiteUrl()}/auth/callback`
 }
-
-console.log('[Supabase] Client initialized successfully')
 
 export { supabase as default }

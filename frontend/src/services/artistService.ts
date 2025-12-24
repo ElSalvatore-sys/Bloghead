@@ -62,9 +62,6 @@ function getPlaceholderImage(artistId: string): string {
 
 // Get list of artists with filters
 export async function getArtists(filters: ArtistFilters = {}) {
-  console.log('[artistService] Fetching artists with filters:', filters)
-  console.log('[artistService] Environment check - URL:', import.meta.env.VITE_SUPABASE_URL ? 'set' : 'MISSING')
-
   let query = supabase
     .from('artist_profiles')
     .select(`
@@ -125,8 +122,6 @@ export async function getArtists(filters: ArtistFilters = {}) {
   query = query.order('star_rating', { ascending: false })
 
   const { data, error, count } = await query
-
-  console.log('[artistService] Query result:', { data, error, count, dataLength: data?.length })
 
   if (error) {
     console.error('[artistService] Error fetching artists:', error)
@@ -235,8 +230,6 @@ export async function getArtistById(artistId: string) {
 
   // 3. FALLBACK: Try users table directly
   // This handles demo artists created via map view that only exist in users table
-  console.log('[artistService] Artist not in artist_profiles, trying users table for:', artistId)
-
   const { data: userData, error: userError } = await supabase
     .from('users')
     .select(`

@@ -89,7 +89,8 @@ export function CoinPurchaseModal({
       }, 2000)
     }
 
-    console.log('Payment succeeded:', paymentIntentId)
+    // Suppress unused variable warning
+    void paymentIntentId
   }
 
   const handlePaymentError = (error: string) => {

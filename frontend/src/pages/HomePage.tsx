@@ -24,24 +24,11 @@ export function HomePage() {
   const onboardingTriggeredRef = useRef(false)
   const pendingOnboardingRef = useRef(false) // Track if we're waiting for user to load
 
-  // Debug logging for auth state
-  useEffect(() => {
-    console.log('[HomePage] Auth state:', {
-      user: user?.email,
-      userType: userProfile?.user_type,
-      needsOnboarding,
-      loading,
-      showOnboarding,
-      pendingOnboarding: pendingOnboardingRef.current,
-      searchParams: searchParams.toString()
-    })
-  }, [user, userProfile, needsOnboarding, loading, showOnboarding, searchParams])
 
   // CRITICAL: Check for onboarding query param (from OAuth callback)
   // Must handle the case where user is not yet loaded (loading=true)
   useEffect(() => {
     const onboardingParam = searchParams.get('onboarding')
-    console.log('[HomePage] Checking onboarding param:', onboardingParam, 'user:', !!user, 'loading:', loading)
 
     if (onboardingParam === 'true') {
       // Mark that we want to show onboarding
@@ -54,12 +41,9 @@ export function HomePage() {
 
       // If user is already loaded, show modal now
       if (user && !loading) {
-        console.log('[HomePage] 🎯 Onboarding param detected, user loaded - showing modal NOW')
         setShowOnboarding(true)
         onboardingTriggeredRef.current = true
         pendingOnboardingRef.current = false
-      } else {
-        console.log('[HomePage] Onboarding param detected, waiting for user to load...')
       }
     }
   }, [searchParams, setSearchParams, user, loading])
@@ -67,7 +51,6 @@ export function HomePage() {
   // CRITICAL: Show onboarding when user finishes loading (if pending)
   useEffect(() => {
     if (!loading && user && pendingOnboardingRef.current && !showOnboarding) {
-      console.log('[HomePage] 🎯 User loaded, pending onboarding - showing modal NOW')
       setShowOnboarding(true)
       onboardingTriggeredRef.current = true
       pendingOnboardingRef.current = false
@@ -83,7 +66,6 @@ export function HomePage() {
       // Check if user hasn't dismissed onboarding before
       const dismissed = localStorage.getItem(`onboarding_dismissed_${user.id}`)
       if (!dismissed) {
-        console.log('[HomePage] 🎯 needsOnboarding is true, showing modal')
         setShowOnboarding(true)
       }
     }
@@ -101,7 +83,6 @@ export function HomePage() {
   }
 
   const handleOnboardingComplete = () => {
-    console.log('[HomePage] Onboarding complete, closing modal')
     setShowOnboarding(false)
     onboardingTriggeredRef.current = false
     completeOnboarding()
