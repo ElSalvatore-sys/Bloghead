@@ -74,7 +74,17 @@ See `docs/PHASE-8-SUMMARY.md` for full details.
 - ✅ Period-based filtering (7d, 30d, 90d, 12m)
 - ✅ Trend indicators and comparison data
 
-### ⏳ Phase 5+: Advanced Features (Future)
+### ✅ Phase 9: Notifications & Communication (Complete)
+See `docs/PHASE-9-SUMMARY.md` for full details.
+- ✅ Database migration (010_notifications.sql) with 4 tables and RPC functions
+- ✅ In-app notifications with bell icon and real-time toasts
+- ✅ NotificationCenter page (`/dashboard/notifications`)
+- ✅ NotificationPreferences page (`/dashboard/settings/notifications`)
+- ✅ 17 notification types with German localization
+- ✅ Reminder system (24h + 1h before events)
+- ✅ German email templates (10 templates)
+
+### ⏳ Phase 10+: Advanced Features (Future)
 See docs/PRODUCT-SPECIFICATIONS.md for full requirements:
 - Event planning wizard with AI
 - Messagebox/chat system
@@ -107,6 +117,7 @@ scp -r dist/* sysuser_5@h2976173.stratoserver.net:~/httpdocs/
 | `docs/PHASE-2-SUMMARY.md` | Frontend implementation details |
 | `docs/PHASE-4-STRIPE-INTEGRATION.md` | Stripe payment integration docs |
 | `docs/PHASE-8-SUMMARY.md` | Analytics & Dashboard system docs |
+| `docs/PHASE-9-SUMMARY.md` | Notifications & Communication docs |
 | `BlogHead_Styleguide.pdf` | Design system (colors, fonts) |
 | `BlogHead-Website-Ansicht.pdf` | Designer mockups |
 
