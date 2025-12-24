@@ -24,7 +24,7 @@ export interface AdminUser {
   banned_reason: string | null
   banned_by: string | null
   created_at: string
-  last_sign_in_at: string | null
+  last_login: string | null
 }
 
 export interface Payout {
@@ -210,7 +210,7 @@ export async function getUsers(
   try {
     let query = supabase
       .from('users')
-      .select('id, email, membername, vorname, nachname, user_type, role, is_verified, is_banned, banned_at, banned_reason, banned_by, created_at, last_sign_in_at', { count: 'exact' })
+      .select('id, email, membername, vorname, nachname, user_type, role, is_verified, is_banned, banned_at, banned_reason, banned_by, created_at, last_login', { count: 'exact' })
 
     if (search) {
       query = query.or(`email.ilike.%${search}%,membername.ilike.%${search}%`)

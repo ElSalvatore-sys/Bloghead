@@ -140,7 +140,7 @@ export function UserTable({
                 {formatDate(user.created_at)}
               </td>
               <td className="py-4 pr-4 text-gray-400">
-                {formatDate(user.last_sign_in_at)}
+                {formatDate(user.last_login)}
               </td>
               <td className="py-4">
                 <div className="flex items-center gap-2">

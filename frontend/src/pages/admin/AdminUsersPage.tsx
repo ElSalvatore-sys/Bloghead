@@ -126,7 +126,7 @@ export function AdminUsersPage() {
       { key: 'is_banned', label: 'Gesperrt' },
       { key: (row) => row.banned_reason || '', label: 'Sperrgrund' },
       { key: (row) => formatDateTimeCSV(row.created_at), label: 'Registriert' },
-      { key: (row) => formatDateTimeCSV(row.last_sign_in_at), label: 'Letzter Login' }
+      { key: (row) => formatDateTimeCSV(row.last_login), label: 'Letzter Login' }
     ]
     exportToCSV(users, 'benutzer', columns)
   }
