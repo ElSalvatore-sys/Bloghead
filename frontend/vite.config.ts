@@ -66,6 +66,16 @@ export default defineConfig({
     // Use esbuild for fast minification
     minify: 'esbuild',
 
+    // Disable modulepreload polyfill to prevent unnecessary preloads
+    modulePreload: {
+      polyfill: false,
+      // Only preload critical chunks, exclude heavy libraries like maps
+      resolveDependencies: (_filename, deps) => {
+        // Filter out map-related chunks from being preloaded
+        return deps.filter(dep => !dep.includes('vendor-maps'))
+      }
+    },
+
     // Manual chunk splitting for better caching
     rollupOptions: {
       output: {
