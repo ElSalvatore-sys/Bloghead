@@ -588,14 +588,14 @@ export function Header() {
             {location.pathname === '/' ? (
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="font-display text-2xl lg:text-3xl text-text-primary hover:opacity-80 transition-opacity cursor-pointer"
+                className="font-display text-2xl lg:text-3xl text-white hover:opacity-80 transition-opacity cursor-pointer"
               >
                 BLOGHEAD
               </button>
             ) : (
               <Link
                 to="/"
-                className="font-display text-2xl lg:text-3xl text-text-primary hover:opacity-80 transition-opacity"
+                className="font-display text-2xl lg:text-3xl text-white hover:opacity-80 transition-opacity"
               >
                 BLOGHEAD
               </Link>

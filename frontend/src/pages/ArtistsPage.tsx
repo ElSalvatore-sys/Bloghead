@@ -76,9 +76,9 @@ function ArtistCard({ artist }: ArtistCardProps) {
       {/* Content */}
       <div className="space-y-1.5">
         {/* Name */}
-        <h3 className="text-white font-bold text-lg uppercase tracking-wide">
+        <h2 className="text-white font-bold text-lg uppercase tracking-wide">
           {artist.kuenstlername || 'Unbekannter Künstler'}
-        </h3>
+        </h2>
 
         {/* Role */}
         <p className="text-text-secondary text-sm uppercase tracking-wider">

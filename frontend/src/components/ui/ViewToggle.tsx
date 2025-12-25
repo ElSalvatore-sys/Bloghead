@@ -14,6 +14,7 @@ export function ViewToggle({ view, onViewChange, className = '' }: ViewTogglePro
     <div className={`inline-flex items-center bg-bg-card border border-white/10 rounded-lg p-1 ${className}`}>
       <button
         onClick={() => onViewChange('grid')}
+        aria-label="Rasteransicht anzeigen"
         className={`relative z-10 flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
           view === 'grid' ? 'text-white' : 'text-white/60 hover:text-white'
         }`}
@@ -31,6 +32,7 @@ export function ViewToggle({ view, onViewChange, className = '' }: ViewTogglePro
 
       <button
         onClick={() => onViewChange('map')}
+        aria-label="Kartenansicht anzeigen"
         className={`relative z-10 flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
           view === 'map' ? 'text-white' : 'text-white/60 hover:text-white'
         }`}
