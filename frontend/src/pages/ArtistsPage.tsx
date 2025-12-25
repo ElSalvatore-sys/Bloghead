@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { updatePageMeta, pageSEO } from '../lib/seo'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -7,10 +7,12 @@ import { StarRating } from '../components/ui/StarRating'
 import { FavoriteButton } from '../components/ui/FavoriteButton'
 import { ViewToggle, type ViewMode } from '../components/ui/ViewToggle'
 import { FilterBar, type FilterBarFilters } from '../components/filters'
-import { ArtistMapLeaflet } from '../components/map'
 import { useArtists } from '../hooks/useArtists'
 import type { ArtistListItem } from '../services/artistService'
 import type { ArtistLocation } from '../services/mapService'
+
+// Lazy load map component to reduce initial bundle size (Leaflet ~150KB)
+const ArtistMapLeaflet = lazy(() => import('../components/map').then(m => ({ default: m.ArtistMapLeaflet })))
 
 // Location icon
 function LocationIcon({ className = '' }: { className?: string }) {
@@ -140,6 +142,18 @@ function ArtistCardSkeleton() {
         <div className="h-4 bg-white/10 rounded w-2/3" />
         <div className="h-4 bg-white/10 rounded w-1/3" />
         <div className="h-10 bg-white/10 rounded-full mt-4" />
+      </div>
+    </div>
+  )
+}
+
+// Map loading skeleton
+function MapLoadingSkeleton() {
+  return (
+    <div className="w-full h-[600px] rounded-lg bg-white/5 animate-pulse flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full border-4 border-accent-purple/20 border-t-accent-purple animate-spin" />
+        <p className="text-white/60">Karte wird geladen...</p>
       </div>
     </div>
   )
@@ -306,11 +320,13 @@ export function ArtistsPage() {
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.3 }}
               >
-                <ArtistMapLeaflet
-                  userType="artist"
-                  onArtistClick={handleArtistMapClick}
-                  className="shadow-2xl"
-                />
+                <Suspense fallback={<MapLoadingSkeleton />}>
+                  <ArtistMapLeaflet
+                    userType="artist"
+                    onArtistClick={handleArtistMapClick}
+                    className="shadow-2xl"
+                  />
+                </Suspense>
                 <p className="text-center text-white/40 text-sm mt-4">
                   Klicke auf einen Marker, um das Künstlerprofil zu öffnen
                 </p>
