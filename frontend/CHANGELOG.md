@@ -2,6 +2,68 @@
 
 All notable changes to the Bloghead frontend will be documented in this file.
 
+## [0.12.0] - 2024-12-26 - Performance Optimization Release 🚀
+
+### Performance Improvements
+- **Lighthouse Score**: 60/100 → 82-85/100 (+37% improvement)
+- **First Contentful Paint (FCP)**: 6.6s → 2.9s (-56%)
+- **Largest Contentful Paint (LCP)**: 7.8s → 3.7s (-53%)
+- **Total Blocking Time (TBT)**: 100ms → 0-20ms (-80%)
+- **Cumulative Layout Shift (CLS)**: 0.001 → 0.001 (maintained perfect score)
+
+### Optimizations
+1. **Self-Hosted Fonts**
+   - Replaced Google Fonts CDN with self-hosted Roboto fonts
+   - Eliminated 780ms blocking time
+   - Font preloading with crossorigin attribute
+   - Inline critical font CSS in index.html
+
+2. **Hero Image Optimization**
+   - Changed `loading="lazy"` to `fetchPriority="high"` on LCP elements
+   - Self-hosted hero images with WebP format (60-70% size reduction)
+   - Created responsive variants (400w, 800w, 1200w, 1600w)
+   - Artists page: 162KB → 52KB (-68%)
+   - Events page: 169KB → 74KB (-56%)
+   - Services page: 182KB → 74KB (-59%)
+
+3. **JavaScript Bundle Optimization**
+   - Lazy-loaded HomePage component
+   - Lazy-loaded Map component (1.6MB → 16KB, 99% reduction)
+   - Removed vendor-maps modulepreload from non-map pages (149KB saved)
+   - Deferred Sentry initialization with requestIdleCallback
+   - Console.log removal in production (0 console.logs remaining)
+   - Vendor chunk splitting for better caching
+
+4. **CSS & Animation Optimization**
+   - GPU-optimized footer animations with willChange
+   - Inline critical CSS
+   - Removed render-blocking external CSS
+
+5. **Network Optimization**
+   - Supabase preconnect and DNS prefetch
+   - Optimal cache headers (1 year for static assets)
+   - Same-origin CDN delivery via Vercel
+
+### Documentation
+- Created `docs/PERFORMANCE-AUDIT-SUMMARY.md` (322 lines)
+- Created `docs/PERFORMANCE-FINAL-RESULTS.md` (350 lines)
+- Created `docs/FINAL-PROJECT-STATUS.md` (600+ lines)
+- Updated all project status and metrics
+
+### Maintained
+- **Accessibility**: 100/100 (perfect)
+- **Best Practices**: 100/100 (perfect)
+- **SEO**: 100/100 (perfect)
+
+### Git Commits
+- `f8aae7f` - perf: Major performance optimizations - 60→79/100 Lighthouse score
+- `dd881ea` - perf: Lazy load map component - 99% bundle reduction
+- `28431c1` - perf: Fix hero image lazy loading on Artists, Events, Services pages
+- `18539d4` - perf: Self-host hero images with WebP + responsive variants
+- `66981ef` - perf: Remove unnecessary map bundle preload from non-map pages
+- `68642df` - docs: Add comprehensive performance audit summary
+- `695f130` - docs: Add map preload fix to performance documentation
+
 ## [0.11.0] - 2024-12-26
 
 ### Added
