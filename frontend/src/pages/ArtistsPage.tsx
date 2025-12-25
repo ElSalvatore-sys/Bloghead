@@ -230,7 +230,12 @@ export function ArtistsPage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1920&h=600&fit=crop"
+            src="/images/heroes/artists-hero.webp"
+            srcSet="/images/heroes/responsive/artists-hero-400w.webp 400w,
+                    /images/heroes/responsive/artists-hero-800w.webp 800w,
+                    /images/heroes/responsive/artists-hero-1200w.webp 1200w,
+                    /images/heroes/responsive/artists-hero-1600w.webp 1600w"
+            sizes="100vw"
             alt="Artists background"
             fetchPriority="high"
             decoding="async"

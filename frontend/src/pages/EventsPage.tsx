@@ -76,7 +76,12 @@ export function EventsPage() {
       {/* Hero Section */}
       <div className="relative h-64 md:h-80 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600"
+          src="/images/heroes/events-hero.webp"
+          srcSet="/images/heroes/responsive/events-hero-400w.webp 400w,
+                  /images/heroes/responsive/events-hero-800w.webp 800w,
+                  /images/heroes/responsive/events-hero-1200w.webp 1200w,
+                  /images/heroes/responsive/events-hero-1600w.webp 1600w"
+          sizes="100vw"
           alt="Events background"
           fetchPriority="high"
           decoding="async"

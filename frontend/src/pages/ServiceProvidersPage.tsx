@@ -129,7 +129,12 @@ export function ServiceProvidersPage() {
         {/* Background Image */}
         <div className="absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1920&h=600&fit=crop"
+            src="/images/heroes/services-hero.webp"
+            srcSet="/images/heroes/responsive/services-hero-400w.webp 400w,
+                    /images/heroes/responsive/services-hero-800w.webp 800w,
+                    /images/heroes/responsive/services-hero-1200w.webp 1200w,
+                    /images/heroes/responsive/services-hero-1600w.webp 1600w"
+            sizes="100vw"
             alt="Services background"
             fetchPriority="high"
             decoding="async"
