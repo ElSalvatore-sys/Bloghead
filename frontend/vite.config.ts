@@ -53,12 +53,17 @@ export default defineConfig({
     },
   },
 
+  // Drop console and debugger statements in production
+  esbuild: {
+    drop: ['console', 'debugger'],
+  },
+
   // Build optimizations
   build: {
     // Target modern browsers for smaller bundle
     target: 'es2020',
 
-    // Enable minification with esbuild (default, fast)
+    // Use esbuild for fast minification
     minify: 'esbuild',
 
     // Manual chunk splitting for better caching
@@ -111,6 +116,10 @@ export default defineConfig({
           // Lucide icons
           if (id.includes('node_modules/lucide-react')) {
             return 'vendor-icons'
+          }
+          // Sentry (loaded async, separate chunk)
+          if (id.includes('node_modules/@sentry')) {
+            return 'vendor-sentry'
           }
         },
 

@@ -50,6 +50,8 @@
   <!-- Preconnect to external resources -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://yyplbhrqtaeyzmcxpfli.supabase.co" />
+  <link rel="dns-prefetch" href="https://yyplbhrqtaeyzmcxpfli.supabase.co" />
 
   <!-- Google Fonts - Roboto (WOFF2, cached across sites) -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
@@ -69,7 +71,37 @@
   <meta name="geo.placename" content="Germany" />
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Inline critical CSS for instant loading state (no FOUC) -->
+    <style>
+      .app-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #171717;
+        z-index: 9999;
+      }
+      .app-loader-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #333;
+        border-top-color: #610AD1;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+    <div class="app-loader">
+      <div class="app-loader-spinner"></div>
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

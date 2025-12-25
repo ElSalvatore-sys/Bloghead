@@ -1,15 +1,15 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Layout, DashboardLayout, AdminLayout } from './components/layout'
-import { HomePage } from './pages'
 import { CookieConsent } from './components/ui/CookieConsent'
 import { ProtectedRoute, RoleGuard } from './components/auth'
 import { AdminGuard } from './components/admin'
 import { AuthProvider } from './contexts/AuthContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 
-// Lazy load all pages except HomePage for better initial load
+// Lazy load ALL pages (including HomePage) for optimal initial load performance
 // Using .then() to convert named exports to default exports for React.lazy()
+const HomePage = lazy(() => import('./pages').then(m => ({ default: m.HomePage })))
 const ArtistsPage = lazy(() => import('./pages/ArtistsPage').then(m => ({ default: m.ArtistsPage })))
 const ArtistProfilePage = lazy(() => import('./pages/ArtistProfilePage').then(m => ({ default: m.ArtistProfilePage })))
 const EventsPage = lazy(() => import('./pages/EventsPage').then(m => ({ default: m.EventsPage })))
