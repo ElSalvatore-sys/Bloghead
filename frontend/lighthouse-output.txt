@@ -1,0 +1,3 @@
+"" is not a valid 'output' value. Argument 'output' must be an array from choices "json", "html", "csv"
+
+Specify --help for available options
