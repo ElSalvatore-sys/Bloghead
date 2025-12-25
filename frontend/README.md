@@ -278,3 +278,4 @@ Proprietary - All rights reserved
 ---
 
 **Built with ❤️ in Germany** 🇩🇪
+# Accessibility Improvements
