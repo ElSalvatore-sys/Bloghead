@@ -39,22 +39,21 @@
   <!-- Canonical -->
   <link rel="canonical" href="https://blogyydev.xyz/" />
 
-  <!-- Preload LCP Image (CRITICAL for performance) -->
-  <!-- Desktop: full resolution -->
-  <link rel="preload" as="image" href="/images/alexandre-st-louis-IlfpKwRMln0-unsplash.webp" type="image/webp" fetchpriority="high" media="(min-width: 1200px)" />
-  <!-- Tablet: 1200w -->
-  <link rel="preload" as="image" href="/images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-1200w.webp" type="image/webp" fetchpriority="high" media="(min-width: 800px) and (max-width: 1199px)" />
-  <!-- Mobile: 800w -->
-  <link rel="preload" as="image" href="/images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-800w.webp" type="image/webp" fetchpriority="high" media="(max-width: 799px)" />
-
-  <!-- Preconnect to external resources -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- Preconnect to Supabase (critical resource) -->
   <link rel="preconnect" href="https://yyplbhrqtaeyzmcxpfli.supabase.co" />
   <link rel="dns-prefetch" href="https://yyplbhrqtaeyzmcxpfli.supabase.co" />
 
-  <!-- Google Fonts - Roboto (WOFF2, cached across sites) -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <!-- Preload critical self-hosted fonts (eliminates Google Fonts blocking) -->
+  <link rel="preload" href="/fonts/roboto-400.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="/fonts/roboto-700.woff2" as="font" type="font/woff2" crossorigin />
+
+  <!-- Preload LCP Image (CRITICAL for performance) -->
+  <!-- Desktop: 1600w (102KB - optimized for LCP) -->
+  <link rel="preload" as="image" href="/images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-1600w.webp" type="image/webp" fetchpriority="high" media="(min-width: 1200px)" />
+  <!-- Tablet: 1200w (64KB) -->
+  <link rel="preload" as="image" href="/images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-1200w.webp" type="image/webp" fetchpriority="high" media="(min-width: 800px) and (max-width: 1199px)" />
+  <!-- Mobile: 800w (31KB) -->
+  <link rel="preload" as="image" href="/images/responsive/alexandre-st-louis-IlfpKwRMln0-unsplash-800w.webp" type="image/webp" fetchpriority="high" media="(max-width: 799px)" />
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -69,35 +68,88 @@
   <meta name="format-detection" content="telephone=no" />
   <meta name="geo.region" content="DE" />
   <meta name="geo.placename" content="Germany" />
+
+  <!-- Critical inline CSS (eliminates render-blocking) -->
+  <style>
+    /* Self-hosted Roboto font (eliminates 780ms Google Fonts blocking) */
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 300;
+      font-display: swap;
+      src: url('/fonts/roboto-300.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url('/fonts/roboto-400.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url('/fonts/roboto-500.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'Roboto';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url('/fonts/roboto-700.woff2') format('woff2');
+    }
+
+    /* Critical base styles */
+    :root {
+      --bg-primary: #171717;
+      --accent-purple: #610AD1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-primary);
+      font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Loading state (instant, no FOUC) */
+    .app-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-primary);
+      z-index: 9999;
+    }
+
+    .app-loader-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #333;
+      border-top-color: var(--accent-purple);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      will-change: transform;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
   <div id="root">
-    <!-- Inline critical CSS for instant loading state (no FOUC) -->
-    <style>
-      .app-loader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #171717;
-        z-index: 9999;
-      }
-      .app-loader-spinner {
-        width: 40px;
-        height: 40px;
-        border: 3px solid #333;
-        border-top-color: #610AD1;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    </style>
     <div class="app-loader">
       <div class="app-loader-spinner"></div>
     </div>
