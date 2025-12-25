@@ -131,7 +131,7 @@ export function ServiceProvidersPage() {
           <img
             src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1920&h=600&fit=crop"
             alt="Services background"
-            loading="lazy"
+            fetchPriority="high"
             decoding="async"
             className="w-full h-full object-cover grayscale"
           />

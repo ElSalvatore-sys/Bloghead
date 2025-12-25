@@ -78,7 +78,7 @@ export function EventsPage() {
         <img
           src="https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1600"
           alt="Events background"
-          loading="lazy"
+          fetchPriority="high"
           decoding="async"
           className="w-full h-full object-cover"
         />
