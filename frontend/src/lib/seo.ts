@@ -117,6 +117,12 @@ export const pageSEO = {
       'Datenschutzerklaerung von Bloghead. Informationen zur Verarbeitung deiner Daten.',
     url: '/datenschutz',
   },
+  venues: {
+    title: 'Locations finden',
+    description:
+      'Entdecke Clubs, Bars, Konzerthallen und weitere Veranstaltungsorte in Deutschland. Finde die perfekte Location fuer dein Event.',
+    url: '/venues',
+  },
 }
 
 /**

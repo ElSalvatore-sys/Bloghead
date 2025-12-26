@@ -32,6 +32,10 @@ const baseNavItems: NavItem[] = [
     href: '/artists',
   },
   {
+    label: 'LOCATIONS',
+    href: '/venues',
+  },
+  {
     label: 'EVENTS',
     href: '/events',
     dropdown: [

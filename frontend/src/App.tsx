@@ -46,6 +46,13 @@ const FanAnalyticsPage = lazy(() => import('./pages/dashboard/FanAnalyticsPage')
 const NotificationCenterPage = lazy(() => import('./pages/dashboard/NotificationCenterPage').then(m => ({ default: m.NotificationCenterPage })))
 const NotificationPreferencesPage = lazy(() => import('./pages/dashboard/NotificationPreferencesPage').then(m => ({ default: m.NotificationPreferencesPage })))
 
+// Venue pages
+const VenuesPage = lazy(() => import('./pages/VenuesPage').then(m => ({ default: m.VenuesPage })))
+const VenueProfilePage = lazy(() => import('./pages/VenueProfilePage').then(m => ({ default: m.VenueProfilePage })))
+const VenueRegistrationPage = lazy(() => import('./pages/VenueRegistrationPage').then(m => ({ default: m.VenueRegistrationPage })))
+const VenueEditPage = lazy(() => import('./pages/VenueEditPage').then(m => ({ default: m.VenueEditPage })))
+const VenueDashboard = lazy(() => import('./pages/dashboard/VenueDashboard').then(m => ({ default: m.VenueDashboard })))
+
 // Legacy Dashboard pages (default exports - keeping for backward compatibility)
 const LegacyMyRequestsPage = lazy(() => import('./pages/dashboard/MyRequestsPage'))
 const LegacyMyCommunityPage = lazy(() => import('./pages/dashboard/MyCommunityPage'))
@@ -90,6 +97,8 @@ function App() {
                 <Route path="/events/:id" element={<EventDetailPage />} />
                 <Route path="/services" element={<ServiceProvidersPage />} />
                 <Route path="/services/:id" element={<ServiceProviderProfilePage />} />
+                <Route path="/venues" element={<VenuesPage />} />
+                <Route path="/venues/:slug" element={<VenueProfilePage />} />
                 <Route path="/impressum" element={<ImpressumPage />} />
                 <Route path="/kontakt" element={<KontaktPage />} />
                 <Route path="/datenschutz" element={<DatenschutzPage />} />
@@ -98,6 +107,8 @@ function App() {
                 {/* Protected Routes with Layout */}
                 <Route path="/profile/edit" element={<ProtectedRoute><ProfileEditPage /></ProtectedRoute>} />
                 <Route path="/events/create" element={<ProtectedRoute><CreateEventPage /></ProtectedRoute>} />
+                <Route path="/venues/register" element={<ProtectedRoute><VenueRegistrationPage /></ProtectedRoute>} />
+                <Route path="/venues/:slug/edit" element={<ProtectedRoute><VenueEditPage /></ProtectedRoute>} />
               </Route>
 
               {/* Dashboard Routes - Protected with DashboardLayout (no Header/Footer) */}
@@ -114,6 +125,9 @@ function App() {
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="notifications" element={<NotificationCenterPage />} />
                 <Route path="settings/notifications" element={<NotificationPreferencesPage />} />
+
+                {/* Venue Owner pages */}
+                <Route path="venue" element={<VenueDashboard />} />
 
                 {/* Fan pages - protected by user_type */}
                 <Route path="favorites" element={<RoleGuard allowedUserTypes={['fan']}><FavoritesPage /></RoleGuard>} />
