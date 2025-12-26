@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import {
   HeroSection,
   AboutSection,
@@ -93,84 +92,29 @@ export function HomePage() {
 
   return (
     <div className="scroll-smooth">
-      {/* Hero Section - Main banner with Bloghead branding */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6 }}
-      >
-        <HeroSection onMemberClick={handleMemberClick} />
-      </motion.div>
+      {/* Hero Section - Main banner with Bloghead branding (No animation for better LCP) */}
+      <HeroSection onMemberClick={handleMemberClick} />
 
       {/* About Section - Introduction to the platform */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.5 }}
-      >
-        <AboutSection />
-      </motion.div>
+      <AboutSection />
 
       {/* Features Section - Platform USP and benefits */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <FeaturesSection onRegisterClick={handleMemberClick} />
-      </motion.div>
+      <FeaturesSection onRegisterClick={handleMemberClick} />
 
       {/* Artists Carousel Section - Featured artists with member benefits */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <ArtistsCarouselSection onMemberClick={handleMemberClick} />
-      </motion.div>
+      <ArtistsCarouselSection onMemberClick={handleMemberClick} />
 
       {/* Member CTA Section - Call to action for registration */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <MemberCTASection onMemberClick={handleMemberClick} />
-      </motion.div>
+      <MemberCTASection onMemberClick={handleMemberClick} />
 
       {/* Vorteile Member Section - Member benefits */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <VorteileMemberSection onMemberClick={handleMemberClick} />
-      </motion.div>
+      <VorteileMemberSection onMemberClick={handleMemberClick} />
 
       {/* Events Section - Upcoming events showcase */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
-        <EventsSection />
-      </motion.div>
+      <EventsSection />
 
       {/* VR Experiences Section - Virtual reality concerts */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-100px' }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-      >
-        <VRExperiencesSection />
-      </motion.div>
+      <VRExperiencesSection />
 
       {/* Registration Modal */}
       <RegisterModal
