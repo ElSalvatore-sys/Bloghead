@@ -37,6 +37,7 @@ export function StarRating({
             type="button"
             disabled={!interactive}
             onClick={() => handleClick(value)}
+            aria-label={interactive ? `Rate ${value} out of ${maxRating} stars` : `${value} of ${maxRating} stars`}
             className={`
               ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : 'cursor-default'}
               disabled:cursor-default
