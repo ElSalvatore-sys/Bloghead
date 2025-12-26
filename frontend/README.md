@@ -1,9 +1,10 @@
 # 🎸 Bloghead - Artist Booking Platform
 
 [![Production](https://img.shields.io/badge/production-live-brightgreen)](https://blogyydev.xyz)
-[![Lighthouse Performance](https://img.shields.io/badge/performance-91%25-brightgreen)](https://blogyydev.xyz)
+[![Lighthouse Performance](https://img.shields.io/badge/performance-98%25-brightgreen)](https://blogyydev.xyz)
 [![Lighthouse Accessibility](https://img.shields.io/badge/accessibility-100%25-brightgreen)](https://blogyydev.xyz)
 [![Lighthouse SEO](https://img.shields.io/badge/SEO-100%25-brightgreen)](https://blogyydev.xyz)
+[![Best Practices](https://img.shields.io/badge/best_practices-100%25-brightgreen)](https://blogyydev.xyz)
 
 Professional platform connecting musicians, DJs, and performers with event organizers and venues in Germany.
 
