@@ -3,14 +3,17 @@
 // Main page for browsing and searching venues
 // ============================================
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { updatePageMeta, pageSEO } from '../lib/seo';
 import { motion } from 'framer-motion';
-import { MapPin, Search, AlertCircle } from 'lucide-react';
+import { MapPin, AlertCircle, Grid3X3, Map } from 'lucide-react';
 import {
   VenueSearchFilters,
   VenueGrid,
 } from '../components/venues';
+
+// Lazy load the map component
+const VenueMapView = lazy(() => import('../components/venues').then(m => ({ default: m.VenueMapView })));
 import {
   searchVenues,
   toggleVenueFavorite,
@@ -49,6 +52,9 @@ export function VenuesPage() {
 
   // Mobile filter visibility
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // View mode (grid or map)
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
 
   // Load favorites on mount
   useEffect(() => {
@@ -177,7 +183,7 @@ export function VenuesPage() {
             />
           </motion.div>
 
-          {/* Results Summary */}
+          {/* Results Summary & View Toggle */}
           {searchResult && !isLoading && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -188,11 +194,41 @@ export function VenuesPage() {
                 {searchResult.total} Location{searchResult.total !== 1 ? 's' : ''} gefunden
               </p>
 
-              {searchResult.page && searchResult.total > 0 && (
-                <p className="text-text-muted text-sm">
-                  Seite {searchResult.page} von {Math.ceil(searchResult.total / filters.limit)}
-                </p>
-              )}
+              <div className="flex items-center gap-4">
+                {searchResult.page && searchResult.total > 0 && (
+                  <p className="text-text-muted text-sm hidden md:block">
+                    Seite {searchResult.page} von {Math.ceil(searchResult.total / filters.limit)}
+                  </p>
+                )}
+
+                {/* View Toggle */}
+                <div className="flex items-center gap-1 bg-bg-card border border-white/10 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                      viewMode === 'grid'
+                        ? 'bg-accent-purple text-white'
+                        : 'text-text-secondary hover:text-text-primary'
+                    }`}
+                    title="Gitteransicht"
+                  >
+                    <Grid3X3 className="w-4 h-4" />
+                    <span className="text-sm font-medium hidden sm:inline">Gitter</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('map')}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md transition-colors ${
+                      viewMode === 'map'
+                        ? 'bg-accent-purple text-white'
+                        : 'text-text-secondary hover:text-text-primary'
+                    }`}
+                    title="Kartenansicht"
+                  >
+                    <Map className="w-4 h-4" />
+                    <span className="text-sm font-medium hidden sm:inline">Karte</span>
+                  </button>
+                </div>
+              </div>
             </motion.div>
           )}
 
@@ -219,18 +255,37 @@ export function VenuesPage() {
             </motion.div>
           )}
 
-          {/* Venues Grid */}
+          {/* Venues Grid or Map */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.3 }}
           >
-            <VenueGrid
-              venues={venues}
-              onFavoriteToggle={handleFavoriteToggle}
-              favoritedIds={favoritedIds}
-              isLoading={isLoading}
-            />
+            {viewMode === 'grid' ? (
+              <VenueGrid
+                venues={venues}
+                onFavoriteToggle={handleFavoriteToggle}
+                favoritedIds={favoritedIds}
+                isLoading={isLoading}
+              />
+            ) : (
+              <Suspense
+                fallback={
+                  <div className="flex items-center justify-center h-[600px] bg-bg-card rounded-xl">
+                    <div className="text-center">
+                      <div className="w-12 h-12 border-4 border-white/20 border-t-accent-purple rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-text-secondary">Karte wird geladen...</p>
+                    </div>
+                  </div>
+                }
+              >
+                <VenueMapView
+                  venues={venues}
+                  height="600px"
+                  showControls={true}
+                />
+              </Suspense>
+            )}
           </motion.div>
 
           {/* Pagination */}

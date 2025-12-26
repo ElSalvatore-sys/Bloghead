@@ -62,6 +62,7 @@ const LegacyMyCoinsPage = lazy(() => import('./pages/dashboard/MyCoinsPage'))
 // Admin pages
 const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })))
 const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage').then(m => ({ default: m.AdminUsersPage })))
+const AdminVenuesPage = lazy(() => import('./pages/admin/AdminVenuesPage').then(m => ({ default: m.AdminVenuesPage })))
 const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPage').then(m => ({ default: m.AdminReportsPage })))
 const AdminAnnouncementsPage = lazy(() => import('./pages/admin/AdminAnnouncementsPage').then(m => ({ default: m.AdminAnnouncementsPage })))
 const AdminTicketsPage = lazy(() => import('./pages/admin/AdminTicketsPage').then(m => ({ default: m.AdminTicketsPage })))
@@ -170,6 +171,7 @@ function App() {
               >
                 <Route index element={<AdminDashboardPage />} />
                 <Route path="users" element={<AdminUsersPage />} />
+                <Route path="venues" element={<AdminVenuesPage />} />
                 <Route path="reports" element={<AdminReportsPage />} />
                 <Route path="announcements" element={<AdminAnnouncementsPage />} />
                 <Route path="tickets" element={<AdminTicketsPage />} />

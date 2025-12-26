@@ -5,3 +5,5 @@ export { VenueEquipmentList } from './VenueEquipmentList';
 export { VenueHoursDisplay } from './VenueHoursDisplay';
 export { VenueRoomCard } from './VenueRoomCard';
 export { VenueSearchFilters } from './VenueSearchFilters';
+export { VenueMapView } from './VenueMapView';
+export { VenueBookingModal } from './VenueBookingModal';

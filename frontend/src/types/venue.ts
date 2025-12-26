@@ -448,6 +448,8 @@ export interface VenueCardData {
   is_verified: boolean;
   rating?: number;
   total_reviews?: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Day names in German
