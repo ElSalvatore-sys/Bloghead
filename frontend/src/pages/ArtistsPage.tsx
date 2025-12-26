@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, lazy, Suspense } from 'react'
+import { useState, useMemo, useEffect, lazy, Suspense, memo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { updatePageMeta, pageSEO } from '../lib/seo'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -24,13 +24,13 @@ function LocationIcon({ className = '' }: { className?: string }) {
   )
 }
 
-// Artist Card Component - adapted for Supabase data
+// Artist Card Component - adapted for Supabase data (Optimized with React.memo)
 interface ArtistCardProps {
   artist: ArtistListItem
 }
 
-function ArtistCard({ artist }: ArtistCardProps) {
-  // Format price range
+const ArtistCard = memo(function ArtistCard({ artist }: ArtistCardProps) {
+  // Format price range (moved to memo to prevent recalculation)
   const priceRange = useMemo(() => {
     if (artist.preis_pro_stunde && artist.preis_pro_veranstaltung) {
       return `€${artist.preis_pro_stunde} - €${artist.preis_pro_veranstaltung}`
@@ -47,14 +47,7 @@ function ArtistCard({ artist }: ArtistCardProps) {
     'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop'
 
   return (
-    <motion.div
-      className="group flex flex-col"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ duration: 0.4 }}
-      whileHover={{ y: -8, transition: { duration: 0.3 } }}
-    >
+    <div className="group flex flex-col transition-transform duration-300 hover:-translate-y-2">
       {/* Image Container */}
       <div className="relative aspect-square mb-4 overflow-hidden rounded-lg">
         <img
@@ -114,22 +107,20 @@ function ArtistCard({ artist }: ArtistCardProps) {
         </div>
 
         {/* CTA Button */}
-        <Link to={`/artists/${artist.id}`}>
-          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-            <Button
-              variant="secondary"
-              size="sm"
-              fullWidth
-              className="mt-3 rounded-full border-white/30 hover:border-white/50 uppercase tracking-wider"
-            >
-              Profil Ansehen
-            </Button>
-          </motion.div>
+        <Link to={`/artists/${artist.id}`} className="block">
+          <Button
+            variant="secondary"
+            size="sm"
+            fullWidth
+            className="mt-3 rounded-full border-white/30 hover:border-white/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 uppercase tracking-wider"
+          >
+            Profil Ansehen
+          </Button>
         </Link>
       </div>
-    </motion.div>
+    </div>
   )
-}
+})
 
 // Loading skeleton
 function ArtistCardSkeleton() {
@@ -245,26 +236,16 @@ export function ArtistsPage() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-bg-primary" />
         </div>
 
-        {/* Title */}
+        {/* Title - No animation for better LCP */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="font-display text-6xl md:text-7xl lg:text-8xl text-white tracking-wide"
-          >
+          <h1 className="font-display text-6xl md:text-7xl lg:text-8xl text-white tracking-wide">
             ARTISTS
-          </motion.h1>
+          </h1>
         </div>
       </section>
 
-      {/* Filter Bar Section */}
-      <motion.section
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-        className="py-8 px-4 md:px-6 border-b border-white/10"
-      >
+      {/* Filter Bar Section - Optimized */}
+      <section className="py-8 px-4 md:px-6 border-b border-white/10">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
             {/* View Toggle */}
@@ -274,14 +255,9 @@ export function ArtistsPage() {
             />
 
             {/* Results Count */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="text-white/60 text-sm"
-            >
+            <p className="text-white/60 text-sm">
               {loading ? 'Laden...' : `${artists.length} Künstler gefunden`}
-            </motion.p>
+            </p>
           </div>
 
           {/* Filter Bar - only show in grid view */}
@@ -291,7 +267,7 @@ export function ArtistsPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.2 }}
               >
                 <FilterBar
                   filters={filterBarFilters}
@@ -302,7 +278,7 @@ export function ArtistsPage() {
             )}
           </AnimatePresence>
         </div>
-      </motion.section>
+      </section>
 
       {/* Content Section */}
       <section className="py-12 md:py-16 px-4 md:px-6">
@@ -314,16 +290,16 @@ export function ArtistsPage() {
             </div>
           )}
 
-          {/* Animated View Transition */}
+          {/* Animated View Transition - Optimized */}
           <AnimatePresence mode="wait">
             {viewMode === 'map' ? (
               /* Map View */
               <motion.div
                 key="map"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
               >
                 <Suspense fallback={<MapLoadingSkeleton />}>
                   <ArtistMapLeaflet
@@ -340,10 +316,10 @@ export function ArtistsPage() {
               /* Grid View */
               <motion.div
                 key="grid"
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.98 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
               >
                 {/* Loading State */}
                 {loading && artists.length === 0 ? (
