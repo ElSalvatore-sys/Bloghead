@@ -2,6 +2,9 @@
 // PHASE 12: VENUE SYSTEM TYPES
 // ============================================
 
+// Import equipment types from equipment.ts (Phase 13)
+import type { EquipmentCategory, EquipmentCondition } from './equipment';
+
 // Venue Type Enum
 export type VenueType =
   | 'club'
@@ -17,19 +20,6 @@ export type VenueType =
 
 // Price Range Enum
 export type PriceRange = 'budget' | 'moderate' | 'premium' | 'luxury';
-
-// Equipment Category Enum
-export type EquipmentCategory =
-  | 'audio'
-  | 'lighting'
-  | 'stage'
-  | 'video'
-  | 'backline'
-  | 'dj_equipment'
-  | 'other';
-
-// Equipment Condition Enum
-export type EquipmentCondition = 'excellent' | 'good' | 'fair' | 'needs_maintenance';
 
 // Room Type Enum
 export type RoomType =
@@ -474,17 +464,6 @@ export const VENUE_TYPE_LABELS: Record<VenueType, string> = {
   private_venue: 'Private Location',
   restaurant: 'Restaurant',
   hotel: 'Hotel',
-  other: 'Sonstiges',
-};
-
-// Equipment category labels in German
-export const EQUIPMENT_CATEGORY_LABELS: Record<EquipmentCategory, string> = {
-  audio: 'Audio',
-  lighting: 'Beleuchtung',
-  stage: 'Bühne',
-  video: 'Video',
-  backline: 'Backline',
-  dj_equipment: 'DJ Equipment',
   other: 'Sonstiges',
 };
 
